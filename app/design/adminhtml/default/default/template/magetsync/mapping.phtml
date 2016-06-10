@@ -1,0 +1,875 @@
+<?php
+
+	$mappingModel = Mage::getModel('magetsync/mappingEtsy');
+	$queryMapping = $mappingModel->getCollection()->getSelect();
+	$mappingsAux = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($queryMapping);
+
+?>
+
+<script type="text/javascript">
+    var $j = jQuery.noConflict();
+     $j(function() {
+         var isLoad = false;
+         $j("body").on( "click", "img[name=thumbnail-etsy]", function() {
+             var urlAux = $j(this).attr("src");
+             var url = urlAux.replace("75x75","570xN");
+             var modalTitle = $j(this).attr("title");
+             $j('#thumbnail-image').attr('src',url);
+             $j('#modal-product-label').text(modalTitle);
+             $j('#modal-thumbnail').modal();
+         });
+         $j('[data-toggle="tooltip"]').tooltip();
+
+         $j('[data-toggle="tooltip"]').on('hidden.bs.tooltip', function () {
+             $j(this).fadeIn();
+         });
+
+         $j('#start-mapping').on('click', function () {
+             $j('#alert-mapping').fadeIn();
+         });
+
+         $j('#accept-all').on('click', function () {
+             
+			 var listPossibleProducts = new Array();
+             var listPossibleEtsy     = new Array();
+             
+			 $j.each( $j('#possible-all-items li'), function( i, val ) { 
+				var possibleEtsy = $j('#possible-etsy-list').children('li')[i].id;
+               	var possibleProduct    = $j(this).attr('id');
+			   		
+					possibleProduct = possibleProduct.replace('possible-node-','');
+				   	possibleEtsy    = possibleEtsy.replace('possible-etsy-','');
+				   	
+					listPossibleProducts[i] = possibleProduct;
+				   	listPossibleEtsy[i]     = possibleEtsy;
+             });
+
+             if(listPossibleEtsy.length >0) {
+                acceptAll(listPossibleProducts,listPossibleEtsy);
+             }
+
+         });
+
+         $j('#btn-start-mapping').on('click', function () {
+             $j("#popup_mapping_loader").fadeIn();
+             startMapping(0,0);
+             $j('#alert-mapping').fadeOut();
+         });
+
+         $j('#btn-close-mapping').on('click', function () {
+             $j('#alert-mapping').fadeOut();
+         });
+
+         $j('#mapping-tabs a').click(function (e) {
+             e.preventDefault()
+              $j(this).tab('show')
+         });
+
+         $j('a[data-toggle="tab"],button[data-toggle="tab"]').on('show.bs.tab', function (e) {
+             var tabName = $j(e.target).attr('aria-controls');
+             if(tabName == 'match-all-div')
+             {
+                 $j('#start-mapping').fadeIn();
+                 $j('#accept-all').fadeOut();
+             }
+             if(tabName == 'match-possible-div')
+             {
+                 $j('#start-mapping').fadeOut();
+                 $j('#accept-all').fadeIn();
+             }
+             if(tabName == 'match-already-div')
+             {
+                 $j('#start-mapping').fadeOut();
+                 $j('#accept-all').fadeOut();
+             }
+
+             //e.relatedTarget // previous active tab
+         });
+
+         setProducts();
+
+
+         if($j('#all-all-checks li').length== 0)
+         {
+             $j('#all-msg-available').css('display','block');
+         }
+
+         if($j('#possible-all-checks li').length== 0)
+         {
+             $j('#possible-msg-available').css('display','block');
+         }
+
+         if($j('#already-all-checks li').length== 0)
+         {
+             $j('#already-msg-available').css('display','block');
+         }
+
+         initDraggable('#drag-match-all li');
+         initDraggable('#drag-match-possible li');
+         initDraggable('#drag-match-already li');
+
+         var productId;
+         var activeList;
+
+         $j('body').on('click','a[name=no-match]',openLink);
+
+function loadProducts() {
+    var reloadurl = '<?php echo $this->getUrl('adminhtml/magetsync_mapping/loadProducts');?>';
+    new Ajax.Request(reloadurl, {
+        method: 'get',
+        onLoading: function (response) {
+        },
+        onCreate: function (request) {
+            //Ajax.Responders.unregister(varienLoaderHandler.handler);
+        },
+        onComplete: function (response) {
+            var dataJson = $j.parseJSON(response.responseText);
+            $j('#product-browser tbody').append(dataJson.data);
+            $j('#modal-product').modal();
+            var table = $j('#product-browser').footable();
+            table.on('click', '.row-match-product', function(e) {
+                e.preventDefault();
+
+                var rowid = $j(this).parent().parent().children()[0].innerHTML;
+
+                var pname = $j(this).parent().parent().children()[1].innerHTML;
+
+                var sku = $j(this).parent().parent().children()[2].innerHTML;
+
+                var rowname = pname +'/('+sku+')';
+
+                if ($j('#all-node-' + rowid).length || $j('#already-node-' + rowid).length) {
+                    alert('This product has already been matched');
+                } else {
+
+                    var listName = '';
+
+                    if(activeList == 'all-all-items') {
+                        listName = 'all';
+                    }
+
+                    if(activeList == 'possible-all-items') {
+                        listName = 'possible';
+                    }
+
+                    if(activeList == 'already-all-items') {
+                        listName = 'already';
+                    }
+
+
+                    $j('#' + productId).attr("id", listName+'-node-' + rowid);
+                    $j('#'+listName+'-node-' + rowid).html('<span class="glyphicon glyphicon-list">'
+                        + '</span><span>' + rowname + '&#32&#32</span>&nbsp;<a name="no-match" class="small" href="#">Edit</a>');
+
+                    var indexRow = $j('#'+listName+'-node-' + rowid).index();
+
+                    initDraggable('#drag-match-'+listName+' li');
+                    initDroppable($j('#drag-match-'+listName+' li'),'#drag-match-'+listName+' li');
+
+                    if(listName!='all')
+                    {
+                        var newNode = productId.replace(listName,'all');
+
+                        $j('#' + newNode).attr("id",'all-node-' + rowid);
+                        $j('#all-node-' + rowid).html('<span class="glyphicon glyphicon-list">'
+                            + '</span><span>' + rowname + '&#32&#32</span>&nbsp;<a name="no-match" class="small" href="#">Edit</a>');
+
+                        initDraggable('#drag-match-all li');
+                        initDroppable($j('#drag-match-all li'),'#drag-match-all li');
+                    }else
+                    {
+
+                        $j($j('#all-all-checks').find('li')[indexRow]).html('<button class="btn btn-success" name="check-ok"><span>&laquo; OK &raquo;</span></button>');
+
+                        var newNode = productId.replace(listName,'possible');
+
+                        $j('#' + newNode).attr("id",'possible-node-' + rowid);
+
+                        $j('#possible-node-' + rowid).html('<span class="glyphicon glyphicon-list">'
+                            + '</span><span>' + rowname + '&#32&#32</span>&nbsp;<a name="no-match" class="small" href="#">Edit</a>');
+
+                        initDraggable('#drag-match-possible li');
+                        initDroppable($j('#drag-match-possible li'),'#drag-match-possible li');
+                    }
+
+                    $j('#modal-product').modal('hide');
+                }
+
+            });
+        }
+    });
+}
+
+
+function openLink() {
+
+    if (!isLoad)
+    {
+        productId = $j(this).parent()[0].id;
+        activeList = $j(this).parent().parent()[0].id;
+        loadProducts();
+        isLoad = true;
+    }else {
+        productId = $j(this).parent()[0].id;
+        activeList = $j(this).parent().parent()[0].id;
+        $j('#modal-product').modal();
+    }
+
+}
+
+initDroppable($j("#drag-match-all li"),'#drag-match-all li');
+initDroppable($j("#drag-match-possible li"),'#drag-match-possible li');
+initDroppable($j("#drag-match-already li"),'#drag-match-already li');
+			
+function initDroppable($elements,listName) {
+		$elements.droppable({
+			//activeClass: "ui-state-default",
+			hoverClass:  "ui-drop-hover",
+			accept:      ":not(.ui-sortable-helper)",
+			over: function(event, ui) {
+				var $this = $j(this);
+			},
+			drop: function(event, ui) {
+
+				var index = $j(this).parent().children('li').index(this);
+				var check = $j('#all-all-checks li').children()[index].childNodes[0].innerHTML;
+                var index2 = $j(ui.draggable).parent().children('li').index(ui.draggable);//.index();
+                var check2 = $j('#all-all-checks li').children()[index2].childNodes[0].innerHTML;
+
+				if(check == '« OK »' || check == 'NONE') {
+
+					var $this = $j(this);
+
+					var li1 = $j('<li id="' + $j(ui.draggable).context.id + '">' + ui.draggable.context.innerHTML + '</li>')
+					var linew1 = $j(this).after(li1);
+
+					var li2 = $j('<li id="' + $j(this).context.id + '">' + $j(this).context.innerHTML + '</li>')
+					var linew2 = $j(ui.draggable).after(li2);
+
+
+					$j(ui.draggable).remove();
+					$j(this).remove();
+
+                    if(check == '« OK »' && check2 == 'NONE')
+                    {
+                        $j('#all-all-checks li').children()[index].childNodes[0].innerHTML  = 'NONE';
+                        $j('#all-all-checks li').children()[index].style.display = 'none';
+                        $j('#all-all-checks li').children()[index2].childNodes[0].innerHTML = '« OK »';
+                        $j('#all-all-checks li').children()[index2].style.display = 'inline';
+                    }
+
+                    if(check == 'NONE' && check2 == '« OK »')
+                    {
+                        $j('#all-all-checks li').children()[index].childNodes[0].innerHTML  = '« OK »';
+                        $j('#all-all-checks li').children()[index2].childNodes[0].innerHTML = 'NONE';
+                        $j('#all-all-checks li').children()[index2].style.display = 'none';
+                        $j('#all-all-checks li').children()[index].style.display = 'inline';
+                    }
+
+
+                    initDroppable($j(listName), listName);
+					initDraggable(listName);
+
+					/*$j('a[name=no-match]').click(function () {
+						$j('#modal-product').modal('show');
+					});*/
+
+				}else
+				{
+					ui.helper.fadeOut();
+				}
+			}
+		});
+}
+
+function initDraggable(list){
+
+	 $j(list).draggable({
+		 //appendTo: "mapping-tabs",
+		 helper: "clone",
+		 //cursor: "move",
+		 revert: "true",
+		 start: function (event, ui) {
+	
+			  //var index = $j('#'+ui.helper.context.id).index();
+              var data = ui.helper.context.id.split('-');
+			  //var check = $j('#all-all-checks li').children()[index].childNodes[0].innerHTML;
+			  if(data[0] == 'already') {
+			  return false;
+			  }
+	
+			 $j(this).addClass('being-dragged');
+		 },
+		 stop: function () {
+			   $j(this).removeClass('being-dragged');
+		 }
+	 });
+}
+
+$j( "body" ).on( "click", "button[name=cancel-match]", function() {
+ 	var process = $j(this).parent().parent()[0].id;
+	processMatch(this,process,false);
+});
+
+
+/*$j('button[name=cancel-match]').click(function(){
+
+ var process = $j(this).parent().parent()[0].id;
+ processMatch(this,process,false);
+
+});*/
+
+function processMatch(e,process,isSet) {
+ 
+ 	var typeProcess = '';
+ 	switch (process)  {
+	 case 'all-all-checks':
+		 typeProcess = 'all';
+		 break;
+	 case 'possible-all-checks':
+		 typeProcess = 'possible';
+		 break;
+	 case 'already-all-checks':
+		 typeProcess = 'already';
+		 break;
+	}
+
+	var position = $j(e).parent().index();
+	var checkAux = $j(e);
+	
+	var productID = $j($j('#'+typeProcess+'-all-items').find('li')[position]).context.id;
+	var productNAME = $j($j('#'+typeProcess+'-all-items').find('li')[position]).context.childNodes[1].innerHTML;
+	var listingID = $j($j('#'+typeProcess+'-etsy-list').find('li')[position]).context.id;
+        var listingNAME = $j($j('#'+typeProcess+'-etsy-list').find('li')[position]).context.childNodes[1].innerHTML;
+	var imageListing = $j($j('#'+typeProcess+'-etsy-list').find('li')[position]).context.childNodes[0];//.innerHTML;
+        var divAux = document.createElement("div");   
+        divAux.appendChild(imageListing);
+        var imageAux = divAux.innerHTML;
+        var dataObj = {productID:productID,productName:productNAME,listingID:listingID,listingName:listingNAME,imageListing:imageAux};
+	
+	var productNameSave = dataObj.productName;//.replace('<a name="no-match" href="#">Edit</a>','');
+	productNameSave     = productNameSave.replace('/','-a909a-');
+	productNameSave = productNameSave.trim();
+	
+	var reloadurl = '';
+	if (isSet) { reloadurl = '<?php echo $this->getUrl('adminhtml/magetsync_mapping/setMapping');?>' + 'productID/' + productID + '/listingID/' + listingID+'/process/'+typeProcess+'/productNAME/'+productNameSave;
+	} else { reloadurl = '<?php echo $this->getUrl('adminhtml/magetsync_mapping/cancelMapping');?>'+'productID/' +productID+'/listingID/'+listingID+'/process/'+typeProcess+'/productNAME/'+productNameSave;
+	}
+
+  	new Ajax.Request(reloadurl, {
+	  method: 'get',
+		  onCreate: function(request) {
+		  Ajax.Responders.unregister(varienLoaderHandler.handler);
+	  },
+	  onLoading:function()
+	  {
+		checkAux.html('<span>Processing...</span>');
+	  },
+	  onFailure:function(e)
+	  {
+		  if(isSet) {
+			  checkAux.html('<span>&laquo; OK &raquo;</span>');
+		  }else
+		  {
+			 checkAux.html('<span>Break Link</span>');
+		  }
+	},
+	
+	onComplete: function(response) {
+        Ajax.Responders.register(varienLoaderHandler.handler);
+        var dataJson = $j.parseJSON(response.responseText);
+        if(dataJson.status == true) {
+            if(isSet) {
+                //checkAux.html('<span>CANCEL</span>');
+                //checkAux.attr('name','cancel-match');
+
+
+                switch(typeProcess)
+                {
+                    case 'all':
+                    case 'possible':
+                        var numAll       = parseInt($j('#total-all').html());
+                        var numPossible = parseInt($j('#total-possible').html());
+                        var numAlready   = parseInt($j('#total-already').html());
+
+
+                        $j('#total-all').html(numAll -1);
+
+                        var possibleId = dataObj.productID;
+                        if(typeProcess == 'all') {
+                            possibleId = dataObj.productID.replace('all', 'possible');
+                        }
+
+                        if($j('#'+possibleId).length)
+                        {
+                            $j('#total-possible').html(numPossible - 1);
+                        }
+                        $j('#total-already').html(numAlready +1);
+
+                        break;
+                }
+
+                manageRowListing('already','possible',typeProcess,dataObj,'Break Link');
+
+            }else
+            {
+                checkAux.html('<span>&laquo; OK &raquo;</span>');
+                checkAux.attr('name','check-ok');
+
+                manageRowListing('possible','already',typeProcess,dataObj,'« OK »');
+
+                switch(typeProcess)
+                {
+                    case 'already':
+                        var numAll       = parseInt($j('#total-all').html());
+                        var numPossible  = parseInt($j('#total-possible').html());
+                        var numAlready   = parseInt($j('#total-already').html());
+
+                        $j('#total-all').html(numAll +1);
+                        $j('#total-possible').html(numPossible +1);
+                        $j('#total-already').html(numAlready -1);
+
+                        break;
+                    }
+
+            }
+
+            if(typeProcess == 'possible' || typeProcess == 'all' )
+            {
+                var idListing =  listingID.replace(typeProcess+'-etsy-','');
+                //var idProduct =  productID.replace('possible-node-','');
+                var posEtsy = $j('#all-etsy-'+idListing).index();
+
+                $j($j('#all-all-items').find('li')[posEtsy]).remove();//attr('id','all-node-'+idProduct);
+                $j($j('#all-etsy-list').find('li')[posEtsy]).remove();//remove();//html('<span>'+dataObj.listingName+'</span>');
+                $j($j('#all-all-checks').find('li')[posEtsy]).remove();//html('<button name="cancel-match"><span>CANCEL</span></button>');
+
+            }
+
+            if(typeProcess == 'already')
+            {
+                var idListing =  listingID.replace('already-etsy-','');
+                var idProduct =  productID.replace('already-node-','');
+                var posEtsy = $j('#all-etsy-'+idListing).index();
+                var link = '<a name="no-match" class="small" href="#">Edit</a>';
+
+                /*$j($j('#all-all-items').find('li')[posEtsy]).attr('id','all-node-'+idProduct);
+                 $j($j('#all-etsy-list').find('li')[posEtsy]).html('<span>'+dataObj.listingName+'</span>');
+                 $j($j('#all-all-checks').find('li')[posEtsy]).html('<button name="check-ok"><span>OK</span></button>');*/
+
+                $j('#all-all-items').append('<li class="possible-match" id="all-node-'+idProduct+'"><span class="glyphicon glyphicon-list">'
+                +'</span><span>'+dataObj.productName+'</span>'+link+'</li>');
+                $j('#all-all-checks').append('<li><button class="btn btn-success" name="check-ok"><span>&laquo; OK &raquo;</span></button></li>');
+                $j('#all-etsy-list').append('<li id="all-etsy-'+idListing+'">'+dataObj.imageListing+'<span>'+dataObj.listingName+'<span></li>');
+
+
+            }
+
+  } else {
+	  	if (isSet) { checkAux.html('<span>&laquo; OK &raquo;</span>');
+	  } else {
+		  checkAux.html('<span>Break Link</span>');
+	  }
+		alert(dataJson.message);
+  	}
+
+  }
+
+
+  });
+
+}
+
+    function manageRowListing(opt1,opt2,typeProcess,dataObj,label)
+    {
+        var buttonAcion = '';
+        var newName = '';
+        var link = '';
+
+        if(label == 'Break Link')
+        {
+            buttonAcion = '<button class="btn btn-warning" name="cancel-match"><span>'+label+'</span>';
+            newName     = dataObj.productName;//.replace('<a name="no-match" href="#">Edit</a>','');
+            newName     = newName.trim();
+        }else
+        {
+            buttonAcion = '<button class="btn btn-success" name="check-ok"><span>'+label+'</span>';
+            newName     = dataObj.productName+'&#32&#32';
+            link        = '<a name="no-match" class="small" href="#">Edit</a>';
+        }
+
+        var idProduct = dataObj.productID.replace(typeProcess+'-node-', '');
+        var idListing = dataObj.listingID.replace(typeProcess+'-etsy-', '');
+
+        //if(typeProcess == 'all')
+        //{
+        $j('#all-node-'+idProduct).html('<span class="glyphicon glyphicon-list">'
+        +'</span><span>'+newName+'</span>'+link);
+        //}
+
+        var iconRow = '<span class="glyphicon glyphicon-list">';
+        if(opt1=='already')
+        {
+            iconRow = '<span class="glyphicon glyphicon-ok">';
+        }
+
+        $j('#'+opt1+'-all-items').append('<li id="'+opt1+'-node-'+idProduct+'">'+iconRow
+        +'</span><span>'+newName+'</span>'+link+'</li>');
+        $j('#'+opt1+'-all-checks').append('<li>'+buttonAcion+'</li>');
+        $j('#'+opt1+'-etsy-list').append('<li id="'+opt1+'-etsy-'+idListing+'">'+dataObj.imageListing+'<span>'+dataObj.listingName+'<span></li>');
+
+        //if(typeProcess != 'all') {
+            var indexPos = $j('#' + opt2 + '-node-' + idProduct).index();//$j('#'+dataObj.productID).index();
+   
+        if(indexPos >= 0) {
+            $j('#' + opt2 + '-all-checks li').eq(indexPos).remove();
+            $j('#' + opt2 + '-node-' + idProduct).remove();
+            $j('#' + opt2 + '-etsy-' + idListing).remove();
+        }
+        //}
+
+        if($j('#'+opt1+'-all-checks li').length== 0)
+        {
+            $j('#'+opt1+'-msg-available').css('display','block');
+        }else
+        {
+            $j('#'+opt1+'-msg-available').css('display','none');
+            initDraggable('#drag-match-'+opt1+' li');
+            initDroppable($j('#drag-match-'+opt1+' li'),'#drag-match-'+opt1+' li');
+        }
+
+
+        if($j('#'+opt2+'-all-checks li').length== 0)
+        {
+            $j('#'+opt2+'-msg-available').css('display','block');
+        }else
+        {
+            $j('#'+opt2+'-msg-available').css('display','none');
+            initDraggable('#drag-match-'+opt2+' li');
+            initDroppable($j('#drag-match-'+opt2+' li'),'#drag-match-'+opt2+' li');
+        }
+    }
+
+
+$j( "body" ).on( "click", "button[name=check-ok]", function() {
+		 var process = $j(this).parent().parent()[0].id;
+		 processMatch(this,process,true);
+	 });
+
+	 /*$j('button[name=check-ok]').click(function(){
+	
+		 var process = $j(this).parent().parent()[0].id;
+		 processMatch(this,process,true);
+	 });*/
+
+});
+
+function acceptAll(idsProducts,idsListings) {
+	var reloadurl = '<?php echo $this->getUrl('adminhtml/magetsync_mapping/acceptAll'); ?>' + 'idsProducts/' + idsProducts+'/idsListings/'+idsListings;
+	new Ajax.Request(reloadurl, {
+		method: 'get',
+		onLoading: function (response) {
+
+		},
+		onComplete: function (response) {
+			var dataJson = $j.parseJSON(response.responseText);
+			if(dataJson.status == true) {
+				document.location.reload(true);
+			} else {
+				alert(dataJson.message);
+			}
+
+		}
+	});
+}
+
+function startMapping(offset,count) {
+	var reloadurl = '<?php echo $this->getUrl('adminhtml/magetsync_mapping/initMapping'); ?>' + 'offset/' + offset;
+	new Ajax.Request(reloadurl, {
+		method: 'get',
+		onLoading: function (response) {
+		},
+        onCreate: function(request) {
+            Ajax.Responders.unregister(varienLoaderHandler.handler);
+        },
+		onComplete: function(response) {
+			var dataJson = $j.parseJSON(response.responseText);
+			if(dataJson.success == true) {
+                if(dataJson.count == 0)
+                {
+                    $j("#popup_mapping_loader").fadeOut();
+                    if(count == 0)
+                    {
+                       alert('There are not Etsy listings to match.');
+                    }else {
+                        document.location.reload(true);
+                    }
+                }else
+                {
+                    count = count + parseInt(dataJson.count);
+                    $j("#mapping_content_loader").html(count+ ' listing has been found.');
+                    startMapping(offset + 25,count);
+                }
+			} else {
+                if(dataJson.count != null && dataJson.count == 0) {
+                    startMapping(offset + 25,count);
+                }else
+                {
+                    $j("#popup_mapping_loader").fadeOut();
+                    alert(dataJson.message);
+                }
+			}
+		}
+	});
+}
+
+function setProducts() {
+
+    <?php
+    $countAll      = 0;
+    $countPossible = 0;
+    $countAlready  = 0;
+    foreach ($mappingsAux as $itemProduct) {
+
+        	if ($itemProduct['product_id']) {
+
+            if ($itemProduct['state']==1) {
+	?>
+	$j('#already-all-items').append('<li id="already-node-<?php echo $itemProduct['product_id']; ?>"><span class="glyphicon glyphicon-ok">'
+	+'</span><span><?php echo addslashes($itemProduct['product_name'].'/('.$itemProduct['product_sku'].')'); ?></span></li>');
+	$j('#already-etsy-list').append('<li id="already-etsy-<?php echo $itemProduct['etsy_id']; ?>"><img width="38px" height="38px" name="thumbnail-etsy" src="<?php echo $itemProduct['thumbnail']; ?>" title="<?php echo addslashes($itemProduct['etsy_name']); ?>" alt="<?php echo addslashes($itemProduct['etsy_name']); ?>"/><span><?php echo addslashes( $itemProduct['etsy_name']); ?><span></li>');
+	$j('#already-all-checks').append('<li> <button name="cancel-match" class="btn btn-warning"><span>Break Link</span></button></li>');
+
+	<?php
+	$countAlready++;
+	} else { ?>
+
+    $j('#all-etsy-list').append('<li id="all-etsy-<?php echo $itemProduct['etsy_id']; ?>"><img width="38px" height="38px" name="thumbnail-etsy" src="<?php echo $itemProduct['thumbnail']; ?>" title="<?php echo addslashes($itemProduct['etsy_name']); ?>" alt="<?php echo addslashes($itemProduct['etsy_name']); ?>"/><span><?php echo addslashes($itemProduct['etsy_name']); ?><span></li>');
+
+	/*** ALL Products ***/
+	$j('#all-all-items').append('<li class="possible-match" id="all-node-<?php echo $itemProduct['product_id']; ?>"><span class="glyphicon glyphicon-ok">'
+	+'</span><span class="product-name"><?php echo addslashes($itemProduct['product_name'].' / ('.$itemProduct['product_sku'].')'); ?>&#32&#32</span>&nbsp;<a name="no-match" class="small" href="#">Edit</a></li>');
+	/***************/
+
+	$j('#all-all-checks').append('<li><button name="check-ok" type="button" class="btn btn-success"><span>&laquo; OK &raquo;</span></button></li>');
+
+	$j('#possible-all-items').append('<li class="possible-match" id="possible-node-<?php echo $itemProduct['product_id']; ?>"><span class="glyphicon glyphicon-ok">'
+	+'</span><span class="product-name"><?php echo addslashes($itemProduct['product_name'].' / ('.$itemProduct['product_sku'].')'); ?>&#32&#32</span>&nbsp;<a name="no-match" class="small" href="#">Edit</a></li>');
+	$j('#possible-etsy-list').append('<li id="possible-etsy-<?php echo $itemProduct['etsy_id']; ?>"><img name="thumbnail-etsy"  width="38px" height="38px" src="<?php echo $itemProduct['thumbnail']; ?>" title="<?php echo addslashes($itemProduct['etsy_name']); ?>" alt="<?php echo addslashes($itemProduct['etsy_name']); ?>"/><span><?php echo addslashes($itemProduct['etsy_name']); ?><span></li>');
+	$j('#possible-all-checks').append('<li><button name="check-ok" type=""button class="btn btn-success"><span>&laquo; OK &raquo;</span></button></li>');
+    
+	<?php
+	$countAll++;
+	$countPossible++;
+	} } else{ ?>
+
+    $j('#all-etsy-list').append('<li id="all-etsy-<?php echo $itemProduct['etsy_id']; ?>"><img width="38px" height="38px" name="thumbnail-etsy" src="<?php echo $itemProduct['thumbnail']; ?>" title="<?php echo addslashes($itemProduct['etsy_name']); ?>" alt="<?php echo addslashes($itemProduct['etsy_name']); ?>"/><span><?php echo addslashes($itemProduct['etsy_name']); ?><span></li>');
+	$j('#all-all-checks').append('<li><button name="check-ok" type="button" class="btn btn-success" style="display: none"><span>NONE</span></button></li>');
+	$j('#all-all-items').append('<li id="match-<?php echo $itemProduct['id']; ?>"><span class="glyphicon glyphicon-list">&nbsp;</span><span class="faded">No matches found :( </span> <a name="no-match" href="#" class="small">Find it in your Catalog &raquo; </a></li>');
+
+        <?php
+        $countAll++;
+        }
+    }
+         ?>
+
+    $j('#total-all').html('<?php echo $countAll; ?>');
+    $j('#total-possible').html('<?php echo $countPossible; ?>');
+    $j('#total-already').html('<?php echo $countAlready; ?>');
+
+}
+
+
+</script>
+<?php
+$url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN);
+?>
+
+<div id='popup_mapping_loader' class='overlay_mapping'>
+    <div class='popup_mapping_loader'>
+        <h2>Processing mappings</h2>
+        <div><img src="<?php echo $url.'adminhtml/default/default/Merchante/images/gif-load.gif';?>"/></div>
+        <div class='content' id="mapping_content_loader">
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info alert-dismissible fade in" id="alert-mapping" role="alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+  <h4>Start Mapping</h4>
+  <p>This process will query your Etsy shop and bring its products to be compared with your Magento Catalog. Do you want to continue?</p>
+  <p>
+    <button type="button" id="btn-start-mapping" class="btn btn-default">Yes</button>
+    <button type="button" id="btn-close-mapping" class="btn btn-default">No</button>
+  </p>
+</div>
+<!-- Modal box thumbnail -->
+<div class="modal fade" id="modal-thumbnail" tabindex="-1" role="dialog" aria-labelledby="modal-thumbnail-label">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modal-product-label">Etsy</h4>
+            </div>
+                <div class="modal-body">
+                    <div class="tile-body">
+                        <img src="" id="thumbnail-image"/>
+                    </div>
+                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal box -->
+<div class="modal fade" id="modal-product" tabindex="-1" role="dialog" aria-labelledby="modal-product-label">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modal-product-label">Find a product</h4>
+      </div>
+      <div class="modal-body">
+        <div class="tile-body">
+          <div class="form-group">
+            <label for="filter" style="padding-top: 5px">Search:</label>
+            <input id="filter" type="text" class="form-control input-sm w-sm mb-10 inline-block"/>
+          </div>
+          <table id="product-browser" data-filter="#filter" data-page-size="10" class="footable table table-custom">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th data-hide='phone, tablet'>Sku</th>
+                <th data-sort-ignore="true" data-name="Selected" class="footable-last-column"></th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot class="hide-if-no-paging">
+              <tr>
+                <td colspan="5"  class="text-center"><ul class="pagination">
+                  </ul></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <!-- /tile body --> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- //Modal Box Ends -->
+<div class="content-header">
+    <h3 class="icon-head head-adminhtml-listing">MagetSync Mappings (For existing Etsy stores)</h3> <a href="http://support.magetsync.com" class="link-store-scope" title="Help" target="_blank">Help</a>
+</div>
+
+<div>
+  <div class="bg-warning">
+    <p> This section is only for Merchants who wish to synchronise their products from an existing Etsy shop. Make sure you've configured MagetSync and have authorized it beforehand.</p>
+  </div>
+  
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" id="mapping-tabs" role="tablist">
+    <li role="presentation" class="active"> <a href="#match-all-div" aria-controls="match-all-div" role="tab" data-toggle="tab" tabindex="1">ALL PRODUCTS (<span id="total-all">0</span>)</a> </li>
+    <li role="presentation"> <a href="#match-possible-div" aria-controls="match-possible-div" role="tab" data-toggle="tab"  tabindex="2">POSSIBLE MATCHES ONLY (<span id="total-possible">0</span>)</a> </li>
+    <li role="presentation"> <a href="#match-already-div" aria-controls="match-already-div" role="tab" data-toggle="tab"  tabindex="3">ALREADY MATCHED (<span id="total-already">0</span>)</a> </li>
+    <li role="presentation" class="pull-right">
+      <button type="button" id="start-mapping" class="btn btn-primary" aria-label="Left Align"> Start Mapping <span class="glyphicon glyphicon-refresh" aria-hidden="true"  tabindex="4"></span> </button>
+    </li>
+    <li role="presentation" class="pull-right">
+      <button type="button" id="accept-all" class="btn btn-default btn-success" aria-label="Accept All"> Accept All <span class="glyphicon glyphicon-check" aria-hidden="true"></span> </button>
+    </li>
+  </ul>
+  <!-- Nav tabs -->
+  
+  <div class="tab-content"> 
+    <!-- Tab Pane: ALL PRODUCTS -->
+    <div role="tabpanel" class="tab-pane active" id="match-all-div">
+      <div class="row">
+      	<div class="bg-warning">
+    	<ol>
+			<li>Click on <em>Start Mapping</em> to fetch your existing Etsy catalog. MagetSync will try to match your catalogues automatically (based on product names) and mark them as 'possible matches'.</li>
+			<li>Make sure products on both sides are the same.</li>
+            <li>A possible match is highlighted in green. Click 'OK' to stablish a permanent link between those two products.</li>
+			<li>When no matches are found, search your Magento catalog to find its corresponding match</li>
+            <li>Items in the left column can be <strong>dragged and dropped</strong> to the same row of its corresponding match.</li>
+        </ol>
+
+        </div>
+        <div id="drag-match-all" class="col-md-6 col-xs-5 no-padding drag-table">
+          <h3 class="text-center">List of your Magento products</h3>
+          <ul class="ul-map" id="all-all-items">
+          </ul>
+        </div>
+        <div id="check-all" class="col-md-1 col-xs-1 no-padding">
+          <h3 class="text-center">Match</h3>
+          <ul id="all-all-checks" class="text-center">
+          </ul>
+        </div>
+        <div id="drop-match-all" class="col-md-5 col-xs-5 no-padding">
+          <h3 class="text-center">List of products found on your Etsy store</h3>
+          <ul class="ul-map" id="all-etsy-list">
+          </ul>
+        </div>
+        <div id="all-msg-available" class="message" style="display: none"><span>No mappings available. Configure MagetSync to get started.</span></div>
+      </div>
+    </div>
+    <!-- // All Products --> 
+    
+    <!-- Tab Pane: Possible Matches Only -->
+    <div role="tabpanel" class="tab-pane" id="match-possible-div">
+      <div class="row">
+        <p class="bg-warning">This section displays all possible matches found by MagetSync. If all suggestions are correct you can 'accept all' or individually create mappings by clicking OK. You can also drag and drop if necessary. </p>
+        <div id="drag-match-possible" class="col-md-6 col-xs-5 no-padding drag-table">
+          <h3 class="text-center">List of your Magento products</h3>
+          <ul class="ul-map" id="possible-all-items">
+          </ul>
+        </div>
+        <div id="check-possible" class="col-md-1 col-xs-1 no-padding">
+          <h3 class="text-center">Match</h3>
+          <ul id="possible-all-checks" class="text-center">
+          </ul>
+        </div>
+        <div id="drop-match-possible" class="col-md-5 col-xs-5 no-padding">
+          <h3 class="text-center">List of products found on your Etsy store</h3>
+          <ul class="ul-map" id="possible-etsy-list">
+          </ul>
+        </div>
+        <div id="possible-msg-available" class="message" ><span>No mappings available here. First start mapping under the 'All Products' tab.</span></div>
+      </div>
+    </div>
+    <!-- // Possible Matches Only --> 
+    
+    <!-- Tab Pane: Already Matched -->
+    <div role="tabpanel" class="tab-pane" id="match-already-div">
+      <div class="row">
+      	<p class="bg-warning">This section contains all mappings you've established. Products that are already matched also appear in the Listing Manager.
+         </p>
+        <div id="drag-match-already" class="col-md-5 col-xs-5 no-padding">
+          <h3 class="text-center">List of your Magento products</h3>
+          <ul class="ul-map" id="already-all-items">
+          </ul>
+        </div>
+        <div id="check-already" class="col-md-1 col-xs-1 no-padding">
+          <h3 class="text-center">Match</h3>
+          <ul id="already-all-checks" class="text-center">
+          
+          </ul>
+        </div>
+        <div id="drop-match-already" class="col-md-5 col-xs-5 no-padding">
+          <h3 class="text-center">List of products found on your Etsy store</h3>
+          <ul class="ul-map" id="already-etsy-list">
+          </ul>
+        </div>
+        <div id="already-msg-available" class="message" ><span>No mappings available. To see something here you will need to have created links between your products under the other two tabs.</span></div>
+      </div>
+    </div>
+    <!-- // Already Matched --> 
+  </div>
+</div>

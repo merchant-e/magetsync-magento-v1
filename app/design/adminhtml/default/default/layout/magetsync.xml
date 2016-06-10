@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<layout version="0.1.0">
+    <!--
+    /*** @copyright  Copyright (c) 2015 Merchant-e ***/
+    -->
+    <default>
+        <reference name="notifications">
+            <block type="magetsync/adminhtml_notifications" name="magetsync_notifications" template="magetsync/notification.phtml"/>
+        </reference>
+        <reference name="head">
+            <!--**** POPUP PAYMENT ****-->
+<!--            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/default.css</name></action>
+            <action method="addItem"><type>js_css</type><name>prototype/windows/themes/magento.css</name></action>-->
+            <action method="addItem"><type>js_css</type><name>magetsync/style.css</name></action>
+        </reference>
+    </default>
+    <adminhtml_magetsync_index_index>
+        <reference name="content">
+            <block type="core/template" name="notice_listing" before="content" template="magetsync/notice.phtml" after="breadcrumbs" />
+            <block type="magetsync/adminhtml_listing" name="admin_listing"/>
+        </reference>
+    </adminhtml_magetsync_index_index>
+    <adminhtml_magetsync_mapping_index>
+        <reference name="head">
+            <action method="addItem"><type>js_css</type><name>magetsync/mappings.css</name></action>
+            <action method="addItem"><type>js_css</type><name>magetsync/jquery-ui.css</name></action>
+            <action method="addItem"><type>js_css</type><name>magetsync/bootstrap.min.css</name></action>
+
+            <action method="addItem"><type>js_css</type><name>magetsync/footable.core.min.css</name></action>
+            <!--<action method="addItem"><type>js_css</type><name>magetsync/footable.standalone.min.css</name></action>-->
+
+            <action method="addJs"><file>magetsync/jquery.min.js</file></action>
+            <action method="addJs"><file>magetsync/footable.min.js</file></action>
+            <action method="addJs"><file>magetsync/footable.filter.min.js</file></action>
+            <action method="addJs"><file>magetsync/footable.paginate.min.js</file></action>
+            <action method="addJs"><file>magetsync/footable.sort.min.js</file></action>
+            <action method="addJs"><file>magetsync/bootstrap.js</file></action>
+            <action method="addJs"><file>magetsync/jquery-ui.min.js</file></action>
+
+        </reference>
+        <reference name="content">
+            <block type="magetsync/adminhtml_mapping_form" name="admin_mapping"/>
+        </reference>
+    </adminhtml_magetsync_mapping_index>
+    <adminhtml_magetsync_shopsection_index>
+        <reference name="content">
+            <block type="magetsync/adminhtml_global_shopSection" name="admin_shopsection"/>
+        </reference>
+    </adminhtml_magetsync_shopsection_index>
+    <adminhtml_magetsync_shippingtemplate_index>
+        <reference name="content">
+            <block type="magetsync/adminhtml_global_shippingTemplate" name="admin_shippingtemplate"/>
+        </reference>
+    </adminhtml_magetsync_shippingtemplate_index>
+</layout>

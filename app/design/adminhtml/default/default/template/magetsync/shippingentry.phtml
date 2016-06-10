@@ -1,0 +1,121 @@
+<?php
+error_reporting(E_ALL ^ E_NOTICE);
+
+
+/*** @copyright  Copyright (c) 2015 Merchant-e ***/
+
+
+$_htmlId      = $this->getElement()->getHtmlId();
+$_htmlClass   = $this->getElement()->getClass();
+$_htmlName    = $this->getElement()->getName();
+$_readonly    = $this->getElement()->getReadonly();
+
+$collection = Mage::registry('magetsync_shippingtemplate');
+$collection = $collection->getData();
+$collection = (isset($collection['entries'])?$collection['entries']:null);
+$_counter = 0;
+
+$countries = Mage::getModel('magetsync/countryEtsy')->getCollection();
+$countries = $countries->getData();
+?>
+
+<tr>
+    <td class="label"><?php echo $this->getElement()->getLabel() ?></td>
+    <td colspan="10" style="padding-left:4px;" class="grid">
+        <table id="attribute-options-table" class="dynamic-grid" cellspacing="0" cellpadding="0"><tbody>
+            <tr>
+                <th>Ships To</th><th>Cost</th><th>With Another Item</th>
+                <th><button id="add_new_option_button" title="Add Option" type="button" class="scalable add"><span><span><span>Add</span></span></span></button></th>
+            </tr>
+            <?php if(is_array($collection)) {foreach ($collection as $_item){ ?>
+            <tr class="" id="hour-row-<?php echo $_counter?>">
+                 <td><select class="validate-select" name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][countryDestination][country_id]">
+                        <option class="validate-select" value="">Please Select Country</option>
+                         <optgroup label="---------------">
+                        <option class="validate-select" <?php if ($_item['destination_country_id'] == 0) echo ' selected="selected"' ?> value="0">Everywhere Else</option>
+                         </optgroup>
+                         <optgroup label="---------------">
+                             <?php
+                            foreach ($countries as $value) {
+                                ?>
+                                <option
+                                    class="validate-select" <?php if ($_item['countryDestination']['country_id'] === $value['country_id']) echo ' selected="selected"' ?>
+                                    value="<?php echo $value['country_id'] ?>"><?php echo $value['name'] ?></option>
+                            <?php
+                        }
+                        ?>
+                             </optgroup>
+                    </td>
+                    </select>
+                    <input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][shipping_template_entry_id]" value="<?php echo $_item['shipping_template_entry_id']; ?>" type="hidden">
+                    <td><input onblur="isDecimal(this)" onkeypress="return isNumeric(event,this);" ondrop="return false;" onpaste="return false;" class="validate-number required-entry input-text" name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][primary_cost]" value="<?php echo $_item['primary_cost']; ?>" type="text"></td>
+                    <td><input onblur="isDecimal(this)" onkeypress="return IiNumeric(event,this);" ondrop="return false;" onpaste="return false;" class="validate-number required-entry input-text" name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][secondary_cost]" value="<?php echo $_item['secondary_cost'] ?>" type="text"></td>
+                    <td class="a-left" id="delete_button_container_option_<?php echo $_counter ?>'">
+                    <input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][id]" value="<?php echo $_item['id'] ?>" type="hidden">
+                    <input id="delete-row-<?php echo $_counter ?>" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_<?php echo $_counter ?>]" value=""/>
+                    <button onclick="$('hour-row-<?php echo $_counter ?>').style.display='none'; $('delete-row-<?php echo $_counter ?>').setValue(1);" title="Delete" type="button" class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button>
+                </td>
+            </tr>
+                <?php
+                $_counter++;
+              }
+            }
+            ?>
+            </tbody>
+        </table>
+        <br /> <a href="http://support.magetsync.com/hc/en-us/articles/206537948" class="link-store-scope" title="What is this?" target="_blank">What is this?</a>
+        
+        <script type="text/javascript">//<![CDATA[
+
+            var _form_html_row = '<tr class="option-row" id="hour-row-{{id}}"><td>' +
+                '<select class="validate-select" name="<?php echo $_htmlName;?>[value][option_{{id}}][countryDestination][country_id]">'+
+                '<option class="validate-select" value="">Please Select Country</option>'+
+                '<option class="validate-select" value="0">Everywhere Else</option>'+
+                '<?php foreach ($countries as $value) { ?>'+
+                '<option class="validate-select" value="<?php echo $value['country_id']?>"><?php echo $value['name']?></option>' +
+                '<?php } ?> </td></select>' +
+                '<input name="<?php echo $_htmlName; ?>[value][option_{{id}}][shipping_template_entry_id]" value="" type="hidden">' +
+                '</td><td><input onblur="isDecimal(this)" onkeypress="return isNumeric(event,this);" ondrop="return false;" onpaste="return false;" name="<?php echo $_htmlName; ?>[value][option_{{id}}][primary_cost]"' +
+                'value="" class="input-text required-entry validate-number" type="text"></td><td><input onblur="isDecimal(this)"  onkeypress="return isNumeric(event,this);" ondrop="return false;" onpaste="return false;" name="<?php echo $_htmlName; ?>[value][option_{{id}}][secondary_cost]"' +
+                'value="" class="input-text required-entry validate-number" type="text"></td><td class="a-left" id="delete_button_container_option_{{id}}"><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][id]"' +
+                'value="" type="hidden"><input id="delete-row-{{id}}" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_{{id}}]"' +
+                'value=""/><button onclick="$(\'hour-row-{{id}}\').style.display=\'none\'; $(\'delete-row-{{id}}\').setValue(1);" title="Delete" type="button"' +
+                'class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button></td></tr>';
+
+            var _shipping_counter = <?php echo $_counter?>;
+
+            $('add_new_option_button').observe('click', function(){
+                $('attribute-options-table').insert(_form_html_row.replace(/\{\{id\}\}/ig, _shipping_counter));
+                _shipping_counter++;
+            });
+
+            function isNumeric(evt,a) {
+                var code = (code ? code : evt.which);
+                if (code != 46 && code > 31 && (code < 48 || code > 57))
+                    return false;
+                //if it is (.)
+                else if (code == 46) {
+                    var Value = a.value;
+                    //if value already contains (.) character
+                    if (Value.indexOf('.') != -1) {
+                        var splt = Value.split('.');
+                        //if there is already(.) char then return false
+                        if (splt.length >= 2)
+                            return false;
+                    }
+                }
+                return true;
+            }
+
+            function isDecimal(a)
+            {
+                var regex = /^[0-9]{1,14}(\.[0-9]{0,8})?$/;
+                if (!regex.test(a.value)) {
+                    a.value = "";
+                }
+            }
+
+            //]]></script>
+    </td>
+</tr>
+

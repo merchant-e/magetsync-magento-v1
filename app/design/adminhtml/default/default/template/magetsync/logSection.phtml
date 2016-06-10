@@ -1,0 +1,24 @@
+<?php
+
+$logModel = Mage::getModel('magetsync/logData');
+$dataListing = Mage::registry('magetsync_data')->getData();
+
+$query = $logModel->getCollection()->getSelect()->where('entity_id = ?', $dataListing{'id'});
+$query = $query->order('main_table.date DESC');
+$query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+
+if($query) {
+    ?>
+    <ul style="font-size: 11px; clear: both; float: none;
+">
+
+<?php foreach($query as $item) {
+    $date = new DateTime($item['date']);
+    ?>
+    <li style="border-bottom: 1px dotted #ddd;"><strong>[<?php echo $date->format('Y-m-d'); ?>] [<?php  echo $date->format('H:i:s'); ?> ]:</strong> <?php echo $item['message']; ?></li>
+<?php } ?>
+
+    </ul>
+<?php
+}
+?>

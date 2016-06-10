@@ -1,0 +1,9 @@
+<?xml version = "1.0"?>
+   <config>
+      <modules>
+        <Merchante_MagetSync>
+            <active>true</active>
+            <codePool>local</codePool>
+         </Merchante_MagetSync>
+       </modules>
+    </config>

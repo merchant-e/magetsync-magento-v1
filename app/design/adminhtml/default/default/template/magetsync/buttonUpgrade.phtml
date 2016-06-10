@@ -1,0 +1,40 @@
+<!--
+/*** @copyright  Copyright (c) 2015 Merchant-e ***/
+-->
+<script type="text/javascript">
+    //<![CDATA[
+    function UpgradeMagetsync(token) {
+        if ($('browser_window') && typeof(Windows) != 'undefined') {
+            Windows.focus('browser_window');
+            return;
+        }
+        window.open("http://secure.merchant-e.net/public/payment/initSubscription?user="+token, "_blank");
+        var message = '<img style="padding:6px 8px;" width=120px heigth=120px src="<?php echo Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA). 'Magetsync/loader.gif'; ?>" />'+
+            '</br><h3 style="text-align:center">Loading...</h3></br><button onClick="refreshPageMagetsync()" style="width:100%;">Validate</button>';
+
+        var dialogWindow = Dialog.info(message, {
+            closable:true,
+            className:'magento',
+            windowClassName:'popup-window',
+            title:'Processing payment',
+            showProgress: true,
+            width:170,
+            height:220,
+            zIndex:1000,
+            recenterAuto:false,
+            hideEffect:Element.hide,
+            showEffect:Element.show,
+            id:'browser_window',
+            onClose:function (param, el) {
+                refreshPageMagetsync();
+            }
+        });
+    }
+    function refreshPageMagetsync()
+    {
+        location.reload();
+    }
+    //]]>
+</script>
+
+<?php echo $this->getButtonHtml() ?>

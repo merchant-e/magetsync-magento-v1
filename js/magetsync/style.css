@@ -1,0 +1,65 @@
+.greenAuthorize{
+    background: darkseagreen !important;
+    border: solid 1px #000000;
+}
+.magetsyncIsOrderEtsy
+{
+    text-align: center;
+}
+
+.lmTable {
+    display: table;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+}
+
+.lmRow {
+    display: table-row;
+}
+
+.lmRow > span {
+    list-style:none;
+    display: table-cell;
+    border-color: #dadfe0;
+    border-width:0px 1px 1px 0px;
+    border-style: solid;
+    padding: 2px 6px;
+    /*max-width: 0px;*/
+}
+
+.lmHeader {
+    display: table-header-group;
+    /*position: absolute;*/
+}
+
+.lmHeader span {
+    background-color: #ccc;
+}
+
+.lmBody {
+    display: table-row-group;
+}
+
+.lmID{
+    width: 50px;
+}
+
+.lmSKU{
+    width: 140px;
+}
+
+.lmQty{
+    width: 50px;
+}
+.link-store-scope {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 0 1px;
+    width: 16px;
+    height: 16px;
+    background: url('../../skin/adminhtml/default/default/Merchante/images/i_question-mark.png') 0 0 no-repeat;
+    text-decoration: none !important;
+    text-indent: -999em;
+    overflow: hidden;
+}
