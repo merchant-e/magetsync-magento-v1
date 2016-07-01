@@ -18,6 +18,10 @@ class Merchante_MagetSync_Block_Adminhtml_Notifications extends Mage_Adminhtml_B
             $url = $url . "customerVerification/" . $tokenCustomer;
             $response = $etsyModel->curlConnect($url);
             $response = json_decode($response, true);
+            if(array_key_exists('type',$response) !== false && $response['type'] == 2)
+            {
+                return;
+            }
             $urlLink = '';
             $configURL = '<strong>MagetSync</strong>';
             if ($response['url']) {

@@ -176,62 +176,62 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
             $obligatory = array('shop_id' => Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop'));
             $params = array('includes' => 'MainImage','offset' => intval($offset),'limit' => 25);
             $listingsResult = $this->findAllShopListingsActive($obligatory,$params);
-            $resultAux = json_decode(json_decode($listingsResult['result']), true);
-            $result = $resultAux['results'];
-            $count  = count($result);
-            $changes = 0;
-            $changesCount = 0;
-            $mappingModel = Mage::getModel('magetsync/mappingEtsy');
-            $listingModel = Mage::getModel('magetsync/listing');
-            $productModel = Mage::getModel('catalog/product');
-            $resource = Mage::getSingleton('core/resource');
-            foreach($result as $item)
-            {
-                $queryM = $mappingModel->getCollection()->addFieldToSelect('etsy_id')->getSelect()->where('etsy_id = ?',$item['listing_id']);
-                $queryM = $resource->getConnection('core_read')->fetchAll($queryM);
-                if(!$queryM)
-                {
-                    $query = $listingModel->getCollection()->addFieldToSelect('listing_id')->getSelect()->where('listing_id = ?',$item['listing_id']);
-                    $query = $resource->getConnection('core_read')->fetchAll($query);
-                    if(!$query) {
-                        $productsCollection = $productModel->getCollection()
-                            ->addAttributeToSelect('name')
-                            ->addAttributeToSelect('sku')
-                            ->addAttributeToSelect('entity_id')
-                            ->addAttributeToFilter('name', array('eq' => $item['title']));//->addAttributeToFilter('synchronizedEtsy',0);
-                        $queryProduct = $productsCollection->getData();
-                        if ($queryProduct) {
-                            $queryAux = $listingModel->getCollection()->addFieldToSelect('idproduct')->getSelect()->where('idproduct = ?', $queryProduct[0]['id']);
-                            $queryAux = $resource->getConnection('core_read')->fetchAll($queryAux);
-                            if (!$queryAux) {
-                                $matchings = array('etsy_id' => $item['listing_id'], 'etsy_name' => $item['title'],'thumbnail'=>$item['MainImage']['url_75x75'], 'product_id' => $queryProduct[0]['entity_id'],
-                                    'product_name' => $queryProduct[0]['name'], 'product_sku' => $queryProduct[0]['sku']);
+            if($listingsResult['status']) {
+                $resultAux = json_decode(json_decode($listingsResult['result']), true);
+                $result = $resultAux['results'];
+                $count = count($result);
+                $changes = 0;
+                $changesCount = 0;
+                $mappingModel = Mage::getModel('magetsync/mappingEtsy');
+                $listingModel = Mage::getModel('magetsync/listing');
+                $productModel = Mage::getModel('catalog/product');
+                $resource = Mage::getSingleton('core/resource');
+                foreach ($result as $item) {
+                    $queryM = $mappingModel->getCollection()->addFieldToSelect('etsy_id')->getSelect()->where('etsy_id = ?', $item['listing_id']);
+                    $queryM = $resource->getConnection('core_read')->fetchAll($queryM);
+                    if (!$queryM) {
+                        $query = $listingModel->getCollection()->addFieldToSelect('listing_id')->getSelect()->where('listing_id = ?', $item['listing_id']);
+                        $query = $resource->getConnection('core_read')->fetchAll($query);
+                        if (!$query) {
+                            $productsCollection = $productModel->getCollection()
+                                ->addAttributeToSelect('name')
+                                ->addAttributeToSelect('sku')
+                                ->addAttributeToSelect('entity_id')
+                                ->addAttributeToFilter('name', array('eq' => $item['title']));//->addAttributeToFilter('synchronizedEtsy',0);
+                            $queryProduct = $productsCollection->getData();
+                            if ($queryProduct) {
+                                $queryAux = $listingModel->getCollection()->addFieldToSelect('idproduct')->getSelect()->where('idproduct = ?', $queryProduct[0]['id']);
+                                $queryAux = $resource->getConnection('core_read')->fetchAll($queryAux);
+                                if (!$queryAux) {
+                                    $matchings = array('etsy_id' => $item['listing_id'], 'etsy_name' => $item['title'], 'thumbnail' => $item['MainImage']['url_75x75'], 'product_id' => $queryProduct[0]['entity_id'],
+                                        'product_name' => $queryProduct[0]['name'], 'product_sku' => $queryProduct[0]['sku']);
+                                } else {
+                                    $matchings = array('etsy_id' => $item['listing_id'], 'etsy_name' => $item['title'], 'thumbnail' => $item['MainImage']['url_75x75'], 'product_id' => null,
+                                        'product_name' => null, 'product_sku' => null);
+                                }
                             } else {
-                                $matchings = array('etsy_id' => $item['listing_id'], 'etsy_name' => $item['title'],'thumbnail'=>$item['MainImage']['url_75x75'], 'product_id' => null,
+                                $matchings = array('etsy_id' => $item['listing_id'], 'etsy_name' => $item['title'], 'thumbnail' => $item['MainImage']['url_75x75'], 'product_id' => null,
                                     'product_name' => null, 'product_sku' => null);
                             }
-                        } else {
-                            $matchings = array('etsy_id' => $item['listing_id'], 'etsy_name' => $item['title'],'thumbnail'=>$item['MainImage']['url_75x75'],'product_id' => null,
-                                'product_name' => null, 'product_sku' => null);
+                            $changes = true;
+                            $changesCount = $changesCount + 1;
+                            $matchings['state'] = 0;
+                            $mappingModel->setData($matchings);
+                            $mappingModel->save();
                         }
-                        $changes= true;
-                        $changesCount = $changesCount + 1;
-                        $matchings['state'] = 0;
-                        $mappingModel->setData($matchings);
-                        $mappingModel->save();
                     }
                 }
-            }
-            if($changes) {
-                return array('success'=>true,'count' =>$changesCount);
-            }else
-            {
-                if($count == 0)
-                {
-                    return array('success' => true, 'count' => 0);
-                }else {
-                    return array('success' => false, 'count' => 0);
+                if ($changes) {
+                    return array('success' => true, 'count' => $changesCount);
+                } else {
+                    if ($count == 0) {
+                        return array('success' => true, 'count' => 0);
+                    } else {
+                        return array('success' => false, 'count' => 0);
+                    }
                 }
+            }else {
+                return array('success' => false, 'message' => $listingsResult['message']);
             }
 
         }catch (Exception $e)
@@ -851,6 +851,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 } else {
                     $newImages = $dataPro['media_gallery']['images'];
                 }
+
+                //We sort and cut the array of images
                 $imageUrl = $productModel->getImage();
                 $resultIndex = $this->searchForFile($imageUrl, $newImages);
                 if(isset($resultIndex)) {
@@ -882,7 +884,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
             }
 
             foreach ($newImages as $image) {
-
+                //We control that the number of images always
+                //be 5 or less (Etsy restriction)
                 if ($h < (5 - $totalImages)) {
                     $imageModel   = Mage::getModel('magetsync/imageEtsy')->getCollection();
                     $query        = $imageModel->getSelect()->where('file = ?', $image['file']);
@@ -894,6 +897,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     $obligatory   = array('listing_id' => $result['listing_id']);
                     $etsyModel    = Mage::getModel('magetsync/etsy');
                     $url          = Merchante_MagetSync_Model_Etsy::$merchApi . 'Listing/saveImageUpload';
+                    //According to the PHP_VERSION we use file_contents
+                    //in different ways
                     if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
                         $tempImage = curl_file_create($file,$mime,'tempImage');
                         $post         = array('file_contents' => $tempImage);

@@ -285,6 +285,7 @@ class Merchante_MagetSync_Model_Observer
                     }
                     $postData['quantity'] = $qty;
                     $postData['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_NOT_CHANGED;
+                    //$postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_SYNCED;
                 } else {
                     $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_FAILED;
                     Merchante_MagetSync_Model_LogData::magetsync($item['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING,

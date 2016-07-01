@@ -20,8 +20,6 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
      * @var string
      */
     public static $merchApi = "https://api.magetsync.net/public/v1/";
-    //public static $merchApi = "http://merchapi/public/v1/";
-
     /**
      *
      */
@@ -186,7 +184,7 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
                  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
              }
              //curl_setopt($ch, CURLOPT_SSLVERSION,3);
-             curl_setopt($ch, CURLOPT_CAINFO, getcwd() . "/CACerts/cacert.pem");
+             curl_setopt($ch, CURLOPT_CAINFO, Mage::getBaseDir() . "/CACerts/cacert.pem");
              # Get the response
              $response = curl_exec($ch);
 

@@ -14,6 +14,7 @@ class Merchante_MagetSync_Model_MagentoStore_Source
      */
     public function toOptionArray()
     {
+        Mage::app()->getStore()->resetConfig();
         $allStores = Mage::app()->getStores();
         $return = array();
         $return[] = array('value'=> null,'label' => Mage::helper('magetsync')->__('Please Select'));

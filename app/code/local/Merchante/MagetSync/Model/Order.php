@@ -49,6 +49,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                 $obligatory = array('shop_id' => $shop);
                 $limit = 25;
                 $offset = 0;
+                $totalGlobal = 0;
                 do {
                     $totalReceipts = 0;
                     $params = array('includes' => 'Listings,Transactions,Country,Buyer/Profile',
@@ -58,6 +59,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                         $results = json_decode(json_decode($dataApi['result']), true);
                         $results = $results['results'];
                         $totalReceipts = count($results);
+                        $totalGlobal = $totalGlobal + $totalReceipts;
                         $allActivePaymentMethods = Mage::getModel('payment/config')->getActiveMethods();
                         $currentCurrency = Mage::app()->getStore()->getDefaultCurrencyCode();
                         foreach ($results as $value) {
@@ -354,15 +356,23 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
                         $offset = $offset + $limit;
 
+                    }else
+                    {
+                         $messageOrder = '';
+                         if($totalGlobal > 0)
+                         {
+                            $messageOrder = "imported Orders: ".$totalGlobal."\n";
+                         }
+                        return array('status' => false,'message' => $messageOrder.$dataApi['message']);
                     }
                 }while($totalReceipts > 0);
-                return true;
+                return array('status' => true);
             } else {
-                return false;
+                return array('status' => false,'message' => 'Customer is not authorized.');
                 /****NOT AUTHORIZED YET****/
                 //Mage::log("Error: ".print_r($dataApi['message'], true),null,'order.log');
             }
-        }else{return false;}
+        }else{return array('status' => false,'message' => 'Customer token empty.');}
     }
 
     public function setOrder($quote,$addressData,$value,$qtyProducts = null,$paymentMethod = null, $transactionNumber = null, $was_shipped = 0)

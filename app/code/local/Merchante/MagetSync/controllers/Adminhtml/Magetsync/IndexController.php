@@ -222,13 +222,12 @@ error_reporting(E_ALL ^ E_NOTICE);
             try {
 
                 $orderModel = Mage::getModel('magetsync/order');
-                $orderModel->makeOrder(1);
-                $result = array('success' => true);
+                $result = $orderModel->makeOrder(1);
                 echo json_encode($result,true);
 
             }catch(Exception $e)
             {
-                $result = array('success' => false,'msg' => $e->getMessage());
+                $result = array('status' => false,'message' => $e->getMessage());
                 echo json_encode($result,true);
                 //return;
             }

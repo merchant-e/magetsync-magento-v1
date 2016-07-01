@@ -30,9 +30,11 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid_Renderer_Product extends 
             if ($product->getData('type_id') == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
                 $childProducts = Mage::getModel('catalog/product_type_configurable')
                     ->getChildrenIds($val);
-                $simpleProducts = Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')
-                    ->addIdFilter($childProducts)->load();
-
+                $simpleProducts = null;
+                if($childProducts && count($childProducts[0]) > 0) {
+                    $simpleProducts = Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')
+                        ->addIdFilter($childProducts)->load();
+                }
                 //$conf = Mage::getModel('catalog/product_type_configurable')->setProduct($product);
                 //$simpleProducts = $conf->getUsedProductCollection()->addAttributeToSelect(array('sku', 'name'), 'inner')->addFilterByRequiredOptions()->load();
                 //$simpleProducts = Mage::getModel('catalog/product_type_configurable')->getUsedProducts(null, $product);

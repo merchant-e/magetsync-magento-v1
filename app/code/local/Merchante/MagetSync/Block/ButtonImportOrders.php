@@ -32,10 +32,10 @@ class Merchante_MagetSync_Block_ButtonImportOrders extends Mage_Adminhtml_Block_
                         },
                         onComplete: function(response) {
                             var dataJson = response.responseText.evalJSON();
-                            if(dataJson.success == true) {
+                            if(dataJson.status == true) {
                                 alert(\'Orders successfully imported\');
                             } else {
-                                alert(dataJson.msg);
+                                alert(dataJson.message);
                             }
                         }
                     });
