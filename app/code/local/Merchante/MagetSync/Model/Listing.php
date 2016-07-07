@@ -546,7 +546,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
        }
         }catch (Exception $e)
         {
-            Mage::log("Error: ".print_r($e->getMessage(), true),null,'qty.log');
+            Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_qty.log');
             return array('success' => false, 'error' => $e->getMessage());
         }
     }

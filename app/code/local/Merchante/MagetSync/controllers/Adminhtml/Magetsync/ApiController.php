@@ -142,7 +142,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ApiController extends Mage_Adminht
                                 $url = $url . "customerDate/" . $tokenCustomer . '/' . $shop_name;
                                 $etsyModel->curlConnect($url);
 
-                                Mage::log("Path: " . print_r(getcwd() . "/CACerts/cacert.pem", true), null, 'certpath.log');
+                                Mage::log("Path: " . print_r(getcwd() . "/CACerts/cacert.pem", true), null, 'magetsync_certpath.log');
 
                             }
 
@@ -183,7 +183,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ApiController extends Mage_Adminht
                 return;
             }
         }catch (Exception $e){
-            Mage::log("Error: ".print_r($response, true),null,'authorize.log');
+            Mage::log("Error: ".print_r($response, true),null,'magetsync_authorize.log');
             Mage::getSingleton('adminhtml/session')
             ->addError($e->getMessage());
             $this->_redirect('adminhtml/system_config/edit/section/magetsync_section/');

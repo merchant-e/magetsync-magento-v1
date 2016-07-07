@@ -67,7 +67,7 @@ class Merchante_MagetSync_Adminhtml_Catalog_Product_IndexController extends Mage
                 Mage::getSingleton('adminhtml/session')
                     ->addError($e->getMessage());
             }
-            Mage::log("Error: ".print_r($e, true),null,'product.log');
+            Mage::log("Error: ".print_r($e, true),null,'magetsync_product.log');
             Mage::getSingleton('adminhtml/session')
                 ->settestData($this->getRequest()
                         ->getPost()

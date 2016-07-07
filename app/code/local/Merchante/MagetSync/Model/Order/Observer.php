@@ -43,7 +43,7 @@ class Merchante_MagetSync_Model_Order_Observer
 
         }catch (Exception $e)
         {
-            //Mage::log("Error: ".print_r($e->getMessage(), true),null,'orderState.log');
+            //Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_orderState.log');
         }
     }
 
@@ -62,9 +62,9 @@ class Merchante_MagetSync_Model_Order_Observer
             $resultReceipt = $receiptModel->updateReceipt($obligatoryParams,$auxParams);
             if($resultReceipt['status'] == true)
             {
-                Mage::log("Info: " .$queryOrder[0]['receipt_id'] . ' - ' . $order->getId() , null, 'shipped.log');
+                Mage::log("Info: " .$queryOrder[0]['receipt_id'] . ' - ' . $order->getId() , null, 'magetsync_shipped.log');
             }else{
-                Mage::log("Error: " . print_r($resultReceipt['message'], true), null, 'shipped.log');
+                Mage::log("Error: " . print_r($resultReceipt['message'], true), null, 'magetsync_shipped.log');
             }
 
         }

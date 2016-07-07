@@ -370,7 +370,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
             } else {
                 return array('status' => false,'message' => 'Customer is not authorized.');
                 /****NOT AUTHORIZED YET****/
-                //Mage::log("Error: ".print_r($dataApi['message'], true),null,'order.log');
+                //Mage::log("Error: ".print_r($dataApi['message'], true),null,'magetsync_order.log');
             }
         }else{return array('status' => false,'message' => 'Customer token empty.');}
     }
@@ -502,13 +502,13 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
             if(!$order->canInvoice())
             {
-                Mage::log("Error: Cannot create an invoice.", null, 'invoice.log');
+                Mage::log("Error: Cannot create an invoice.", null, 'magetsync_invoice.log');
             }
 
             $invoice = Mage::getModel('sales/service_order', $order)->prepareInvoice();
 
             if (!$invoice->getTotalQty()) {
-                Mage::log("Error: Cannot create an invoice without products.", null, 'invoice.log');
+                Mage::log("Error: Cannot create an invoice without products.", null, 'magetsync_invoice.log');
             }
 
             $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
@@ -524,7 +524,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
         }else
         {
-            Mage::log("Error: " . print_r($value['receipt_id'], true), null, 'orderId.log');
+            Mage::log("Error: " . print_r($value['receipt_id'], true), null, 'magetsync_orderId.log');
         }
     }
 

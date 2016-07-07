@@ -118,7 +118,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShippingTemplateController extends
                 return;
             }
         }  catch (Exception $e){
-            Mage::log("Error: ".print_r($e, true),null,'shippingtemplate.log');
+            Mage::log("Error: ".print_r($e, true),null,'magetsync_shippingtemplate.log');
             if($e instanceof OAuthException)
             {
                 Mage::getSingleton('adminhtml/session')
@@ -353,7 +353,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShippingTemplateController extends
                     Mage::getSingleton('adminhtml/session')
                         ->addError($e->getMessage());
                 }
-                Mage::log("Error: ".print_r($e, true),null,'shippingtemplate.log');
+                Mage::log("Error: ".print_r($e, true),null,'magetsync_shippingtemplate.log');
                 Mage::getSingleton('adminhtml/session')
                     ->settestData($this->getRequest()
                             ->getPost()

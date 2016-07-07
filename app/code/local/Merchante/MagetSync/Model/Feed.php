@@ -53,7 +53,7 @@ class Merchante_MagetSync_Model_Feed extends Mage_AdminNotification_Model_Feed
             return $this;
         }catch (Exception $e)
         {
-            //Mage::log("Error: ".print_r($e->getMessage(), true),null,'feeds.log');
+            //Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_feeds.log');
         }
     }
 

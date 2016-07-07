@@ -16,7 +16,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid extends Mage_Adminhtml_Bl
         parent::__construct();
         $this->setId('productGrid');
         $this->setDefaultSort('listing_id');
-        $this->setDefaultDir('DESC');
+        $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
         $this->unsetChild('search_button');
     }

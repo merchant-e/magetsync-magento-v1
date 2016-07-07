@@ -190,14 +190,14 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
 
              if(curl_errno($ch))
              {
-                 Mage::log("Error: ".print_r(curl_error($ch), true),null,'curl.log');
+                 Mage::log("Error: ".print_r(curl_error($ch), true),null,'magetsync_curl.log');
              }
 
              curl_close($ch);
              return $response;
          }catch (Exception $e)
          {
-             Mage::log("Error: ".print_r($e, true),null,'curl.log');
+             Mage::log("Error: ".print_r($e, true),null,'magetsync_curl.log');
          }
      }
 

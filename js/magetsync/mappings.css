@@ -57,6 +57,7 @@ img[name=thumbnail-etsy]{
 
 .ul-map li 						{ position:relative; display: block; line-height: 40px; background: #f0f9fc; border: 1px solid #daf1f8; color: #6aa3d5; padding: 0 0 0 5px; margin-bottom: 5px; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; height:45px;}
 .ul-map li span 				{ vertical-align: middle; }
+.ul-map li span.glyphicon 		{ display:inline!important; }
 .ul-map li span span			{ display: none;}
 .ul-map li:before 				{ content: ''; display: inline-block; vertical-align: middle; height: 100%; }
 .ul-map li img                  { margin: 0 5px; }

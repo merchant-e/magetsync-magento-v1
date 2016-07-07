@@ -26,7 +26,7 @@ if(!$query) {
         }
 
     } else {
-        Mage::log("Error: " . print_r($dataApi['message'], true), null, 'styleInstall.log');
+        Mage::log("Error: " . print_r($dataApi['message'], true), null, 'magetsync_styleInstall.log');
     }
 
 
