@@ -4,6 +4,9 @@
 
 ### Changed
 - All log filenames (prepended magetsync_)
+- Improvements to Mappings layout/styles
+- Etsy order states now are marked as processing instead of new.
+- Etsy orders pending payments are marked as such
 
 ##[0.9.6.8.6] - 2016-03-01
 ### Fixed

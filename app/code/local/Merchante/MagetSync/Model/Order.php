@@ -464,16 +464,17 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                 $current_time = Varien_Date::formatDate($value['creation_tsz'], false);
                 $order->setCreatedAt($current_time);
                 $order->setUpdatedAt($current_time);
-
+                
                 $order->addStatusToHistory(Mage_Sales_Model_Order::STATE_COMPLETE,$msgFromBuyer,false);
 
-            }else
+            } else
             {
                 /***************************/
                 if ($value['was_paid'] == true) {
-                    //$order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true)->save();
+                    $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
                     $order->addStatusToHistory(Mage_Sales_Model_Order::STATE_PROCESSING,$msgFromBuyer,false);
                 }else{
+                    $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true);
                     $order->addStatusHistoryComment($msgFromBuyer);
                 }
             }
