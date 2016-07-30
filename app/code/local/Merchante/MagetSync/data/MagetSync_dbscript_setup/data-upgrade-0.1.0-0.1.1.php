@@ -85,7 +85,7 @@ if(!$query) {
         $values = (isset($values['results']) ? $values['results'] : null);
         $categoryModel->recursiveCategories($values, $installer);
     } else {
-        Mage::log("Error: " . print_r($dataApi['message'], true), null, 'dataInstall.log');
+        Mage::log("Error: " . print_r($dataApi['message'], true), null, 'magetsync_dataInstall.log');
     }
 }
 

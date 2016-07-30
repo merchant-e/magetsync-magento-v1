@@ -97,7 +97,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
                 return;
             }
         }  catch (Exception $e){
-            Mage::log("Error: ".print_r($e, true),null,'shopsection.log');
+            Mage::log("Error: ".print_r($e, true),null,'magetsync_shopsection.log');
             if($e instanceof OAuthException)
             {
             Mage::getSingleton('adminhtml/session')
@@ -189,7 +189,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
                 $this->_redirect('*/*/');
                 return;
             } catch (Exception $e){
-                Mage::log("Error: ".print_r($e, true),null,'shopsection.log');
+                Mage::log("Error: ".print_r($e, true),null,'magetsync_shopsection.log');
                 if($e instanceof OAuthException)
                 {
                     Mage::getSingleton('adminhtml/session')

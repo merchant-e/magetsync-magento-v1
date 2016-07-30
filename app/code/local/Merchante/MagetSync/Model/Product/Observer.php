@@ -23,7 +23,7 @@ class Merchante_MagetSync_Model_Product_Observer {
             {
                return;
             }
-            //Mage::log("Error: ".print_r($data, true),null,'productX.log');
+            //Mage::log("Error: ".print_r($data, true),null,'magetsync_productX.log');
             $status = (isset($data['synchronizedEtsy'])?$data['synchronizedEtsy']:null);
         }else{
             $product = Mage::getModel('catalog/product')->load($idProduct);

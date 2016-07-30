@@ -20,7 +20,7 @@ class Merchante_MagetSync_Model_Login_Observer
 
         }catch (Exception $e)
         {
-            //Mage::log("Error: ".print_r($e->getMessage(), true),null,'feeds.log');
+            //Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_feeds.log');
         }
     }
 

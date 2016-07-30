@@ -39,12 +39,12 @@ class Merchante_MagetSync_Model_Observer
                 //$results = json_decode(json_decode($dataApi['result']), true);
                 //$results = $results['results'];
             } else {
-                Mage::log("Error: " . print_r($dataApi['message'], true), null, 'track.log');
+                Mage::log("Error: " . print_r($dataApi['message'], true), null, 'magetsync_track.log');
             }
         }
         return;
         } catch (Exception $e){
-            Mage::log("Error: ".print_r($e, true),null,'track.log');
+            Mage::log("Error: ".print_r($e, true),null,'magetsync_track.log');
             return;
         }
     }
@@ -71,7 +71,7 @@ class Merchante_MagetSync_Model_Observer
            return $orderModel->makeOrder();
        }catch (Exception $e)
         {
-            Mage::log("Error: " . print_r($e->getMessage(), true), null, 'order.log');
+            Mage::log("Error: " . print_r($e->getMessage(), true), null, 'magetsync_order.log');
             return false;
         }
     }
@@ -279,7 +279,7 @@ class Merchante_MagetSync_Model_Observer
                                 Merchante_MagetSync_Model_LogData::magetsync($item['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING,
                                     $errorMessage, Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
 
-                                Mage::log("Error: " . print_r($errorMessage, true), null, 'inventory.log');
+                                Mage::log("Error: " . print_r($errorMessage, true), null, 'magetsync_inventory.log');
                             }
                         }
                     }

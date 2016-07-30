@@ -92,11 +92,11 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
                     $entity->save();
                 }
             }
-            Mage::log("Error: ".print_r($resultApi, true),null,'countries.log');
+            Mage::log("Error: ".print_r($resultApi, true),null,'magetsync_countries.log');
         }
         else
         {
-            Mage::log("Error: ".print_r($resultApi, true),null,'countries.log');
+            Mage::log("Error: ".print_r($resultApi, true),null,'magetsync_countries.log');
         }
     }
 

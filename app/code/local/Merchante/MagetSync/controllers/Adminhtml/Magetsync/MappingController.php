@@ -48,7 +48,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                         $this->setListingInformation($resultListing,$idsProducts[$i]);
                     }else{
                         //$json = array('message'=>$resultListing['msg'],"status"=>true);
-                        Mage::log("Error: " . print_r($resultListing['msg'], true), null, 'mapping.log');
+                        Mage::log("Error: " . print_r($resultListing['msg'], true), null, 'magetsync_mapping.log');
                     }
                 }
                 if($resultListing['status'])

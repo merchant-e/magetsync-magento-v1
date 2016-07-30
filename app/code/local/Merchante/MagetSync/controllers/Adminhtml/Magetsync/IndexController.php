@@ -513,7 +513,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                            ->addError($e->getMessage());
                        $errorMsg = $e->getMessage();
                    }
-                   Mage::log("Error: ".print_r($errorMsg, true),null,'listing.log');
+                   Mage::log("Error: ".print_r($errorMsg, true),null,'magetsync_listing.log');
                     Mage::getSingleton('adminhtml/session')
                      ->settestData($this->getRequest()
                                         ->getPost()
