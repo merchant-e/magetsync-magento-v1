@@ -275,7 +275,8 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
                                 if($value['name'])
                                 {
-                                    $dataName = explode(' ', $value['name'], 2);
+                                    $value_name = trim($value['name']);
+                                    $dataName = explode(' ', $value_name, 2);
                                     if (count($dataName) > 0) {
                                         $firstName = $dataName[0];
                                         if (count($dataName) == 1) {
