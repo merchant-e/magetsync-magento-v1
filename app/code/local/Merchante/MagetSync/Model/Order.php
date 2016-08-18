@@ -475,7 +475,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                     $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
                     $order->addStatusToHistory(Mage_Sales_Model_Order::STATE_PROCESSING,$msgFromBuyer,false);
                 }else{
-                    $order->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, true);
+                    $order->setState(Mage_Sales_Model_Order::STATE_NEW, true);
                     $order->addStatusHistoryComment($msgFromBuyer);
                 }
             }
