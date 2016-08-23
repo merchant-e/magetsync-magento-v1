@@ -21,14 +21,21 @@ error_reporting(E_ALL ^ E_NOTICE);
            return $this;
          }
 
-        /**
-         * Method for rendering Layout
-         */
-        public function indexAction()
-          {
-             $this->_initAction();
-             $this->renderLayout();
-          }
+    /**
+     * Method for rendering Layout
+     * Force update if quantity has changed
+     */
+    public function indexAction()
+    {
+        $collections = Mage::getModel('magetsync/listing')->getCollection();
+        foreach ($collections as $listing) {
+            if ($listing->getQuantityHasChanged() == $listing::QUANTITY_HAS_CHANGED) {
+                $listing->triggerUpdate();
+            }
+        }
+        $this->_initAction();
+        $this->renderLayout();
+    }
 
         /**
          * Method for massive updating of listings
@@ -431,13 +438,14 @@ error_reporting(E_ALL ^ E_NOTICE);
                                $postData['user_id'] = $result['user_id'];
                                //$postData['should_auto_renew'] = $result['should_auto_renew'];
 
-                               if($statusOperation['status']) {
-                                   if ($result['state'] == 'edit') {
-                                       $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_EXPIRED;
-                                   } else {
-                                       $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_SYNCED;
-                                   }
-                               }else{
+                            if($statusOperation['status']) {
+                                if ($result['state'] == 'edit') {
+                                    $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_EXPIRED;
+                                } else {
+                                    $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_SYNCED;
+                                    $postData['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_NOT_CHANGED;
+                                }
+                            }else{
 
                                    $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_FAILED;
                                    $hasError = true;
@@ -593,5 +601,3 @@ error_reporting(E_ALL ^ E_NOTICE);
             }
         }
     }
-
-    ?>

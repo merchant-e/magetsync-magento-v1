@@ -329,71 +329,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
            $dataSave = array('idproduct' => $dataProduct['entity_id'], 'sync' => Merchante_MagetSync_Model_Listing::STATE_INQUEUE);
 
-           if($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-
-               //is_in_stock -> stock_item
-               $stockItem = $productModel->getStockItem();
-               if($stockItem && $stockItem->getIsInStock()) {
-                   /* When Magento duplicate a product, It is setting out of stock */
-                   if ($productModel->getData("is_duplicate") == true) {
-                       $dataSave['quantity'] = 0;
-                   } else {
-                       if ($stockItem && $stockItem->getQty() == 0) {
-                           $dataSave['quantity'] = 0;
-                       } elseif($stockItem && $stockItem->getQty()  > 999) {
-                           /* If quantity is over 999, we set 999 in this field because that is
-                           is max quantity allowed on Etsy*/
-                           $dataSave['quantity'] = 999;
-                       }else{
-                           $dataSave['quantity'] = $stockItem->getQty();
-                       }
-                   }
-               }else{
-                   $stockInfo = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productModel['entity_id'])->getData();
-                   if($stockInfo && $stockInfo['is_in_stock'])
-                   {
-                       $dataSave['quantity'] = $stockInfo['qty'];
-                   }else {
-                       /* We set 1 because on Etsy you cannot save one quantity */
-                       $dataSave['quantity'] = 0;
-                   }
-               }
-
-
-           }elseif($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
-           {
-               /* Total quantity in configurable products */
-               $itemStock = 0;
-               foreach ($productModel->getTypeInstance(true)->getUsedProducts ( null, $productModel) as $simple) {
-                   $dataSimple = $simple->getData();
-                   if($dataSimple['is_in_stock']) {
-                       $existStockItem =  array_key_exists('stock_item',$dataSimple);
-                       if($existStockItem)
-                       {
-                           $stock = $dataSimple['stock_item']['qty'];
-                           $stock = round($stock, 2);
-                           $itemStock += $stock;
-                       }else{
-                           $itemStock += 0;
-                       }
-                   }else{
-                       $itemStock += 0;
-                   }
-                   /* Synchronized all the associated products */
-                   //syncVal['synchronizedEtsy'] = true;
-                   if(!$simple->getData('synchronizedEtsy')){
-                       $simple->setData('synchronizedEtsy', true)->getResource()->saveAttribute($simple, 'synchronizedEtsy');
-                       //$simple->addData($syncVal)->save();
-                   }
-               }
-
-               if($itemStock > 999) {
-                   $dataSave['quantity'] = 999;
-               }else{
-                   $dataSave['quantity'] = $itemStock;
-               }
-
-           }
+           $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
 
            if($is_qty_validation) {
                if (array_key_exists('quantity', $dataSave) && $dataSave['quantity'] == 0) {
@@ -518,21 +454,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                    $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_ENABLED;
                }
 
-               if ($query[0]['sync'] != Merchante_MagetSync_Model_Listing::STATE_EXPIRED) {
-                   if ($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_SYNCED ||
-                       (($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_FAILED ||
-                           $query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_MAPPED) && $query[0]['listing_id'] != '')
-                   ) {
-                       $dataSave['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
-                   }else{
-                       if ($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_FORCE_DELETE)
-                       {
-                           unset($dataSave['sync']);
-                       }
-                   }
-               } else {
-                   $dataSave['sync'] = Merchante_MagetSync_Model_Listing::STATE_EXPIRED;
-               }
+               $this->handleSyncStatusUpdate($dataSave, $query);
+
                $dataSave['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED;
                $listingModel
                    ->addData($dataSave)
@@ -548,6 +471,96 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
         {
             Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_qty.log');
             return array('success' => false, 'error' => $e->getMessage());
+        }
+    }
+
+    /**
+     * @param $dataProduct
+     * @param $dataSave
+     * @param $productModel
+     */
+    public function handleQtyUpdate($dataProduct, &$dataSave, $productModel) {
+        if ($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+
+            //is_in_stock -> stock_item
+            $stockItem = $productModel->getStockItem();
+            if ($stockItem && $stockItem->getIsInStock()) {
+                /* When Magento duplicate a product, It is setting out of stock */
+                if ($productModel->getData("is_duplicate") == true) {
+                    $dataSave['quantity'] = 0;
+                } else {
+                    if ($stockItem && $stockItem->getQty() == 0) {
+                        $dataSave['quantity'] = 0;
+                    } elseif ($stockItem && $stockItem->getQty() > 999) {
+                        /* If quantity is over 999, we set 999 in this field because that is
+                        is max quantity allowed on Etsy*/
+                        $dataSave['quantity'] = 999;
+                    } else {
+                        $dataSave['quantity'] = $stockItem->getQty();
+                    }
+                }
+            } else {
+                $stockInfo = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productModel['entity_id'])->getData();
+                if ($stockInfo && $stockInfo['is_in_stock']) {
+                    $dataSave['quantity'] = $stockInfo['qty'];
+                } else {
+                    /* We set 1 because on Etsy you cannot save one quantity */
+                    $dataSave['quantity'] = 0;
+                }
+            }
+
+        } elseif ($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+            /* Total quantity in configurable products */
+            $itemStock = 0;
+            foreach ($productModel->getTypeInstance(true)->getUsedProducts(null, $productModel) as $simple) {
+                $dataSimple = $simple->getData();
+                if ($dataSimple['is_in_stock']) {
+                    $existStockItem = array_key_exists('stock_item', $dataSimple);
+                    if ($existStockItem) {
+                        $stock = $dataSimple['stock_item']['qty'];
+                        $stock = round($stock, 2);
+                        $itemStock += $stock;
+                    } else {
+                        $itemStock += 0;
+                    }
+                } else {
+                    $itemStock += 0;
+                }
+                /* Synchronized all the associated products */
+                //syncVal['synchronizedEtsy'] = true;
+                if (!$simple->getData('synchronizedEtsy')) {
+                    $simple->setData('synchronizedEtsy', true)->getResource()->saveAttribute($simple, 'synchronizedEtsy');
+                    //$simple->addData($syncVal)->save();
+                }
+            }
+
+            if ($itemStock > 999) {
+                $dataSave['quantity'] = 999;
+            } else {
+                $dataSave['quantity'] = $itemStock;
+            }
+        }
+    }
+
+    /**
+     * @param $dataSave
+     * @param $query
+     */
+    public function handleSyncStatusUpdate(&$dataSave, $query)
+    {
+        if ($query[0]['sync'] != Merchante_MagetSync_Model_Listing::STATE_EXPIRED) {
+            if ($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_SYNCED ||
+                (($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_FAILED ||
+                        $query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_MAPPED) && $query[0]['listing_id'] != '')
+            ) {
+                $dataSave['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
+            } else {
+                if ($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_FORCE_DELETE) {
+                    unset($dataSave['sync']);
+                }
+            }
+        } else {
+            $dataSave['sync'] = Merchante_MagetSync_Model_Listing::STATE_EXPIRED;
         }
     }
 
@@ -1078,4 +1091,31 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
         }
         return -1;
     }
- }
+
+    /**
+     * Forces listing product qty and status update if update hasn't been logged
+     */
+    function triggerUpdate()
+    {
+        try {
+            $productModel = Mage::getModel('catalog/product')->load($this->getIdproduct());
+            $dataProduct = $productModel->getData();
+            $dataSave = array('idproduct' => $dataProduct['entity_id']);
+            $mockedQuery = array(0 => array('sync' => $this->getSync()));
+
+            $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($dataProduct['entity_id']);
+            if (!$parent
+                && ($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
+                    || $dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
+            ) {
+
+                $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
+                $this->handleSyncStatusUpdate($dataSave, $mockedQuery);
+                $this->addData($dataSave)->save();
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+            return;
+        }
+    }
+}
