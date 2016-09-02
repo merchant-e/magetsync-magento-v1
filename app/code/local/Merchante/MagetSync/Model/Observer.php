@@ -253,6 +253,37 @@ class Merchante_MagetSync_Model_Observer
                         $params['quantity'] = $qty;
                     }
                 }
+		/// getting custom title field flag from the configuration
+		$isCustomTitle = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute');
+		if($isCustomTitle){
+			$isCustomTitleAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_code');
+			// getting custom attribute code for title
+			if(!empty($isCustomTitleAttribute)){
+				$customTitle = $product->getData($isCustomTitleAttribute);
+				if(!empty($customTitle)){
+					$params['title'] = ucfirst($customTitle);
+				}
+			}
+						
+		}
+					
+		/// getting custom description field flag from the configuration
+		$isCustomDescription = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute');
+					
+		if($isCustomDescription){
+			$isCustomDescriptionAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute_code');
+			// getting custom attribute code for title
+			if(!empty($isCustomDescriptionAttribute)){
+				$customDesc = $product->getData($isCustomDescriptionAttribute);
+							
+				if(!empty($customDesc)){
+					$textNoHtml = strip_tags($customDesc,'<br></br><br/><br />');
+					$newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
+					$params['description'] = $newDescription;
+								
+				}
+			}
+		}
                 $obliUpd = array('listing_id' => $item['listing_id']);
                 $resultApiUpd = $listingModel->updateListing($obliUpd, $params);
                 if ($resultApiUpd['status'] == true) {

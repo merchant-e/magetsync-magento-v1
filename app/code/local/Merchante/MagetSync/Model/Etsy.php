@@ -125,7 +125,11 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
                      'tokenCustomer'        => $tokenCustomer,
                      'accessToken'          => $accessToken,
                      'accessTokenSecret'    => $accessTokenSecret);
-
+     	$isDraftMode = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_draft/magetsync_field_listing_draft_mode');
+		if($isDraftMode){
+			$params['state'] = 'draft';
+		}
+		
         # Our new data
          $data = array(
              'obligatory'        => json_encode($obligatory,true),

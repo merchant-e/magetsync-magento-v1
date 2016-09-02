@@ -122,6 +122,9 @@
                                      <magetsync_section_templates translate="title">
                                          <title>Templates</title>
                                      </magetsync_section_templates>
+				     <magetsync_section_draftmode translate="title">
+                                         <title>Draft Mode</title>
+                                     </magetsync_section_draftmode>
                                  </children>
                              </config>
                          </children>

@@ -131,8 +131,8 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid extends Mage_Adminhtml_Bl
             'label'=> Mage::helper('magetsync')->__('Send to Etsy'),
             'url'  => $this->getUrl('*/*/sendtoetsy', array('' => '')),
             'confirm' => Mage::helper('magetsync')->__('You are about to list product(s) on Etsy. If you have filled out all the required information please proceed.'),
-        ));
-
+        ));		
+	$this->getMassactionBlock()->addItem('deleteoption', array('label'=> Mage::helper('magetsync')->__('Delete'),'url'  => $this->getUrl('*/*/deleteoption'),'confirm' => Mage::helper('magetsync')->__('Are you sure?'),));
         return $this;
     }
 
