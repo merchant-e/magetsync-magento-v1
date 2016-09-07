@@ -5,7 +5,7 @@
 <config>
 	<modules>
 		<Merchante_MagetSync>
-			<version>0.2.0</version>
+			<version>0.2.1</version>
 		</Merchante_MagetSync>
 	</modules>
 	<frontend>
@@ -381,6 +381,14 @@
                     <model>magetsync/observer::checkInventory</model>
                 </run>
             </magetsync_inventory>
+            <magetsync_autolist>
+                <schedule>
+                    <cron_expr>*/3 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>magetsync/observer::sendAutoQueue</model>
+                </run>
+            </magetsync_autolist>
             <magetsync_checklistingsexpired>
                 <schedule>
                     <cron_expr>0 0 1 * *</cron_expr>

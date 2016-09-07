@@ -27,6 +27,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
     const STATE_EXPIRED      = 5;
     const STATE_MAPPED       = 6;
     const STATE_FORCE_DELETE = 7;
+    const STATE_AUTO_QUEUE   = 8;
 
     const STATE_ACTIVE     = 'active';
     const STATE_INACTIVE   = 'inactive';
