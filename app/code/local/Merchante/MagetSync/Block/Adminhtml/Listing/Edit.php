@@ -26,39 +26,57 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
         $msgError = Mage::helper('magetsync')->__('Something went wrong');
 
         $dataRecord = Mage::registry('magetsync_data')->getData();
+        $syncState = $dataRecord['sync'];
 
-        if($dataRecord['sync'] == Merchante_MagetSync_Model_Listing::STATE_SYNCED ||
-           $dataRecord['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC ||
-           $dataRecord['sync'] == Merchante_MagetSync_Model_Listing::STATE_EXPIRED)
-        {
-           $label = Mage::helper('magetsync')->__('ReSync');
-        }else{
-         if($dataRecord['listing_id']){
-             $label = Mage::helper('magetsync')->__('ReSync');
-         } else{
-             $label = Mage::helper('magetsync')->__('Sync Now');
-         }
+        if ($syncState == Merchante_MagetSync_Model_Listing::STATE_SYNCED ||
+            $syncState == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC ||
+            $syncState == Merchante_MagetSync_Model_Listing::STATE_EXPIRED
+        ) {
+            $label = Mage::helper('magetsync')->__('ReSync');
+        } else {
+            if ($dataRecord['listing_id']) {
+                $label = Mage::helper('magetsync')->__('ReSync');
+            } else {
+                $label = Mage::helper('magetsync')->__('Sync Now');
+            }
         }
 
         $this->_addButton('sync_now', array(
             'label'     => $label,
-            'onclick'   =>  '
-            if (editForm.validator && editForm.validator.validate())
-                {
+            'onclick'   =>
+                'if (editForm.validator && editForm.validator.validate()) {
                    $(\'edit_form\').request({method: \'post\',
                      onSuccess: function(value){
                         var myWindow = window.open(\'\', \'_self\');
                         myWindow.document.write(value.responseText);
                      },
                      onFailure: function() { alert(\''.$msgError.'\'); },
-                     parameters: { syncStatus:\'1\' }});
-                }
-                else
-                {
+                     parameters: { syncStatus:\''. Merchante_MagetSync_Model_Listing::STATE_INQUEUE .'\' }});
+                } else {
                      editForm.submit();
                 }',
-                            'class'     => 'save',
+            'class'     => 'save',
         ),0, 100);
+
+        if ($syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
+            $this->_addButton('save_and_queue', array(
+                'label'     => Mage::helper('magetsync')->__('Save and auto queue'),
+                'onclick'   =>
+                    'if (editForm.validator && editForm.validator.validate()) {
+                           $(\'edit_form\').request({method: \'post\',
+                             onSuccess: function(value){
+                                var myWindow = window.open(\'\', \'_self\');
+                                myWindow.document.write(value.responseText);
+                             },
+                             onFailure: function() { alert(\''.$msgError.'\'); },
+                             parameters: { autoQueue:\'true\' }});
+                        } else {
+                             editForm.submit();
+                        }',
+                'class'     => 'save',
+            ),0, 101);
+        }
+
     }
 
     /**
