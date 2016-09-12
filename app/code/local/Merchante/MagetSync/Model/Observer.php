@@ -9,6 +9,11 @@
 class Merchante_MagetSync_Model_Observer
 {
     /**
+     * Number of products sent to Etsy per cron job
+     */
+    const AUTOQUEUE_ITERATIONS_LIMIT = 3;
+
+    /**
      * @param $observer
      */
     public function saveTrack($observer)
@@ -334,11 +339,12 @@ class Merchante_MagetSync_Model_Observer
         }
     }
 
-    public function sendAutoQueue($observer)
+    public function sendAutoQueue()
     {
         $etsyConfigVerified = Mage::getModel('magetsync/etsy')->verifyDataConfiguration();
         if ($etsyConfigVerified) {
             $dataGlobal = '';
+            $iterationCntr = 0;
             try {
                 $listingModel = Mage::getModel('magetsync/listing');
                 $listings = $listingModel->getCollection()
@@ -347,6 +353,10 @@ class Merchante_MagetSync_Model_Observer
                     ->load();
 
                 foreach ($listings as $listing) {
+
+                    if ($iterationCntr > $this::AUTOQUEUE_ITERATIONS_LIMIT) {
+                        break;
+                    }
 
                     $data = $listing->getData();
                     if ($data['listing_id']) {
@@ -466,6 +476,8 @@ class Merchante_MagetSync_Model_Observer
 
                     $listing->addData($postData);
                     $listing->save();
+
+                    $iterationCntr++;
 
                     if ($hasError == true) {
                         Merchante_MagetSync_Model_LogData::magetsync($dataGlobal,

@@ -535,6 +535,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                             }
                         } elseif ($this->getRequest()->getParam('autoQueue')) {
                             $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                            Mage::getModel('magetsync/observer')->sendAutoQueue();
                         } else {
                             if ($data['listing_id']) {
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
