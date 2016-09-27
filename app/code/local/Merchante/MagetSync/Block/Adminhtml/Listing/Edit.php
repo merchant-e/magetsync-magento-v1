@@ -60,7 +60,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
 
         if ($syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
             $this->_addButton('save_and_queue', array(
-                'label'     => Mage::helper('magetsync')->__('Save and auto queue'),
+                'label'     => Mage::helper('magetsync')->__('Change and Sync'),
                 'onclick'   =>
                     'if (editForm.validator && editForm.validator.validate()) {
                            $(\'edit_form\').request({method: \'post\',

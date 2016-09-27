@@ -535,6 +535,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                             }
                         } elseif ($this->getRequest()->getParam('autoQueue')) {
                             $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                            Mage::getModel('magetsync/observer')->sendAutoQueue();
                         } else {
                             if ($data['listing_id']) {
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
@@ -620,8 +621,10 @@ error_reporting(E_ALL ^ E_NOTICE);
                     $listingModel->setId($this->getRequest()
                         ->getParam('id'))
                         ->delete();
-                    Mage::getSingleton('adminhtml/session')
-                        ->addSuccess(Mage::helper('magetsync')->__('Successfully deleted'));
+                    Mage::getModel('catalog/product')->load($listingModel->getIdproduct())
+                        ->setData('synchronizedEtsy', '0')
+                        ->save();
+                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__('Successfully deleted'));
                 }else
                 {
                     Mage::getSingleton('adminhtml/session')
