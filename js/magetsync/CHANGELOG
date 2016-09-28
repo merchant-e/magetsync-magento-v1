@@ -1,11 +1,15 @@
-##[0.9.7.0] - 2016-09-01
+##[0.9.7.0] - 2016-10-01
 ### Added
 - New configurable option: Custom Products Titles/Desc support
+- Auto queue functionality (create listings in bulk automatically)
 - Create test products in 'draft' state to prevent Etsy charges
-- New Delete option under Actions menu in Listings Manager. Deletes and resets sync_with_etsy attribute.
+- New Delete option under Actions menu in Listings Manager. Deletes and resets 'Synchronize with Etsy' attribute.
 
 ### Bug
 - Fixed issue preventing stock from updating in Listings Manager after a new Etsy order
+
+### Changed
+- Unpaid orders state changed to new instead of PENDING_PAYMENT
 
 ##[0.9.6.8.7] - 2016-07-07
 ### Fixed
