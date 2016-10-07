@@ -99,7 +99,9 @@ error_reporting(E_ALL ^ E_NOTICE);
                 $cnt = 0;
                 foreach ($listings as $listing) {
                     $readyToSync = $listing->getSyncReady();
-                    if ($readyToSync && $listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
+                    if ($readyToSync
+                        && ($listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
+                            || $listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_FAILED)) {
                         $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE);
                         $listing->save();
                         $cnt++;
@@ -362,16 +364,11 @@ error_reporting(E_ALL ^ E_NOTICE);
                         throw new Exception(Mage::helper('magetsync')->__('Must configure Etsy\'s language'));
                     }
 
-
-                    //$products = Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addIdFilter($newListing)->load();
-
                     $listingModel = Mage::getModel('magetsync/listing');
-                    $listings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter('id', array('in' => $newListing))->load();//->toArray();
+                    $listings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter('id', array('in' => $newListing))->load();
 
                     foreach ($listings as $value) {
-
-                        $data = $value->getData(); //$listingModel->load($value)->getData();
-                        //$data['quantity'] = Mage::getModel('cataloginventory/stock_item')->loadByProduct($value)->getQty();
+                        $data = $value->getData();
 
                         if (isset($postData['category_id'])) {
                             $postData['category_id'] = $listingModel->emptyField($postData['category_id'], null);
@@ -535,7 +532,6 @@ error_reporting(E_ALL ^ E_NOTICE);
                             }
                         } elseif ($this->getRequest()->getParam('autoQueue')) {
                             $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
-                            Mage::getModel('magetsync/observer')->sendAutoQueue();
                         } else {
                             if ($data['listing_id']) {
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
@@ -571,6 +567,9 @@ error_reporting(E_ALL ^ E_NOTICE);
                         }
                     }
 
+                    if ($this->getRequest()->getParam('autoQueue')) {
+                        Mage::getModel('magetsync/observer')->sendAutoQueue();
+                    }
                     Mage::getSingleton('adminhtml/session')->settestData(false);
                     $this->_redirect('*/*/');
                     return;
@@ -598,7 +597,6 @@ error_reporting(E_ALL ^ E_NOTICE);
                     return;
                 }
             }
-            //$this->_redirect('*/*/');
         }
 
 

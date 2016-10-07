@@ -27,56 +27,60 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
 
         $dataRecord = Mage::registry('magetsync_data')->getData();
         $syncState = $dataRecord['sync'];
+        $label = Mage::helper('magetsync')->__('ReSync');
 
-        if ($syncState == Merchante_MagetSync_Model_Listing::STATE_SYNCED ||
-            $syncState == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC ||
-            $syncState == Merchante_MagetSync_Model_Listing::STATE_EXPIRED
-        ) {
-            $label = Mage::helper('magetsync')->__('ReSync');
-        } else {
-            if ($dataRecord['listing_id']) {
-                $label = Mage::helper('magetsync')->__('ReSync');
-            } else {
-                $label = Mage::helper('magetsync')->__('Sync Now');
-            }
+        if (($syncState != Merchante_MagetSync_Model_Listing::STATE_SYNCED
+             || $syncState != Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC
+             || $syncState != Merchante_MagetSync_Model_Listing::STATE_FAILED)
+            && !$dataRecord['listing_id'])
+        {
+            $label = Mage::helper('magetsync')->__('Sync Now');
         }
 
-        $this->_addButton('sync_now', array(
-            'label'     => $label,
-            'onclick'   =>
-                'if (editForm.validator && editForm.validator.validate()) {
-                   $(\'edit_form\').request({method: \'post\',
-                     onSuccess: function(value){
-                        var myWindow = window.open(\'\', \'_self\');
-                        myWindow.document.write(value.responseText);
-                     },
-                     onFailure: function() { alert(\''.$msgError.'\'); },
-                     parameters: { syncStatus:\''. Merchante_MagetSync_Model_Listing::STATE_INQUEUE .'\' }});
-                } else {
-                     editForm.submit();
-                }',
-            'class'     => 'save',
-        ),0, 100);
-
-        if ($syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
+        // Single listing product edit
+        if (Mage::registry('magetsync_massive') == null) {
+            // Do not allow sync expired listing product
+            if (!$this->isExpired($syncState)) {
+                $this->_addButton('sync_now', array(
+                    'label' => $label,
+                    'onclick' =>
+                        'if (editForm.validator && editForm.validator.validate()) {
+                               $(\'edit_form\').request({method: \'post\',
+                                 onSuccess: function(value){
+                                    var myWindow = window.open(\'\', \'_self\');
+                                    myWindow.document.write(value.responseText);
+                                 },
+                                 onFailure: function() { alert(\'' . $msgError . '\'); },
+                                 parameters: { syncStatus:\'' . Merchante_MagetSync_Model_Listing::STATE_INQUEUE . '\' }});
+                            } else {
+                                 editForm.submit();
+                            }',
+                    'class' => 'save',
+                ), 0, 100);
+            }
+            // Do not allow delete listing product directly except In Queue'
+            if (!$this->isInQueue($syncState)) {
+                $this->_removeButton('delete');
+            }
+        // Mass attribute update
+        } else {
             $this->_addButton('save_and_queue', array(
-                'label'     => Mage::helper('magetsync')->__('Change and Sync'),
+                'label'     => Mage::helper('magetsync')->__('Auto queue'),
                 'onclick'   =>
                     'if (editForm.validator && editForm.validator.validate()) {
-                           $(\'edit_form\').request({method: \'post\',
-                             onSuccess: function(value){
-                                var myWindow = window.open(\'\', \'_self\');
-                                myWindow.document.write(value.responseText);
-                             },
-                             onFailure: function() { alert(\''.$msgError.'\'); },
-                             parameters: { autoQueue:\'true\' }});
-                        } else {
-                             editForm.submit();
-                        }',
+                       $(\'edit_form\').request({method: \'post\',
+                         onSuccess: function(value){
+                            var myWindow = window.open(\'\', \'_self\');
+                            myWindow.document.write(value.responseText);
+                         },
+                         onFailure: function() { alert(\''.$msgError.'\'); },
+                         parameters: { autoQueue:\'true\' }});
+                    } else {
+                         editForm.submit();
+                    }',
                 'class'     => 'save',
             ),0, 101);
         }
-
     }
 
     /**
@@ -108,5 +112,21 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
                 return Mage::helper('magetsync')->__('Add a listing');
             }
         }
+    }
+
+    /**
+     * @param $syncState
+     * @return bool
+     */
+    public function isExpired($syncState) {
+        return $syncState == Merchante_MagetSync_Model_Listing::STATE_EXPIRED;
+    }
+
+    /**
+     * @param $syncState
+     * @return bool
+     */
+    public function isInQueue($syncState) {
+        return $syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE;
     }
 }
