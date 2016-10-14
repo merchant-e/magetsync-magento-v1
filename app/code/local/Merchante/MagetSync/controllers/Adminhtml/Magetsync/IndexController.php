@@ -99,9 +99,8 @@ error_reporting(E_ALL ^ E_NOTICE);
                 $cnt = 0;
                 foreach ($listings as $listing) {
                     $readyToSync = $listing->getSyncReady();
-                    if ($readyToSync
-                        && ($listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
-                            || $listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_FAILED)) {
+                    if (($readyToSync && $listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_INQUEUE)
+                            || $listing->getSync() == Merchante_MagetSync_Model_Listing::STATE_FAILED) {
                         $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE);
                         $listing->save();
                         $cnt++;
