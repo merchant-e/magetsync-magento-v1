@@ -1,3 +1,7 @@
+##[0.9.7.1] - 2016-10-15
+### Added
+- Support for Qty updates when importing stock via CSV
+
 ##[0.9.7.0] - 2016-10-01
 ### Added
 - New configurable option: Custom Products Titles/Desc support

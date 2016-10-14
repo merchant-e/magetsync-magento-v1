@@ -516,4 +516,34 @@ class Merchante_MagetSync_Model_Observer
             }
         }
     }
+
+
+    public function importUpdateQuantity($observer) {
+        $adapter = $observer->getEvent()->getAdapter();
+        $ids = $adapter->getAffectedEntityIds();
+        foreach($ids as $product_id){
+            $product = Mage::getModel('catalog/product')->load($product_id);
+            $data = $product->getData();
+            if($data['visibility'] != Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE){
+                $status = (isset($data['synchronizedEtsy'])?$data['synchronizedEtsy']:null);
+                $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($data['entity_id']);
+                if(!$parent) {
+                    if ($status == 1) {
+                        $listingModel = Mage::getModel('magetsync/listing');
+                        $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $data['entity_id']);
+                        $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+                        $stocklevel = (int)Mage::getModel('cataloginventory/stock_item')
+                        ->loadByProduct($product)->getQty();
+                        $dataSave = ["idproduct" => $data['entity_id'], "quantity" => $stocklevel,
+                        "quantity_has_changed" => Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED];
+                        if (!empty($query) && $query[0]['quantity'] != $stocklevel) {
+                            $listingModel->addData($dataSave)->setId($query[0]['id']);
+                            $listingModel->save();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }

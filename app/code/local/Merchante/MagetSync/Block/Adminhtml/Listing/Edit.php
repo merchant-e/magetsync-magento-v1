@@ -78,7 +78,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
                     } else {
                          editForm.submit();
                     }',
-                'class'     => 'save',
+                'class'     => 'add',
             ),0, 101);
         }
     }

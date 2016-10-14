@@ -321,6 +321,17 @@
                         </magetsync>
                     </observers>
             </sales_order_save_commit_after>
+            
+            <catalog_product_import_finish_before>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/observer</class>
+                        <method>importUpdateQuantity</method>
+                    </magetsync>
+                </observers>
+             </catalog_product_import_finish_before>
+            
             <admin_session_user_login_success>
                     <observers>
                         <magetsync>
