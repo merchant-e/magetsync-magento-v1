@@ -738,14 +738,16 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     if($nCustom == 0) {
                         $propertyID = 513;
                         if (strlen($propertyName) > 20) {
-                            throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                            $propertyName = substr($propertyName,0,19).'…';							
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         }
                         $customNames['513'] = $propertyName;
                     }elseif($nCustom == 1)
                     {
                         $propertyID = 514;
-                        if (strlen($propertyName) > 20) {
-                            throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                        if (strlen($propertyName) > 20) {							
+                        	$propertyName = substr($propertyName,0,19).'…';							
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         }
                         $customNames['514'] = $propertyName;
                     }else{
@@ -756,25 +758,27 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     $y = 0;
                     foreach ($valuesOpt as $item) {
 
-                        $singleVariation = array();
-                        $singleVariation['property_id'] = $propertyID;
-                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                            $singleVariation['is_available'] = true;
-                            $dataItem = $item->getData();
-                            if (strlen($dataItem['title']) > 20) {
-                                throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                            }
-                            $singleVariation['value'] = $dataItem['title'];
+                    $singleVariation = array();
+                    $singleVariation['property_id'] = $propertyID;
+                    if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+                        $singleVariation['is_available'] = true;
+                        $dataItem = $item->getData();
+                        if (strlen($dataItem['title']) > 20) {								
+                        	$dataItem['title'] = substr($dataItem['title'],0,19).'…';
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                        }
+                        $singleVariation['value'] = $dataItem['title'];
 
-                            $pricing = $dataItem['price'];
-                            $price_type = $dataItem['price_type'];
-                        } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                            $singleVariation['is_available'] = isset($availabilityStock[$y])?$availabilityStock[$y]:true;
-                            $dataItem = $item;
-                            if (strlen($dataItem['label']) > 20) {
-                                throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                            }
-                            $singleVariation['value'] = $dataItem['label'];
+                        $pricing = $dataItem['price'];
+                        $price_type = $dataItem['price_type'];
+                    } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                        $singleVariation['is_available'] = isset($availabilityStock[$y])?$availabilityStock[$y]:true;
+                        $dataItem = $item;
+                        if (strlen($dataItem['label']) > 20) {								
+                        	$dataItem['label'] = substr($dataItem['label'],0,19).'…';								
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                        }
+                        $singleVariation['value'] = $dataItem['label'];
 
                             //$singleVariation['value'] = $dataItem['label'];
                             $pricing = $dataItem['pricing_value'];
