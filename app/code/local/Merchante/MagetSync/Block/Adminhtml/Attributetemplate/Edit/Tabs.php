@@ -3,9 +3,9 @@
 /**
  * @copyright  Copyright (c) 2016 Merchant-e
  *
- * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tabs
+ * Class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit_Tabs
  */
-class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
+class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
     /**
      * Initialize tabs

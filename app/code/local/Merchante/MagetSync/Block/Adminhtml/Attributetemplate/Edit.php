@@ -4,9 +4,9 @@
  * @copyright  Copyright (c) 2016 Merchant-e
  *
  * Class templates grid initialization
- * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit
+ * Class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit
  */
-class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit extends
+class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit extends
     Mage_Adminhtml_Block_Widget_Form_Container{
 
     /**

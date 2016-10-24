@@ -4,9 +4,9 @@
  * @copyright  Copyright (c) 2016 Merchant-e
  *
  * Class for creating templates Grid
- * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Grid
+ * Class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Grid
  */
-class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Grid extends Mage_Adminhtml_Block_Widget_Grid
+class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     /**
      * Initialize grid
