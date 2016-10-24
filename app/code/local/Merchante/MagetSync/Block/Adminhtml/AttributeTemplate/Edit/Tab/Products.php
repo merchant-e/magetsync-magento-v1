@@ -4,9 +4,9 @@
  * @copyright  Copyright (c) 2016 Merchant-e
  *
  * Class for creating template product grid
- * Class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit_Tab_Products
+ * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products
  */
-class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit_Tab_Products extends Mage_Adminhtml_Block_Widget_Grid
+class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
     {

@@ -61,10 +61,10 @@
 
     <adminhtml_magetsync_attributetemplate_edit>
         <reference name="left">
-            <block type="magetsync/adminhtml_attributetemplate_edit_tabs" name="magetsync.attributetemplate.edit.tabs" />
+            <block type="magetsync/adminhtml_attributeTemplate_edit_tabs" name="magetsync.attributetemplate.edit.tabs" />
         </reference>
         <reference name="content">
-            <block type="magetsync/adminhtml_attributetemplate_edit" name="magetsync.attributetemplate.edit" />
+            <block type="magetsync/adminhtml_attributeTemplate_edit" name="magetsync.attributetemplate.edit" />
         </reference>
     </adminhtml_magetsync_attributetemplate_edit>
 

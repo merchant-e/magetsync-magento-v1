@@ -4,9 +4,9 @@
  * @copyright  Copyright (c) 2016 Merchant-e
  *
  * Class for creating template form
- * Class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit_Tab_Form
+ * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form
  */
-class Merchante_MagetSync_Block_Adminhtml_Attributetemplate_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form
+class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     /**
      * @return Mage_Adminhtml_Block_Widget_Form
