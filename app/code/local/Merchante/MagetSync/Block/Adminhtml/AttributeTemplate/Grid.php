@@ -72,11 +72,6 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Grid extends Mage_Ad
         $this->setMassactionIdField('template_ids');
         $this->getMassactionBlock()->setFormFieldName('template_ids');
 
-        $this->getMassactionBlock()->addItem('massduplicate', array(
-            'label'=> Mage::helper('magetsync')->__('Duplicate templates'),
-            'url'  => $this->getUrl('*/*/massduplicate', array('' => '')),
-            'confirm' => Mage::helper('magetsync')->__('Are you sure?')
-        ));
         $this->getMassactionBlock()->addItem('massdelete', array(
             'label'=> Mage::helper('magetsync')->__('Delete templates'),
             'url'  => $this->getUrl('*/*/massdelete', array('' => '')),

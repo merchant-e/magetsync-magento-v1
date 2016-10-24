@@ -109,14 +109,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     }
 
     /**
-     * TODO
-     */
-    public function massDuplicateAction()
-    {
-        $this->_redirect('*/*/index');
-    }
-
-    /**
      * Mass template deletion
      */
     public function massDeleteAction()
