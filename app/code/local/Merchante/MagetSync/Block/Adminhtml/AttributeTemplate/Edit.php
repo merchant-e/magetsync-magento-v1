@@ -35,12 +35,20 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit extends
                         myWindow.document.write(value.responseText);
                      },
                      onFailure: function() { alert(\''.$msgError.'\'); },
-                     parameters: { queueListings:true }});
+                     parameters: { queueListings:\'true\' }});
                 } else {
                      editForm.submit();
                 }',
             'class'     => 'save',
         ),0, 100);
+
+        if ($templateId = $this->getRequest()->getParam('id')) {
+            $this->_addButton('duplicate', array(
+                'label' => Mage::helper('magetsync')->__('Duplicate'),
+                'onclick' => "setLocation('" . $this->getUrl('*/*/duplicate', array('templateToDuplicateId' => $templateId)) . "')",
+                'class' => 'go'
+            ), 0, 101);
+        }
     }
 
     /**

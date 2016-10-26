@@ -13,22 +13,37 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
         parent::__construct();
         $this->setId('productsGrid');
         $this->setUseAjax(true);
-        $this->setDefaultSort('entity_id');
+        $this->setDefaultSort('in_products');
+        if ($this->getSelectedProducts()) {
+            $this->setDefaultFilter(array('in_products' => 1));
+        }
         $this->setSaveParametersInSession(false);
     }
 
+    /**
+     * @return $this
+     */
     protected function _prepareCollection()
     {
-        //TODO allowed product types
         $collection = Mage::getModel('catalog/product')->getCollection()
-            ->addAttributeToSelect('*');
+            ->addAttributeToSelect('*')
+            ->addAttributeToSelect('synchronizedEtsy')
+            ->addAttributeToFilter('visibility', array(
+                'neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE))
+            ->addAttributeToFilter('status', array('eq' => Mage_Catalog_Model_Product_Status::STATUS_ENABLED))
+            ->addAttributeToFilter('synchronizedEtsy', array('neq' => '1'), 'right')
+            ->addAttributeToFilter('type_id', array('in' => array('simple', 'configurable')));
 
         $this->setCollection($collection);
-
         parent::_prepareCollection();
+
         return $this;
     }
 
+    /**
+     * @return $this
+     * @throws Exception
+     */
     protected function _prepareColumns()
     {
         $this->addColumn('in_products', array(
@@ -104,16 +119,27 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
         return parent::_prepareColumns();
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getGridUrl()
     {
         return $this->_getData('grid_url') ? $this->_getData('grid_url') : $this->getUrl('*/*/productsGrid', array('_current'=>true));
     }
 
+    /**
+     * @return array|mixed
+     * @throws Exception
+     */
     protected function _getSelectedProducts()
     {
         return $this->getRequest()->getPost('products', null) ? $this->getRequest()->getPost('products', null) : $this->getSelectedProducts();
     }
 
+    /**
+     * @return array
+     * @throws Exception
+     */
     public function getSelectedProducts()
     {
         $assigned_product_ids = array();

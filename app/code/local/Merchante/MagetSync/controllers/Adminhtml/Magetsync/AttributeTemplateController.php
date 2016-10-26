@@ -13,7 +13,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     protected function _initAction()
     {
         $this->loadLayout()->_setActiveMenu('magetsync/attributeTemplate')
-            ->_addBreadcrumb('MagetSync Manager','MagetSync Manager');
+            ->_addBreadcrumb('MagetSync Manager', 'MagetSync Manager');
         return $this;
     }
 
@@ -31,18 +31,21 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
      */
     public function editAction()
     {
+        $templateToDuplicateId = $this->getRequest()->getParam('templateToDuplicateId');
         $attributeTemplateId = $this->getRequest()->getParam('id');
-        $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->load($attributeTemplateId);
-        if ($attributeTemplateIdModel->getId() <> null || $attributeTemplateId == null)
-        {
+        if ($templateToDuplicateId) {
+            $templateDuplicateFromModelData = Mage::getModel('magetsync/attributeTemplate')->load($templateToDuplicateId)->getData();
+            $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->setData($templateDuplicateFromModelData);
+        } else {
+            $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->load($attributeTemplateId);
+        }
+        if ($attributeTemplateIdModel->getId() <> null || $attributeTemplateId == null) {
             Mage::register('magetsync_data', $attributeTemplateIdModel);
             $this->loadLayout();
             $this->_setActiveMenu('magetsync/attributeTemplate');
-            $this->_addBreadcrumb('MagetSync Manager','MagetSync Manager');
+            $this->_addBreadcrumb('MagetSync Manager', 'MagetSync Manager');
             $this->renderLayout();
-        }
-        else
-        {
+        } else {
             Mage::getSingleton('adminhtml/session')
                 ->addError(Mage::helper('magetsync')->__("Attribute Template does not exist"));
             $this->_redirect('*/*/');
@@ -63,22 +66,65 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
      */
     public function saveAction()
     {
+        $saveAndQueue = $this->getRequest()->getParam('queueListings');
         $attributeTemplateId = $this->getRequest()->getParam('id');
         $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->load($attributeTemplateId);
-        $data = $this->getRequest()->getPost();
-        if ($data) {
+        $postData = $this->getRequest()->getPost();
+        if ($postData) {
             try {
-                $data['title'] = $this->composeTemplateTitle($data);
-                if ($productIds = $this->getRequest()->getParam('in_products', null)) {
+                $postData['title'] = $this->composeTemplateTitle($postData);
+                $productIdsToAddArr = array();
+                if ($this->getRequest()->getParam('in_products', null) !== null) {
+                    $productIds = $this->getRequest()->getParam('in_products', null);
                     $productIdsToAddArr = Mage::helper('adminhtml/js')->decodeGridSerializedInput($productIds);
-                    $data['product_ids'] = implode(',', $productIdsToAddArr);
-                    $data['products_count'] = count($productIdsToAddArr);
+                    $postData['product_ids'] = implode(',', $productIdsToAddArr);
+                    $postData['products_count'] = count($productIdsToAddArr);
                 }
-                $data['price'] = '';
-                $attributeTemplateIdModel->addData($data);
-                $attributeTemplateIdModel->save();
 
-                $this->_getSession()->addSuccess($this->__('The attribute template has been saved.'));
+                $attributeTemplateIdModel->addData($postData);
+                $attributeTemplateIdModel->save();
+                if ($saveAndQueue) {
+                    $products = Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addIdFilter($productIdsToAddArr)->load();
+                    $createdListingsData = array();
+                    foreach ($products as $product) {
+                        $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getEntityId());
+                        if (!$parent) {
+                            $result = Mage::getModel('magetsync/listing')->saveListingSynchronized($product, null, false);
+                            if ($result && $result['success']) {
+                                $product->setData('synchronizedEtsy', 1)->getResource()->saveAttribute($product, 'synchronizedEtsy');
+                                $createdListingsData[$product->getId()] = round($product->getPrice(), 2);
+                            } else {
+                                Mage::getSingleton('adminhtml/session')
+                                    ->addError(Mage::helper('magetsync')->__($result['error'] . ' [' . $product->getEntityId() . ']'));
+                            }
+                        } else {
+                            Mage::getSingleton('adminhtml/session')
+                                ->addError(Mage::helper('magetsync')->__('This is a child product, you can not synchronize this kind of product [' . $product->getEntityId() . '].'));
+                        }
+                    }
+
+                    if (!$this->verifyEtsyApi() || Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language') === null) {
+                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Please set up Etsy.'));
+
+                        return;
+                    }
+
+                    $listingModel = Mage::getModel('magetsync/listing');
+                    $newListings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter('idproduct', array('in' => array_keys($createdListingsData)))->load();
+                    foreach ($newListings as $listing) {
+                        $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                        $postData['sync_ready'] = 1;
+                        $postData['title'] = $listing->getTitle();
+
+                        //TODO dynamic pricing
+                        $postData['price'] = $createdListingsData[$listing->getIdproduct()];
+
+                        $listing->addData($postData);
+                        $listing->save();
+                    }
+                }
+
+                $this->_getSession()->addSuccess($this->__('The attribute template has been saved and listing(s) auto queued.'));
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
@@ -88,6 +134,21 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
         }
 
         $this->_redirect('*/*/');
+    }
+
+
+    /**
+     * Duplicate attribute template action
+     */
+    public function duplicateAction()
+    {
+        if ($templateId = $this->getRequest()->getParam('templateToDuplicateId')) {
+            $this->_forward('edit', null, null, array('templateToDuplicateId' => $templateId));
+        } else {
+            $this->_getSession()->addError('Unable to duplicate.');
+            $this->_redirect('*/*/');
+        }
+
     }
 
 
@@ -167,27 +228,70 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     public function composeTemplateTitle($data)
     {
         $title = '';
-        $categoryModel = Mage::getModel('magetsync/category')->load($data['category_id']);
-        $title .= $categoryModel->getShortName();
+        $shortName = $this->getCategoryShortName($data['category_id']);
+        $title .= $shortName;
 
         if ($subcatId = $data['subcategory_id']) {
-            $title .= '>' . $categoryModel->load($subcatId)->getShortName();
+            $shortName = $this->getCategoryShortName($subcatId);
+            $title .= ' > ' . $shortName;
         }
         if ($subsubcatId = $data['subsubcategory_id']) {
-            $title .= '>' . $categoryModel->load($subsubcatId)->getShortName();
+            $shortName = $this->getCategoryShortName($subsubcatId);
+            $title .= ' > ' . $shortName;
+        }
+        if ($subcat4Id = $data['subcategory4_id']) {
+            $shortName = $this->getCategoryShortName($subcat4Id);
+            $title .= ' > ' . $shortName;
+        }
+        if ($subcat5Id = $data['subcategory4_id']) {
+            $shortName = $this->getCategoryShortName($subcat5Id);
+            $title .= ' > ' . $shortName;
+        }
+        if ($subcat6Id = $data['subcategory4_id']) {
+            $shortName = $this->getCategoryShortName($subcat6Id);
+            $title .= ' > ' . $shortName;
         }
         $title .= ' | ';
 
         $shopSectionColl = Mage::getModel('magetsync/shopSection')->getCollection();
-        $query = $shopSectionColl->getSelect()->where('shop_section_id= ?',$data['shop_section_id']);
+        $query = $shopSectionColl->getSelect()->where('shop_section_id= ?', $data['shop_section_id']);
         $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
         $title .= $query[0]['title'] . ' | ';
 
         $shippingTemplateColl = Mage::getModel('magetsync/shippingTemplate')->getCollection();
-        $query = $shippingTemplateColl->getSelect()->where('shipping_template_id= ?',$data['shipping_template_id']);
+        $query = $shippingTemplateColl->getSelect()->where('shipping_template_id= ?', $data['shipping_template_id']);
         $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
         $title .= $query[0]['title'];
 
         return $title;
+    }
+
+    /**
+     * @param $levelId
+     * @return mixed
+     */
+    public function getCategoryShortName($levelId)
+    {
+        $categoryColl = Mage::getModel('magetsync/category')->getCollection();
+        $query = $categoryColl->getSelect()->where('level_id= ?', $levelId);
+        $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+
+        return $query[0]['short_name'];
+    }
+
+    /**
+     * Method for verifying if the api connection is correct
+     * @return bool
+     */
+    public function verifyEtsyApi()
+    {
+        if (Mage::getModel('magetsync/etsy')->load(1)->getData('AccessToken') <> '') {
+            return true;
+        } else {
+            Mage::getSingleton('adminhtml/session')
+                ->addError(Mage::helper('magetsync')->__('First you must authorise access to Etsy under System > Configuration > MagetSync'));
+            $this->_redirect('*/*/');
+            return false;
+        }
     }
 }
