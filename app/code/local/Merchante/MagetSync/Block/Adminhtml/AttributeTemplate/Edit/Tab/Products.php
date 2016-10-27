@@ -27,11 +27,9 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
     {
         $collection = Mage::getModel('catalog/product')->getCollection()
             ->addAttributeToSelect('*')
-            ->addAttributeToSelect('synchronizedEtsy')
             ->addAttributeToFilter('visibility', array(
                 'neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE))
             ->addAttributeToFilter('status', array('eq' => Mage_Catalog_Model_Product_Status::STATUS_ENABLED))
-            ->addAttributeToFilter('synchronizedEtsy', array('neq' => '1'), 'right')
             ->addAttributeToFilter('type_id', array('in' => array('simple', 'configurable')));
 
         $this->setCollection($collection);

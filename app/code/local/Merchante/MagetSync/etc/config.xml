@@ -99,16 +99,16 @@
                       </template>
                   </children>
               </global>
-              <configuration_magetsync translate="title" module="adminhtml">
-                  <title>Configuration</title>
-                  <sort_order>4</sort_order>
-                  <action>adminhtml/system_config/edit/section/magetsync_section</action>
-              </configuration_magetsync>
               <attributeTemplate translate="title" module="adminhtml">
                   <title>Attribute Templates</title>
-                  <sort_order>5</sort_order>
+                  <sort_order>4</sort_order>
                   <action>adminhtml/magetsync_attributeTemplate</action>
               </attributeTemplate>
+              <configuration_magetsync translate="title" module="adminhtml">
+                  <title>Configuration</title>
+                  <sort_order>5</sort_order>
+                  <action>adminhtml/system_config/edit/section/magetsync_section</action>
+              </configuration_magetsync>
           </children>
        </magetsync>
     </menu>
@@ -157,12 +157,12 @@
                                      </template>
                                  </children>
                              </global>
-                             <configuration_magetsync translate="title" module="adminhtml">
-                                 <title>Configuration</title>
-                             </configuration_magetsync>
                              <attributeTemplate translate="title" module="adminhtml">
                                  <title>Attribute Templates</title>
                              </attributeTemplate>
+                             <configuration_magetsync translate="title" module="adminhtml">
+                                 <title>Configuration</title>
+                             </configuration_magetsync>
                          </children>
                      </magetsync>
                  </children>
