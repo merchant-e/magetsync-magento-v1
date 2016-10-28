@@ -449,7 +449,7 @@ error_reporting(E_ALL ^ E_NOTICE);
         }
 
         /**
-         * Check if admin has permissions to visit page
+         * Check if user has permissions to visit page
          *
          * @return boolean
          */

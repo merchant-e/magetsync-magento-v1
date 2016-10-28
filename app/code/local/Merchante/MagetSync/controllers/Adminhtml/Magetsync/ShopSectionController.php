@@ -275,7 +275,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
     }
 
     /**
-     * Check if admin has permissions to visit page
+     * Check if user has permissions to visit page
      *
      * @return boolean
      */
