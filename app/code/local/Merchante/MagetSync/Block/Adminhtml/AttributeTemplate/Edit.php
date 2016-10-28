@@ -21,8 +21,10 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit extends
         $this->_blockGroup = 'magetsync';
         /** @var  _controller controller name */
         $this->_controller = 'adminhtml_attributeTemplate';
-        $this->_updateButton('save', 'label',Mage::helper('magetsync')->__('Save template'));
-        $this->_updateButton('delete', 'label',Mage::helper('magetsync')->__('Delete template'));
+        $this->_updateButton('save', 'label', Mage::helper('magetsync')->__('Save template'));
+        $this->_updateButton('save', 'sort_order', 100);
+        $this->_updateButton('save', 'level', 0);
+        $this->_updateButton('delete', 'label', Mage::helper('magetsync')->__('Delete template'));
         $msgError = Mage::helper('magetsync')->__('Something went wrong');
 
         $this->_addButton('sync_now', array(
@@ -40,14 +42,14 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit extends
                      editForm.submit();
                 }',
             'class'     => 'save',
-        ),0, 100);
+        ),0, 101);
 
         if ($templateId = $this->getRequest()->getParam('id')) {
             $this->_addButton('duplicate', array(
                 'label' => Mage::helper('magetsync')->__('Duplicate'),
                 'onclick' => "setLocation('" . $this->getUrl('*/*/duplicate', array('templateToDuplicateId' => $templateId)) . "')",
                 'class' => 'go'
-            ), 0, 101);
+            ), 0, 99);
         }
     }
 

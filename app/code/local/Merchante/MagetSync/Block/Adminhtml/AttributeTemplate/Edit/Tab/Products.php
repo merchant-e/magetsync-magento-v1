@@ -19,7 +19,33 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
         }
         $this->setSaveParametersInSession(false);
     }
-
+    
+    /**
+     * Add filter
+     *
+     * @param object $column
+     * @return Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell
+     */
+    protected function _addColumnFilterToCollection($column)
+    {
+        // Set custom filter for in product flag
+        if ($column->getId() == 'in_products') {
+            $productIds = $this->_getSelectedProducts();
+            if (empty($productIds)) {
+                $productIds = 0;
+            }
+            if ($column->getFilter()->getValue()) {
+                $this->getCollection()->addFieldToFilter('entity_id', array('in'=>$productIds));
+            } else {
+                if($productIds) {
+                    $this->getCollection()->addFieldToFilter('entity_id', array('nin'=>$productIds));
+                }
+            }
+        } else {
+            parent::_addColumnFilterToCollection($column);
+        }
+        return $this;
+    }
     /**
      * @return $this
      */
