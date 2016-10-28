@@ -448,6 +448,13 @@ error_reporting(E_ALL ^ E_NOTICE);
             }
         }
 
+        /**
+         * Check if admin has permissions to visit page
+         *
+         * @return boolean
+         */
+        protected function _isAllowed()
+        {
+            return Mage::getSingleton('admin/session')->isAllowed('admin/magetsync/mapping');
+        }
     }
-
-    ?>

@@ -431,4 +431,14 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShippingTemplateController extends
             return false;
         }
     }
+
+    /**
+     * Check if admin has permissions to visit page
+     *
+     * @return boolean
+     */
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('admin/magetsync/global/shippingTemplate');
+    }
 }
