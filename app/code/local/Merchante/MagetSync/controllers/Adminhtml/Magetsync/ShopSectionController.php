@@ -273,4 +273,14 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
             return false;
         }
     }
+
+    /**
+     * Check if user has permissions to visit page
+     *
+     * @return boolean
+     */
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('admin/magetsync/global/shopSection');
+    }
 }
