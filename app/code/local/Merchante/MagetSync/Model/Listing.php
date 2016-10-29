@@ -30,7 +30,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
     const STATE_AUTO_QUEUE   = 8;
 
     const STATE_ACTIVE     = 'active';
-    const STATE_INACTIVE   = 'inactive';
+    const STATE_INACTIVE   = 'inactive';	    
+    const STATE_DRAFT   = 'draft';
 
     const QUANTITY_HAS_CHANGED      = 1;
     const QUANTITY_HAS_NOT_CHANGED  = 0;
@@ -738,81 +739,91 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     if($nCustom == 0) {
                         $propertyID = 513;
                         if (strlen($propertyName) > 20) {
-                            throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                            $customNames['513'] = substr($propertyName,0,19).'…';		
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         }
-                        $customNames['513'] = $propertyName;
+                        else {
+                        	$customNames['513'] = $propertyName;
+                        }
                     }elseif($nCustom == 1)
                     {
                         $propertyID = 514;
                         if (strlen($propertyName) > 20) {
-                            throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        }
-                        $customNames['514'] = $propertyName;
+                        	$customNames['514'] = substr($propertyName,0,19).'…';							
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                        } else {
+                        	$customNames['514'] = $propertyName;
+                    	}
                     }else{
                         break;
                     }
                 }
 
-                    $y = 0;
-                    foreach ($valuesOpt as $item) {
+                $y = 0;
+                foreach ($valuesOpt as $item) {
 
-                        $singleVariation = array();
-                        $singleVariation['property_id'] = $propertyID;
-                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                            $singleVariation['is_available'] = true;
-                            $dataItem = $item->getData();
-                            if (strlen($dataItem['title']) > 20) {
-                                throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                            }
-                            $singleVariation['value'] = $dataItem['title'];
+                    $singleVariation = array();
+                    $singleVariation['property_id'] = $propertyID;
+                    if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+                        $singleVariation['is_available'] = true;
+                        $dataItem = $item->getData();
+                        if (strlen($dataItem['title']) > 20) {								
+                        	$singleVariation['value'] = substr($dataItem['title'],0,19).'…';
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                        } else {
+                        	$singleVariation['value'] = $dataItem['title'];
+                        }
+                        
 
-                            $pricing = $dataItem['price'];
-                            $price_type = $dataItem['price_type'];
-                        } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                            $singleVariation['is_available'] = isset($availabilityStock[$y])?$availabilityStock[$y]:true;
-                            $dataItem = $item;
-                            if (strlen($dataItem['label']) > 20) {
-                                throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                            }
-                            $singleVariation['value'] = $dataItem['label'];
-
-                            //$singleVariation['value'] = $dataItem['label'];
-                            $pricing = $dataItem['pricing_value'];
-                            $price_type = $dataItem['is_percent'];
+                        $pricing = $dataItem['price'];
+                        $price_type = $dataItem['price_type'];
+                    } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                        $singleVariation['is_available'] = isset($availabilityStock[$y])?$availabilityStock[$y]:true;
+                        $dataItem = $item;
+                        if (strlen($dataItem['label']) > 20) {								
+                        	$singleVariation['value'] = substr($dataItem['label'],0,19).'…';
+                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
+                        } else {
+                        	$singleVariation['value'] = $dataItem['label'];
                         }
 
-                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
-                            $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                            $matches = null;
-                            if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
-                                || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
-                            ) {
-                                if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
-                                    $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
-                                ) {
-                                    preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $singleVariation['value'], $matches);
-                                }
-                            }
-                            if ($matches && count($matches) > 0) {
-                                $singleVariation['value'] = $matches[1];
-                            }
-                        }
-
-                        if ($pricing != 0) {
-                            $hasPrice = true;
-                            if ($price_type == 'fixed' || !$price_type) {
-                                $singleVariation['price'] = $priceBase + $pricing;
-                            } elseif ($price_type == 'percent' || $price_type) {
-                                $singleVariation['price'] = ($priceBase * ($pricing / 100)) + $priceBase;
-                            }
-                        }else{
-                            $singleVariation['price'] = $priceBase;
-                        }
-
-                        $singleVariationGlobal[] = $singleVariation;
-                        $y = $y + 1;
-
+                        //$singleVariation['value'] = $dataItem['label'];
+                        $pricing = $dataItem['pricing_value'];
+                        $price_type = $dataItem['is_percent'];
                     }
+
+                    if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
+                        $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                        $matches = null;
+                        if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
+                            || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
+                        ) {
+                            if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
+                                $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
+                            ) {
+                                preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $singleVariation['value'], $matches);
+                            }
+                        }
+                        if ($matches && count($matches) > 0) {
+                            $singleVariation['value'] = $matches[1];
+                        }
+                    }
+
+                    if ($pricing != 0) {
+                        $hasPrice = true;
+                        if ($price_type == 'fixed' || !$price_type) {
+                            $singleVariation['price'] = $priceBase + $pricing;
+                        } elseif ($price_type == 'percent' || $price_type) {
+                            $singleVariation['price'] = ($priceBase * ($pricing / 100)) + $priceBase;
+                        }
+                    }else{
+                        $singleVariation['price'] = $priceBase;
+                    }
+
+                    $singleVariationGlobal[] = $singleVariation;
+                    $y = $y + 1;
+
+                }
 
                 if($exist == -1)
                 {
@@ -1125,6 +1136,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
     }
 
     /**
+
      * Forces listing product qty and status update if update hasn't been logged
      */
     function triggerUpdate()
