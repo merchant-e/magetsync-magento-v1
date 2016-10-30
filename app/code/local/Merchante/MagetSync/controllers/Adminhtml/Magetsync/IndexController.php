@@ -27,8 +27,8 @@ error_reporting(E_ALL ^ E_NOTICE);
      */
     public function indexAction()
     {
-        $collections = Mage::getModel('magetsync/listing')->getCollection();
-        foreach ($collections as $listing) {
+        $collection = Mage::getModel('magetsync/listing')->getCollection();
+        foreach ($collection as $listing) {
             if ($listing->getQuantityHasChanged() == $listing::QUANTITY_HAS_CHANGED) {
                 $listing->triggerUpdate();
             }

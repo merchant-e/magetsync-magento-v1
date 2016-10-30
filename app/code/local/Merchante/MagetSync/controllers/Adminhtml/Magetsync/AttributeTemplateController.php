@@ -73,13 +73,14 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
         if ($postData) {
             try {
                 $postData['title'] = $this->composeTemplateTitle($postData);
-                $productIdsToAddArr = array();
                 if ($this->getRequest()->getParam('in_products', null) !== null) {
                     $productIds = $this->getRequest()->getParam('in_products', null);
                     $productIdsToAddArr = Mage::helper('adminhtml/js')->decodeGridSerializedInput($productIds);
-                    $postData['product_ids'] = implode(',', $productIdsToAddArr);
-                    $postData['products_count'] = count($productIdsToAddArr);
+                } else {
+                    $productIdsToAddArr = explode(',', $attributeTemplateIdModel->getProductIds());
                 }
+                $postData['product_ids'] = implode(',', $productIdsToAddArr);
+                $postData['products_count'] = count($productIdsToAddArr);
 
                 $attributeTemplateIdModel->addData($postData);
                 $attributeTemplateIdModel->save();
@@ -293,5 +294,15 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
             $this->_redirect('*/*/');
             return false;
         }
+    }
+
+    /**
+     * Check if user has permissions to visit page
+     *
+     * @return boolean
+     */
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isAllowed('admin/magetsync/attributeTemplate');
     }
 }

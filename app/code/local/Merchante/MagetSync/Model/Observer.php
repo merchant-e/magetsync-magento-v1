@@ -399,6 +399,11 @@ class Merchante_MagetSync_Model_Observer
 
                     $taxonomyID = $listingModel->getTaxonomyID($data);
 
+                    $style = array();
+                    $style[] = $data['style_one'];
+                    $style[] = $data['style_two'];
+                    $styleData = implode(',', $style);
+
                     $params = array(
                         'description' => !empty($data['description']) ? $data['description'] : '',
                         'materials' => !empty($data['materials']) ? $data['materials'] : '',
@@ -415,7 +420,7 @@ class Merchante_MagetSync_Model_Observer
                         'when_made' => !empty($data['when_made']) ? $data['when_made'] : '',
                         'recipient' => !empty($data['recipient']) ? $data['recipient'] : '',
                         'occasion' => !empty($data['occasion']) ? $data['occasion'] : '',
-                        'style' => !empty($data['style']) ? $data['style'] : '',
+                        'style' => $styleData,
                         'should_auto_renew' => !empty($data['should_auto_renew']) ? $data['should_auto_renew'] : 0,
                         'language' => $language
                         );
