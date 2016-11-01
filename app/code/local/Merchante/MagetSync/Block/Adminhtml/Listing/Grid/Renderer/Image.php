@@ -31,13 +31,13 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid_Renderer_Image extends Ma
             $span =  "<span class='grid-severity-minor'><span>".Mage::helper('magetsync')->__('In queue')."</span></span>";
         }elseif($val == Merchante_MagetSync_Model_Listing::STATE_SYNCED)
         {
-            $span =  "<span class='grid-severity-notice'><span>".Mage::helper('magetsync')->__('Synced')."</span></span>";
+            $span =  "<span class='grid-severity-notice'><span>".Mage::helper('magetsync')->__(($row['state']=='draft'?'DRAFT/':'').'Synced')."</span></span>";
         } elseif($val == Merchante_MagetSync_Model_Listing::STATE_FAILED)
         {
             $span = "<span class='grid-severity-critical'><span>".Mage::helper('magetsync')->__('Failed')."</span></span>";
         }elseif($val == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC)
         {
-            $span = "<span class='grid-severity-major'><span>".Mage::helper('magetsync')->__('Out of sync')."</span></span>";
+            $span = "<span class='grid-severity-major'><span>".Mage::helper('magetsync')->__(($row['state']=='draft'?'DRAFT/':'').'Out of sync')."</span></span>";
         }elseif($val == Merchante_MagetSync_Model_Listing::STATE_EXPIRED)
         {
             $span = "<span style='background-color:lightgray;text-transform:uppercase;font: bold 10px/16px Arial,Helvetica,sans-serif;padding:2px 20px;color:black;border-radius:9px;text-align:center'><span>".Mage::helper('magetsync')->__('Expired')."</span></span>";

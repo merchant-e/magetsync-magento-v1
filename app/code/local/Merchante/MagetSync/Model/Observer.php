@@ -545,5 +545,23 @@ class Merchante_MagetSync_Model_Observer
             }
         }
     }
-
+	
+	public function updateProductQty($observer){
+		$creditMemo = $observer->getEvent()->getCreditmemo();
+		foreach ($creditMemo->getAllItems() as $item) {
+			$productId = $item->getProductId();
+			$listing = Mage::getModel('magetsync/listing')->load($productId,'idproduct');
+			$totalQty = '';
+			if($listing->getId()){
+				$id = $listing->getId();
+				$refundQty = $item->getQty();
+				$totalQty = $listing->getQuantity() + $refundQty;
+				$listing->setQuantity($totalQty);
+				$dataSave = ["quantity_has_changed" => Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED,
+				"sync" => Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC];
+				$listing->addData($dataSave)->setId($id);
+				$listing->save();
+			}
+        }
+    }
 }
