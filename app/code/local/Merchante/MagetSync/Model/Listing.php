@@ -739,7 +739,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     if($nCustom == 0) {
                         $propertyID = 513;
                         if (strlen($propertyName) > 20) {
-                            $customNames['513'] = substr($propertyName,0,19).'…';		
+                            $customNames['513'] = substr($propertyName,0,20);
                             // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         }
                         else {
@@ -749,7 +749,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     {
                         $propertyID = 514;
                         if (strlen($propertyName) > 20) {
-                        	$customNames['514'] = substr($propertyName,0,19).'…';							
+                        	$customNames['514'] = substr($propertyName,0,20);					
                             // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         } else {
                         	$customNames['514'] = $propertyName;
@@ -768,7 +768,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         $singleVariation['is_available'] = true;
                         $dataItem = $item->getData();
                         if (strlen($dataItem['title']) > 20) {								
-                        	$singleVariation['value'] = substr($dataItem['title'],0,19).'…';
+                        	$singleVariation['value'] = substr($dataItem['title'],0,20);
                             // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         } else {
                         	$singleVariation['value'] = $dataItem['title'];
@@ -781,7 +781,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         $singleVariation['is_available'] = isset($availabilityStock[$y])?$availabilityStock[$y]:true;
                         $dataItem = $item;
                         if (strlen($dataItem['label']) > 20) {								
-                        	$singleVariation['value'] = substr($dataItem['label'],0,19).'…';
+                        	$singleVariation['value'] = substr($dataItem['label'],0,20);
                             // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
                         } else {
                         	$singleVariation['value'] = $dataItem['label'];
