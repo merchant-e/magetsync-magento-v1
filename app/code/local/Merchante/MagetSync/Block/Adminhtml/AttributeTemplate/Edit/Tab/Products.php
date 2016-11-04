@@ -86,12 +86,12 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
             'index'     => 'entity_id'
         ));
 
-        $this->addColumn('name', array(
+        $this->addColumn('p_name', array(
             'header'    => Mage::helper('catalog')->__('Name'),
             'index'     => 'name'
         ));
 
-        $this->addColumn('type', array(
+        $this->addColumn('p_type', array(
             'header'    => Mage::helper('catalog')->__('Type'),
             'width'     => 100,
             'index'     => 'type_id',
@@ -103,7 +103,7 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
             ->setEntityTypeFilter(Mage::getModel('catalog/product')->getResource()->getTypeId())
             ->load()
             ->toOptionHash();
-        $this->addColumn('set_name', array(
+        $this->addColumn('p_set_name', array(
             'header'    => Mage::helper('catalog')->__('Attrib. Set Name'),
             'width'     => 130,
             'index'     => 'attribute_set_id',
@@ -111,7 +111,7 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
             'options'   => $sets,
         ));
 
-        $this->addColumn('status', array(
+        $this->addColumn('p_status', array(
             'header'    => Mage::helper('catalog')->__('Status'),
             'width'     => 90,
             'index'     => 'status',
@@ -119,7 +119,7 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
             'options'   => Mage::getSingleton('catalog/product_status')->getOptionArray(),
         ));
 
-        $this->addColumn('visibility', array(
+        $this->addColumn('p_visibility', array(
             'header'    => Mage::helper('catalog')->__('Visibility'),
             'width'     => 90,
             'index'     => 'visibility',
@@ -127,13 +127,13 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Products ex
             'options'   => Mage::getSingleton('catalog/product_visibility')->getOptionArray(),
         ));
 
-        $this->addColumn('sku', array(
+        $this->addColumn('p_sku', array(
             'header'    => Mage::helper('catalog')->__('SKU'),
             'width'     => 80,
             'index'     => 'sku'
         ));
 
-        $this->addColumn('price', array(
+        $this->addColumn('p_price', array(
             'header'        => Mage::helper('catalog')->__('Price'),
             'type'          => 'currency',
             'currency_code' => (string) Mage::getStoreConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE),

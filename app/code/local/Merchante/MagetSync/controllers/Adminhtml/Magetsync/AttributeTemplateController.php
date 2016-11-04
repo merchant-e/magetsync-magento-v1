@@ -82,9 +82,19 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                 $postData['product_ids'] = implode(',', $productIdsToAddArr);
                 $postData['products_count'] = count($productIdsToAddArr);
 
+                $origData = $attributeTemplateIdModel->getOrigData();
                 $attributeTemplateIdModel->addData($postData);
                 $attributeTemplateIdModel->save();
+
                 if ($saveAndQueue) {
+                    //Save products that were added ONLY
+                    if ($attributeTemplateIdModel->dataHasChangedFor('product_ids')) {
+                        $newData = $attributeTemplateIdModel->getData();
+                        $updateNewProductsOnly = $this->compareTemplateDatas($newData, $origData);
+                        if ($updateNewProductsOnly) {
+                            $productIdsToAddArr = array_diff($productIdsToAddArr, explode(',', $origData['product_ids']));
+                        }
+                    }
                     $products = Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addIdFilter($productIdsToAddArr)->load();
                     $createdListingsData = array();
                     foreach ($products as $product) {
@@ -278,6 +288,26 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
         $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
 
         return $query[0]['short_name'];
+    }
+
+    /**
+     * Compare data from DB and new data to save
+     * @param $newData
+     * @param $origData
+     * @return bool
+     */
+    public function compareTemplateDatas($newData, $origData) {
+        foreach($origData as $dataKey => $dataVal) {
+            if ($dataKey == 'product_ids' || $dataKey == 'products_count') continue;
+
+            if ($newData[$dataKey] == $dataVal) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
