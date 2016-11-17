@@ -610,21 +610,23 @@ error_reporting(E_ALL ^ E_NOTICE);
             $data = $this->getRequest()->getPost();
             $listingModel = Mage::getModel('magetsync/listing');
 
-            if(count($data['listingids'])>3){
+            if(count($data['listingids']) > 3){
                 $listings = $listingModel->getCollection()
                 ->addFieldToSelect('*')
                 ->addFieldToFilter('id', array('in' => $data['listingids']))
                 ->load();
                 $cnt = 0;
                 foreach ($listings as $listing) {
-                    $readyToSync = $listing->getSyncReady();
                     $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE);
                     $listing->save();
                     $cnt++;
                 }
                 if ($cnt) {
                     Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
+                }else{
+                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
                 }
+                $this->_redirect('adminhtml/magetsync_index/index');
             }
             else{
                 /// images 
@@ -633,8 +635,8 @@ error_reporting(E_ALL ^ E_NOTICE);
                 ->addFieldToFilter('id', array('in' => $data['listingids']))
                 ->load();
                 foreach ($listings as $listing) {
-                    $idListing = $lid = $listing->getListingId();
-                    $result = ["listing_id" => $lid];
+                    $idListing = $listing->getListingId();
+                    $result = ["listing_id" => $idListing];
                     $idProduct = $listing->getIdproduct();
                     $productModel = Mage::getModel('catalog/product')->load($idProduct);
                     $dataPro = $productModel->getData();
@@ -763,22 +765,20 @@ error_reporting(E_ALL ^ E_NOTICE);
                                 $h = $h + 1;
                             }
                         }
-                        Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__("Images have been re-uploaded."));
 
                     }catch (Exception $e){
                         return array('status'=>false,'message'=>$e->getMessage());
                     }
+                    $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC);
+                    $listing->save();
                 }
-                $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC);
-                $listing->save();
+                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__("Images have been re-uploaded."));
+                $this->_redirect('adminhtml/magetsync_index/index');
             }
-            $this->_redirect('adminhtml/magetsync_index/index');
-            return;
         } catch (Exception $e) {
             Mage::logException($e);
             return;
         }
-
     }
 
     private function __searchForFile($id, $array) {
