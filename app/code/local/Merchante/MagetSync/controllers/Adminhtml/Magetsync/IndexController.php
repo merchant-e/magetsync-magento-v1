@@ -636,7 +636,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                 ->load();
                 foreach ($listings as $listing) {
                     $idListing = $listing->getListingId();
-                    $result = ["listing_id" => $idListing];
+                    $result = array("listing_id" => $idListing);
                     $idProduct = $listing->getIdproduct();
                     $productModel = Mage::getModel('catalog/product')->load($idProduct);
                     $dataPro = $productModel->getData();
@@ -688,7 +688,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 
                     // end of the count if condition
                     try{
-                        $paramImg        = ['listing_id' => $result['listing_id']];
+                        $paramImg        = array('listing_id' => $result['listing_id']);
                         $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
                         $totalImages = 0;
                         if($resultTotalImgs['status']) {

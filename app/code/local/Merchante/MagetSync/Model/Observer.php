@@ -368,7 +368,7 @@ class Merchante_MagetSync_Model_Observer
                     // checking if the product is already there in the list synchronizing only images
                     if ($data['listing_id']) {
                         $idListing = $data['listing_id'];
-                        $result = ["listing_id" => $idListing];
+                        $result = array("listing_id" => $idListing);
                         $idProduct = $listing->getIdproduct();
                         $productModel = Mage::getModel('catalog/product')->load($idProduct);
                         $dataPro = $productModel->getData();
@@ -420,7 +420,7 @@ class Merchante_MagetSync_Model_Observer
 
                         // end of the count if condition
                         try{
-                            $paramImg        = ['listing_id' => $result['listing_id']];
+                            $paramImg        = array('listing_id' => $result['listing_id']);
                             $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
                             $totalImages = 0;
                             if($resultTotalImgs['status']) {
@@ -675,8 +675,8 @@ class Merchante_MagetSync_Model_Observer
                         $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
                         $stocklevel = (int)Mage::getModel('cataloginventory/stock_item')
                         ->loadByProduct($product)->getQty();
-                        $dataSave = ["idproduct" => $data['entity_id'], "quantity" => $stocklevel,
-                        "quantity_has_changed" => Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED];
+                        $dataSave = array("idproduct" => $data['entity_id'], "quantity" => $stocklevel,
+                        "quantity_has_changed" => Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED);
                         if (!empty($query) && $query[0]['quantity'] != $stocklevel) {
                             $listingModel->addData($dataSave)->setId($query[0]['id']);
                             $listingModel->save();
@@ -698,8 +698,8 @@ class Merchante_MagetSync_Model_Observer
                 $refundQty = $item->getQty();
                 $totalQty = $listing->getQuantity() + $refundQty;
                 $listing->setQuantity($totalQty);
-                $dataSave = ["quantity_has_changed" => Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED,
-                "sync" => Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC];
+                $dataSave = array("quantity_has_changed" => Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED,
+                "sync" => Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC);
                 $listing->addData($dataSave)->setId($id);
                 $listing->save();
             }
