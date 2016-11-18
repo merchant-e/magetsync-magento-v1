@@ -1,3 +1,15 @@
+##[0.9.7.2] - 2016-11-18
+### Changed
+- Long variation labels/values are auto trimmed to Etsy limit (20 chars)
+
+### Added
+- Option to re-upload product images for previouly synced products (overcoming Etsy limitation)
+- New observer to keep inventory updated when an item is restocked in Magento (order cancelled)
+- New label for draft state
+
+### Fixed
+- Admin access restriction
+
 ##[0.9.7.1] - 2016-10-15
 ### Added
 - Support for Qty updates when importing stock via CSV
@@ -9,7 +21,7 @@
 - Create test products in 'draft' state to prevent Etsy charges
 - New Delete option under Actions menu in Listings Manager. Deletes and resets 'Synchronize with Etsy' attribute.
 
-### Bug
+### Fixed
 - Fixed issue preventing stock from updating in Listings Manager after a new Etsy order
 
 ### Changed

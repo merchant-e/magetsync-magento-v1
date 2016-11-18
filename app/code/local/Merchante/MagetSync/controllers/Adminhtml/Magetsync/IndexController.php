@@ -622,7 +622,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                     $cnt++;
                 }
                 if ($cnt) {
-                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
+                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__($cnt . " products were queued to have their images updated."));
                 }else{
                     Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
                 }

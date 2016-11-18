@@ -143,10 +143,11 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid extends Mage_Adminhtml_Bl
         $this->getMassactionBlock()->addItem('resetimages', array(
             'label'=> Mage::helper('magetsync')->__('Reset Images'),
             'url'  => $this->getUrl('*/*/resetimages', array('' => '')),
-            'confirm' => Mage::helper('magetsync')->__('You are about to re-upload the images on Etsy.'),
+            'confirm' => Mage::helper('magetsync')->__('You are about to re-upload product images to Etsy. This process may take some time, depending on the number of products selected.'),
         ));
 
-	$this->getMassactionBlock()->addItem('deleteoption', array('label'=> Mage::helper('magetsync')->__('Delete'),'url'  => $this->getUrl('*/*/deleteoption'),'confirm' => Mage::helper('magetsync')->__('Are you sure?'),));
+		$this->getMassactionBlock()->addItem('deleteoption', array('label'=> Mage::helper('magetsync')->__('Delete'),'url'  => $this->getUrl('*/*/deleteoption'),'confirm' => Mage::helper('magetsync')->__('Are you sure?'),));
+		
         return $this;
     }
 
