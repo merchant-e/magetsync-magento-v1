@@ -399,6 +399,21 @@ class Merchante_MagetSync_Model_Observer
         // end of the count if condition
         try{
             $paramImg        = array('listing_id' => $result['listing_id']);
+            // deleting all images on etsy
+            $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
+            if($resultTotalImgs['status']) {
+                $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
+                if ($result['listing_id'] && isset($resultTotalImgs['results']) && count($resultTotalImgs['results']) > 0 ) {
+                    foreach($resultTotalImgs['results'] as $etsyImg){
+                        $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($etsyImg['listing_image_id']) );
+                        $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
+                       if(!$resultImageApiDelete['status']) {
+                           Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+                        }
+                    }
+                }
+            }
+
             $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
             $totalImages = 0;
             if($resultTotalImgs['status']) {
