@@ -339,14 +339,149 @@ class Merchante_MagetSync_Model_Observer
         }
     }
 
-    private function __searchForFile($id, $array) {
-        foreach ($array as $key => $val) {
-            if ($val['file'] === $id) {
-                return $key;
+    /// finction to reset images
+    public function imagesResetEtsy($listing){
+        if(!$listing){
+            return false;
+        }
+        $idListing = $listing->getListingId();
+        $result = array("listing_id" => $idListing);
+        $idProduct = $listing->getIdproduct();
+        $productModel = Mage::getModel('catalog/product')->load($idProduct);
+        $dataPro = $productModel->getData();
+        $newImages = array();
+        // deleting images
+        $h = 0;
+        if (count($dataPro['media_gallery']['images']) > 0) {
+            $excluded = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
+            if ($excluded <> '1') {
+                foreach ($dataPro['media_gallery']['images'] as $imageAux) {
+                    if ($imageAux['disabled'] != '1' && $imageAux['disabled_default'] != '1') {
+                        $newImages[] = $imageAux;
+                        if ($result['listing_id']) {
+                            $imageModel = Mage::getModel('magetsync/imageEtsy')->getCollection();
+                            $queryVerify = $imageModel->getSelect()->where('file = ?', $imageAux['file']);
+                            $queryVerify = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($queryVerify);
+                            if($queryVerify) {
+                                $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($queryVerify[0]['listing_image_id']));
+                                $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
+                                if($resultImageApiDelete['status']) {
+                                    $resultDeleteVerify = Mage::getModel('magetsync/imageEtsy')->setId($queryVerify[0]['id'])->delete();
+                                }
+                                else{
+                                    Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+                                }
+                            }
+                        }
+                    }
+                }
+                //
+                //$newImages = $dataPro['media_gallery']['images'];
+            } //end of excluded if
+            //We sort and cut the array of images
+            
+            $imageUrl = $productModel->getImage();
+            $resultIndex = $listing->searchForFile($imageUrl, $newImages);
+            if(isset($resultIndex)) {
+                $valueDelete = $newImages[$resultIndex];
+                unset($newImages[$resultIndex]);
+                //arsort($newImages);
+                usort($newImages, function($a, $b) {
+                    return strcmp($a->position, $b->position);
+                });
+                if(count($newImages) >= 5) {
+                    $newImages = array_slice($newImages,0,4);
+                }
+                array_push($newImages, $valueDelete);
             }
         }
-        return -1;
+
+        // end of the count if condition
+        try{
+            $paramImg        = array('listing_id' => $result['listing_id']);
+            $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
+            $totalImages = 0;
+            if($resultTotalImgs['status']) {
+                $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
+                $totalImagesAux = $resultTotalImgs['count'];
+                $totalImages = isset($totalImagesAux) ? $totalImagesAux : 0;
+            }else{
+               Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                    $resultTotalImgs['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+            }
+            foreach ($newImages as $image) {
+                //We control that the number of images always
+                //be 5 or less (Etsy restriction)
+                if ($h < (5 - $totalImages)) {
+                    $imageModel   = Mage::getModel('magetsync/imageEtsy')->getCollection();
+                    $query        = $imageModel->getSelect()->where('file = ?', $image['file']);
+                    $query        = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+                    $file         = Mage::getBaseDir('media') . '/catalog/product' . $image['file'];
+                    $info         = pathinfo($file);
+                    $ext          = $info['extension'];
+                    $mime         = Mage::getModel('magetsync/listing')->mimetypes[$ext];
+                    $obligatory   = array('listing_id' => $result['listing_id']);
+                    $etsyModel    = Mage::getModel('magetsync/etsy');
+                    $url          = Merchante_MagetSync_Model_Etsy::$merchApi . 'Listing/saveImageUpload';
+                    //According to the PHP_VERSION we use file_contents
+                    //in different ways
+                    if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
+                        $tempImage = curl_file_create($file,$mime,'tempImage');
+                        $post = array('file_contents' => $tempImage);
+                    }
+                    else {
+                        $post = array('file_contents' => '@' . $file);
+                    }
+                    $resultUpload = $etsyModel->curlConnect($url, $post, 2);
+                    $resultUpload = json_decode($resultUpload, true);
+                    if ($resultUpload['success'] == 1 || $resultUpload['success'] == true) {
+                        $file = $resultUpload['upload'];
+                        if ($query == null) {
+                            $params = array('@image' => '@'.$file. ';type=' . $mime, 'name' => $file);
+                        }else {
+                            $params = array('@image' => '@'.$file. ';type=' . $mime, 'listing_image_id' => intval($query[0]['listing_image_id']), 'name' => $file);
+                            $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($query[0]['listing_image_id']));
+                            $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
+                            if(!$resultImageApiDelete['status']) {
+                               Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                    $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+                            }
+                        }
+
+                        $resultImageApi = Mage::getModel('magetsync/listing')->uploadListingImage($obligatory, $params);
+
+                        if ($resultImageApi['status']) {
+                            $resultImage = json_decode(json_decode($resultImageApi['result']), true);
+                            $resultImage = $resultImage['results'][0];
+                            $imageData = array('listing_id' => $resultImage['listing_id'], 'listing_image_id' => $resultImage['listing_image_id'], 'file' => $image['file']);
+                            if ($query[0]['id']) {
+                                $resultSaveImage = Mage::getModel('magetsync/imageEtsy')->load($query[0]['id'])
+                                    ->addData($imageData)
+                                    ->setId($query[0]['id']);
+                                $resultSaveImage->save();
+                            }else {
+                                $imageEtsyModel = Mage::getModel('magetsync/imageEtsy');
+                                $imageEtsyModel->setData($imageData);
+                                $imageEtsyModel->save();
+                            }
+
+                        }else {
+                            throw new Exception($resultImageApi['message']);
+                        }
+
+                    }else{
+                        Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultUpload['message'],Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
+                    }
+                    $h = $h + 1;
+                }
+            }
+
+        }catch (Exception $e){
+            return array('status'=>false,'message'=>$e->getMessage());
+        }
     }
+
+
 
     public function sendAutoQueue()
     {
@@ -367,137 +502,7 @@ class Merchante_MagetSync_Model_Observer
                     $data = $listing->getData();
                     // checking if the product is already there in the list synchronizing only images
                     if ($data['listing_id']) {
-                        $idListing = $data['listing_id'];
-                        $result = array("listing_id" => $idListing);
-                        $idProduct = $listing->getIdproduct();
-                        $productModel = Mage::getModel('catalog/product')->load($idProduct);
-                        $dataPro = $productModel->getData();
-                        $newImages = array();
-                        // deleting images
-                        $h = 0;
-                        if (count($dataPro['media_gallery']['images']) > 0) {
-                            $excluded = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
-                            if ($excluded <> '1') {
-                                foreach ($dataPro['media_gallery']['images'] as $imageAux) {
-                                    if ($imageAux['disabled'] != '1') {
-                                        $newImages[] = $imageAux;
-                                        if ($result['listing_id']) {
-                                            $imageModel = Mage::getModel('magetsync/imageEtsy')->getCollection();
-                                            $queryVerify = $imageModel->getSelect()->where('file = ?', $imageAux['file']);
-                                            $queryVerify = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($queryVerify);
-                                            if($queryVerify) {
-                                                $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($queryVerify[0]['listing_image_id']));
-                                                $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
-                                                if($resultImageApiDelete['status']) {
-                                                    $resultDeleteVerify = Mage::getModel('magetsync/imageEtsy')->setId($queryVerify[0]['id'])->delete();
-                                                }
-                                                else{
-                                                    Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                //
-                                $newImages = $dataPro['media_gallery']['images'];
-                            } //end of excluded if
-                            //We sort and cut the array of images
-                            $imageUrl = $productModel->getImage();
-                            $resultIndex = $this->__searchForFile($imageUrl, $newImages);
-                            if(isset($resultIndex)) {
-                                $valueDelete = $newImages[$resultIndex];
-                                unset($newImages[$resultIndex]);
-                                //arsort($newImages);
-                                usort($newImages, function($a, $b) {
-                                    return strcmp($a->position, $b->position);
-                                });
-                                if(count($newImages) >= 5) {
-                                    $newImages = array_slice($newImages,0,4);
-                                }
-                                array_push($newImages, $valueDelete);
-                            }
-                        }
-
-                        // end of the count if condition
-                        try{
-                            $paramImg        = array('listing_id' => $result['listing_id']);
-                            $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
-                            $totalImages = 0;
-                            if($resultTotalImgs['status']) {
-                                $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
-                                $totalImagesAux = $resultTotalImgs['count'];
-                                $totalImages = isset($totalImagesAux) ? $totalImagesAux : 0;
-                            }else{
-                               Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                                    $resultTotalImgs['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
-                            }
-                            foreach ($newImages as $image) {
-                                //We control that the number of images always
-                                //be 5 or less (Etsy restriction)
-                                if ($h < (5 - $totalImages)) {
-                                    $imageModel   = Mage::getModel('magetsync/imageEtsy')->getCollection();
-                                    $query        = $imageModel->getSelect()->where('file = ?', $image['file']);
-                                    $query        = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
-                                    $file         = Mage::getBaseDir('media') . '/catalog/product' . $image['file'];
-                                    $info         = pathinfo($file);
-                                    $ext          = $info['extension'];
-                                    $mime         = Mage::getModel('magetsync/listing')->mimetypes[$ext];
-                                    $obligatory   = array('listing_id' => $result['listing_id']);
-                                    $etsyModel    = Mage::getModel('magetsync/etsy');
-                                    $url          = Merchante_MagetSync_Model_Etsy::$merchApi . 'Listing/saveImageUpload';
-                                    //According to the PHP_VERSION we use file_contents
-                                    //in different ways
-                                    if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
-                                        $tempImage = curl_file_create($file,$mime,'tempImage');
-                                        $post = array('file_contents' => $tempImage);
-                                    }
-                                    else {
-                                        $post = array('file_contents' => '@' . $file);
-                                    }
-                                    $resultUpload = $etsyModel->curlConnect($url, $post, 2);
-                                    $resultUpload = json_decode($resultUpload, true);
-                                    if ($resultUpload['success'] == 1 || $resultUpload['success'] == true) {
-                                        $file = $resultUpload['upload'];
-                                        if ($query == null) {
-                                            $params = array('@image' => '@'.$file. ';type=' . $mime, 'name' => $file);
-                                        }else {
-                                            $params = array('@image' => '@'.$file. ';type=' . $mime, 'listing_image_id' => intval($query[0]['listing_image_id']), 'name' => $file);
-                                            $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($query[0]['listing_image_id']));
-                                            $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
-                                            if(!$resultImageApiDelete['status']) {
-                                               Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                                                $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
-                                            }
-                                        }
-                                        $resultImageApi = Mage::getModel('magetsync/listing')->uploadListingImage($obligatory, $params);
-                                        if ($resultImageApi['status']) {
-                                            $resultImage = json_decode(json_decode($resultImageApi['result']), true);
-                                            $resultImage = $resultImage['results'][0];
-                                            $imageData = array('listing_id' => $resultImage['listing_id'], 'listing_image_id' => $resultImage['listing_image_id'], 'file' => $image['file']);
-                                            if ($query[0]['id']) {
-                                                $resultSaveImage = Mage::getModel('magetsync/imageEtsy')->load($query[0]['id'])
-                                                    ->addData($imageData)
-                                                    ->setId($query[0]['id']);
-                                                $resultSaveImage->save();
-                                            }else {
-                                                $imageEtsyModel = Mage::getModel('magetsync/imageEtsy');
-                                                $imageEtsyModel->setData($imageData);
-                                                $imageEtsyModel->save();
-                                            }
-                                        }else {
-                                             Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultImageApi['message'],Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
-                                        }
-                                    }else{
-                                        Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultUpload['message'],Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
-                                    }
-                                    $h = $h + 1;
-                                }
-                            }
-                            $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC);
-                            $listing->save();
-                        }catch (Exception $e){
-                            Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING, $e->getMessage(),Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
-                        }
+                       $this->imagesResetEtsy($listing);
                     }
                     else{ // loop to add new listing and sync the product
                         $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
