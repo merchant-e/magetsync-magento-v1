@@ -130,15 +130,24 @@ error_reporting(E_ALL ^ E_NOTICE);
 					Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select item(s)'));
 				}else{
 					foreach($data['listingids'] as $listId){
-					$listingModel = Mage::getModel('magetsync/listing')->load($listId);						
-					if($listingModel->getSync() == '5'){							
-					$listingModel->delete();							
-					$deleteCount++;						
-				}else if(
-					$listingModel->getSync() == '1'){
-					Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()),array('synchronizedEtsy' => 0));
-					$listingModel->delete();
-					$deleteCount++;
+					$listingModel = Mage::getModel('magetsync/listing')->load($listId);
+					if($listingModel->getSync() == Merchante_MagetSync_Model_Listing::STATE_EXPIRED){
+                        if ($attrTemplateId = $listingModel->getAttributeTemplateId()) {
+                            $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
+                            $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listingModel->getIdproduct());
+                        }
+                        $listingModel->delete();
+                        $deleteCount++;
+				} else if($listingModel->getSync() == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
+                         || $listingModel->getSync() == Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE)
+                {
+                    if ($attrTemplateId = $listingModel->getAttributeTemplateId()) {
+                        $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
+                        $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listingModel->getIdproduct());
+                    }
+                    Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()),array('synchronizedEtsy' => 0));
+                    $listingModel->delete();
+                    $deleteCount++;
 				}
 			}
 				Mage::getSingleton('adminhtml/session')
@@ -368,11 +377,9 @@ error_reporting(E_ALL ^ E_NOTICE);
                     $listingModel = Mage::getModel('magetsync/listing');
                     $listings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter('id', array('in' => $newListing))->load();//->toArray();
 
-                    foreach ($listings as $value) {
+                    foreach ($listings as $listing) {
 
-                        $data = $value->getData(); //$listingModel->load($value)->getData();
-                        //$data['quantity'] = Mage::getModel('cataloginventory/stock_item')->loadByProduct($value)->getQty();
-
+                        $data = $listing->getData();
                         if (isset($postData['category_id'])) {
                             $postData['category_id'] = $listingModel->emptyField($postData['category_id'], null);
                             $postData['subcategory_id'] = $listingModel->emptyField($postData['subcategory_id'], null);
@@ -392,12 +399,9 @@ error_reporting(E_ALL ^ E_NOTICE);
 
                         if ($data['listing_id'] && $syncStatus) {
                             if (!$isSendtoEtsy) {
-                                $value
-                                    ->addData($postData);
-                                //->setId($value);
-                                //->setId($data['id']);
-                                $updateProduct = $value->save();
-                                $data = $updateProduct->getData();//$listingModel->load($value)->getData();
+                                $listing->addData($postData);
+                                $updateProduct = $listing->save();
+                                $data = $updateProduct->getData();
                             }
                         }
 
@@ -458,7 +462,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                             'style' => $styleData,
                             'should_auto_renew' => $renewalOption,
                             'language' => $languageData);
-                        $dataGlobal = $data['id'];//$value;
+                        $dataGlobal = $data['id'];//$listing;
                         $hasError = false;
                         if ($syncStatus) {
 
@@ -545,12 +549,14 @@ error_reporting(E_ALL ^ E_NOTICE);
                         }
 
                         $postData['sync_ready'] = 1;
+                        if ($attrTemplateId = $listing->getAttributeTemplateId()) {
+                            $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
+                            $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listing->getIdproduct());
+                        }
+                        $postData['attribute_template_id'] = 0;
 
-                        $value
-                            ->addData($postData);
-                        //->setId($value);
-                        //->setId($dataGlobal);
-                        $value->save();
+                        $listing->addData($postData);
+                        $listing->save();
 
                         if ($hasError == true) {
                             Merchante_MagetSync_Model_LogData::magetsync($dataGlobal, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
@@ -621,6 +627,10 @@ error_reporting(E_ALL ^ E_NOTICE);
                     $listingModel->setId($this->getRequest()
                         ->getParam('id'))
                         ->delete();
+                    if ($attrTemplateId = $data['attribute_template_id']) {
+                        $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
+                        $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $data['idproduct']);
+                    }
                     Mage::getModel('catalog/product')->load($listingModel->getIdproduct())
                         ->setData('synchronizedEtsy', '0')
                         ->save();

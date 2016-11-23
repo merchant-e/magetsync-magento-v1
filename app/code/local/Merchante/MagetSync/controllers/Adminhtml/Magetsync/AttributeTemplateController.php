@@ -68,7 +68,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     {
         $saveAndQueue = $this->getRequest()->getParam('queueListings');
         $attributeTemplateId = $this->getRequest()->getParam('id');
-        $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->load($attributeTemplateId);
+        $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate')->load($attributeTemplateId);
         $postData = $this->getRequest()->getPost();
         if ($postData) {
             try {
@@ -77,19 +77,20 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                     $productIds = $this->getRequest()->getParam('in_products', null);
                     $productIdsToAddArr = Mage::helper('adminhtml/js')->decodeGridSerializedInput($productIds);
                 } else {
-                    $productIdsToAddArr = explode(',', $attributeTemplateIdModel->getProductIds());
+                    $productIdsToAddArr = explode(',', $attributeTemplateModel->getProductIds());
                 }
                 $postData['product_ids'] = implode(',', $productIdsToAddArr);
                 $postData['products_count'] = count($productIdsToAddArr);
 
-                $origData = $attributeTemplateIdModel->getOrigData();
-                $attributeTemplateIdModel->addData($postData);
-                $attributeTemplateIdModel->save();
+                $origData = $attributeTemplateModel->getOrigData();
+                $attributeTemplateModel->addData($postData);
+                $attributeTemplateModel->save();
+                $attributeTemplateId = $attributeTemplateModel->getId();
 
                 if ($saveAndQueue) {
                     //Save products that were added ONLY
-                    if ($attributeTemplateIdModel->dataHasChangedFor('product_ids')) {
-                        $newData = $attributeTemplateIdModel->getData();
+                    if ($attributeTemplateModel->dataHasChangedFor('product_ids')) {
+                        $newData = $attributeTemplateModel->getData();
                         $updateNewProductsOnly = $this->compareTemplateDatas($newData, $origData);
                         if ($updateNewProductsOnly) {
                             $productIdsToAddArr = array_diff($productIdsToAddArr, explode(',', $origData['product_ids']));
@@ -126,6 +127,11 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
                         $postData['sync_ready'] = 1;
                         $postData['title'] = $listing->getTitle();
+
+                        if ($listing->getAttributeTemplateId() && $listing->getAttributeTemplateId() != $attributeTemplateId) {
+                            $attributeTemplateModel->removeAssociatedProduct($listing->getAttributeTemplateId(), $listing->getIdproduct());
+                        }
+                        $postData['attribute_template_id'] = $attributeTemplateId;
 
                         //TODO dynamic pricing
                         $postData['price'] = $createdListingsData[$listing->getIdproduct()];
@@ -296,7 +302,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
      * @param $origData
      * @return bool
      */
-    public function compareTemplateDatas($newData, $origData) {
+    public function compareTemplateDatas($newData, $origData)
+    {
         foreach($origData as $dataKey => $dataVal) {
             if ($dataKey == 'product_ids' || $dataKey == 'products_count') continue;
 

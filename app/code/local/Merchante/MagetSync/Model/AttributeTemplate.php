@@ -16,4 +16,22 @@ class Merchante_MagetSync_Model_AttributeTemplate extends Mage_Core_Model_Abstra
         parent::_construct();
         $this->_init('magetsync/attributeTemplate');
    	}
+
+    /**
+     * Removes product by ID from attribute template associated products
+     * @param $attributeTemplateId
+     * @param $asociatedProductId
+     */
+    public function removeAssociatedProduct($attributeTemplateId, $asociatedProductId)
+   	{
+        $this->load($attributeTemplateId);
+        $associatedProductsArr = explode(',', $this->getProductIds());
+        $key = array_search($asociatedProductId, $associatedProductsArr);
+        if (false !== $key) {
+            unset($associatedProductsArr[$key]);
+        }
+        $this->setProductsCount(count($associatedProductsArr));
+        $this->setProductIds(implode(',', $associatedProductsArr));
+        $this->save();
+   	}
 }
