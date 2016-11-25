@@ -609,12 +609,11 @@ error_reporting(E_ALL ^ E_NOTICE);
             }
             $data = $this->getRequest()->getPost();
             $listingModel = Mage::getModel('magetsync/listing');
-
-            if(count($data['listingids']) > 3){
-                $listings = $listingModel->getCollection()
+            $listings = $listingModel->getCollection()
                 ->addFieldToSelect('*')
                 ->addFieldToFilter('id', array('in' => $data['listingids']))
                 ->load();
+            if(count($data['listingids']) > 3){
                 $cnt = 0;
                 foreach ($listings as $listing) {
                     $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE);
@@ -630,10 +629,6 @@ error_reporting(E_ALL ^ E_NOTICE);
             }
             else{
                 /// images 
-                $listings = $listingModel->getCollection()
-                ->addFieldToSelect('*')
-                ->addFieldToFilter('id', array('in' => $data['listingids']))
-                ->load();
                 foreach ($listings as $listing) {
                     $observerObj = Mage::getModel('magetsync/observer');
                     $observerObj->imagesResetEtsy($listing);
