@@ -417,6 +417,14 @@
                     <model>magetsync/observer::checkListingsExpired</model>
                 </run>
             </magetsync_checklistingsexpired>
+            <magetsync_imagereset>
+                <schedule>
+                    <cron_expr>*/1 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>magetsync/observer::imageResetCron</model>
+                </run>
+            </magetsync_imagereset>
         </jobs>
   </crontab>
 </config>

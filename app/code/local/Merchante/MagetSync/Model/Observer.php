@@ -339,7 +339,7 @@ class Merchante_MagetSync_Model_Observer
         }
     }
 
-    /// function to reset images
+    /// finction to reset images
     public function imagesResetEtsy($listing){
         if(!$listing){
             return false;
@@ -501,6 +501,38 @@ class Merchante_MagetSync_Model_Observer
         $listing->save();
     }
 
+    public function imageResetCron(){
+
+        $etsyConfigVerified = Mage::getModel('magetsync/etsy')->verifyDataConfiguration();
+        if ($etsyConfigVerified) {
+            $iterationCntr = 0;
+            try {
+                $listingModel = Mage::getModel('magetsync/listing');
+                $listings = $listingModel->getCollection()
+                    ->addFieldToSelect('*')
+                    ->addFieldToFilter('sync', array('eq' => Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE))
+                    ->load();
+                foreach ($listings as $listing) {
+                    if ($iterationCntr > $this::AUTOQUEUE_ITERATIONS_LIMIT) {
+                        break;
+                    }
+                    $data = $listing->getData();
+                    // checking if the product is already there in the list synchronizing only images
+                    if ($data['listing_id']) {
+                        $iterationCntr++;
+                        $this->imagesResetEtsy($listing);
+                    }
+                }
+            } catch (Exception $e) {
+                if ($e instanceof OAuthException) {
+                    $errorMsg = $e->lastResponse;
+                } else {
+                    $errorMsg = $e->getMessage();
+                }
+                Mage::log("Error: " . print_r($errorMsg, true), null, 'magetsync_listing.log');
+            }
+        }
+    }
 
     public function sendAutoQueue()
     {
@@ -521,8 +553,6 @@ class Merchante_MagetSync_Model_Observer
                     $data = $listing->getData();
                     // checking if the product is already there in the list synchronizing only images
                     if ($data['listing_id']) {
-                        $iterationCntr++;
-                        $this->imagesResetEtsy($listing);
                        continue;
                     }
                     else{ // loop to add new listing and sync the product
