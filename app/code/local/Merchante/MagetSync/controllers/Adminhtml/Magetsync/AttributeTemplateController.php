@@ -73,11 +73,15 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
         if ($postData) {
             try {
                 $postData['title'] = $this->composeTemplateTitle($postData);
+                $productIdsToAddArr = array();
                 if ($this->getRequest()->getParam('in_products', null) !== null) {
                     $productIds = $this->getRequest()->getParam('in_products', null);
-                    $productIdsToAddArr = Mage::helper('adminhtml/js')->decodeGridSerializedInput($productIds);
+                    if ($productIds) {
+                        $productIdsToAddArr = Mage::helper('adminhtml/js')->decodeGridSerializedInput($productIds);
+                    }
                 } else {
-                    $productIdsToAddArr = explode(',', $attributeTemplateModel->getProductIds());
+                    if ($prodIdsArr = $attributeTemplateModel->getProductIds())
+                    $productIdsToAddArr = explode(',', $prodIdsArr);
                 }
                 $postData['product_ids'] = implode(',', $productIdsToAddArr);
                 $postData['products_count'] = count($productIdsToAddArr);
@@ -133,8 +137,22 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         }
                         $postData['attribute_template_id'] = $attributeTemplateId;
 
-                        //TODO dynamic pricing
-                        $postData['price'] = $createdListingsData[$listing->getIdproduct()];
+                        $origPrice = $createdListingsData[$listing->getIdproduct()];
+                        if ($postData['pricing_rule'] == 'original') {
+                            $finalPrice = $origPrice;
+                        } else {
+                            if ($postData['affect_strategy'] == 'percentage') {
+                                $delta = round($origPrice*(floatval($postData['affect_value'])/100), 2);
+                            } else {
+                                $delta = $postData['affect_value'];
+                            }
+                            if ($postData['pricing_rule'] == 'increase') {
+                                $finalPrice = $origPrice + $delta;
+                            } else {
+                                $finalPrice = $origPrice - $delta;
+                            }
+                        }
+                        $postData['price'] = $finalPrice;
 
                         $listing->addData($postData);
                         $listing->save();

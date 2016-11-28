@@ -122,25 +122,73 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                     }
                 </script>");
 
-
+        //Single listing edit
         if(!Mage::registry('magetsync_massive')) {
-            $priceArray = array(
-                'label' => Mage::helper('magetsync')->__("Price"),
-                'name' => 'price'
-            );
-            $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-            $classDisabled = 'disabled';
-            if ($new_pricing) {
-                $classDisabled = '';
-                $priceArray['class'] = 'required-entry validate-number ' . $classDisabled;
-                $priceArray['required'] = true;
-            } else {
-                $priceArray['readonly'] = true;
-                $priceArray['class'] = $classDisabled;
-            }
-            $price = $fieldsetAbout->addField('price', 'text',
-                $priceArray
-            );
+            $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Renderer_Pricing');
+            $pricingRule = $fieldsetAbout->addField('pricing_rule', 'pricingrule', array(
+                'name'  => 'price',
+                'required' => true,
+                'label'     => Mage::helper('magetsync')->__("Price")
+            ));
+            $pricingRule->setAfterElementHtml("
+                <script type='text/javascript'>
+                    $('custom-price').observe('change', tootglePriceInput);
+                    function tootglePriceInput(evt) {
+                        var priceInput = $('price');
+                        if (evt.element().checked == true) {
+                            priceInput.disabled = false;
+                        } else {
+                            priceInput.disabled = true;
+                            priceInput.value = $('orig-price-val').value;
+                        }
+                    }
+                </script>
+            ");
+        //Mass attribute update
+        } else {
+            $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Renderer_MassPricing');
+            $pricingRule = $fieldsetAbout->addField('pricing_rule', 'pricingrule', array(
+                'name'  => 'pricing_rule',
+                'label'     => Mage::helper('magetsync')->__("Pricing Rule"),
+                'rules'    => Mage::getModel('magetsync/attributeTemplate')->toPricingRuleOptionArray(),
+                'strategies'    => Mage::getModel('magetsync/attributeTemplate')->toPricingStrategyOptionArray(),
+            ));
+            $pricingRule->setAfterElementHtml("
+            <script type=\"text/javascript\">
+                $('affect_value').observe('keyup', calculateEstimatePrice);
+                $('affect_strategy').observe('change', calculateEstimatePrice);
+                function calculateEstimatePrice(reset) {
+                    var affectPriceVal = document.getElementById('affect_value');
+                    var priceValue = 10;
+                    if (reset !== true) {
+                        if (document.getElementById('affect_strategy').value == 'percentage') {
+                            var delta = priceValue * Number(affectPriceVal.value)/100;
+                        } else {
+                            var delta = Number(affectPriceVal.value);
+                        }
+                        if (document.getElementById('pricing_rule').value == 'increase') {
+                            priceValue += delta;
+                        } else {
+                            priceValue -= delta;
+                        }
+                    }
+
+                    document.getElementById('estimate-price').update(priceValue);
+                }
+                function togglePricing(select) {
+                    if (select.value != 'original') {
+                        document.getElementById('affect_value').show();
+                        document.getElementById('affect_strategy').show();
+                        calculateEstimatePrice();
+                    } else {
+                        document.getElementById('affect_value').hide();
+                        document.getElementById('affect_strategy').hide();
+                        calculateEstimatePrice(true);
+                    }
+                }
+                togglePricing($('pricing_rule'));
+            </script>
+        ");
         }
 
 

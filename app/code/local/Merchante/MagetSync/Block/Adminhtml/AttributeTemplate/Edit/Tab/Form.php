@@ -86,6 +86,53 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
             'values'    => Mage::getModel('magetsync/whenMade')->toOptionArray(),
         ));
 
+        $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Renderer_Pricing');
+        $pricingRule = $fieldsetAbout->addField('pricing_rule', 'pricingrule', array(
+            'name'  => 'pricing_rule',
+            'class'  => 'validate-select',
+            'required' => true,
+            'label'     => Mage::helper('magetsync')->__("Pricing Rule"),
+            'disabled' => false,
+            'rules'    => Mage::getModel('magetsync/attributeTemplate')->toPricingRuleOptionArray(),
+            'strategies'    => Mage::getModel('magetsync/attributeTemplate')->toPricingStrategyOptionArray(),
+            'style'     => 'width:100px;',
+        ));
+        $pricingRule->setAfterElementHtml("
+            <script type=\"text/javascript\">
+                $('affect_value').observe('keyup', calculateEstimatePrice);
+                $('affect_strategy').observe('change', calculateEstimatePrice);
+                function calculateEstimatePrice(reset) {
+                    var affectPriceVal = document.getElementById('affect_value');
+                    var priceValue = 10;
+                    if (reset !== true) {
+                        if (document.getElementById('affect_strategy').value == 'percentage') {
+                            var delta = priceValue * Number(affectPriceVal.value)/100;
+                        } else {
+                            var delta = Number(affectPriceVal.value);
+                        }
+                        if (document.getElementById('pricing_rule').value == 'increase') {
+                            priceValue += delta;
+                        } else {
+                            priceValue -= delta;
+                        }
+                    }
+
+                    document.getElementById('estimate-price').update(priceValue);
+                }
+                function togglePricing(select) {
+                    if (select.value != 'original') {
+                        document.getElementById('affect_value').show();
+                        document.getElementById('affect_strategy').show();
+                        calculateEstimatePrice();
+                    } else {
+                        document.getElementById('affect_value').hide();
+                        document.getElementById('affect_strategy').hide();
+                        calculateEstimatePrice(true);
+                    }
+                }
+                togglePricing($('pricing_rule'));
+            </script>
+        ");
 
         /**
          * Validation on event 'change'

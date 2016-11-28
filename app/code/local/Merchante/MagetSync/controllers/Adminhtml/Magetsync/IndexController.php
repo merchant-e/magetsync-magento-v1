@@ -465,30 +465,39 @@ error_reporting(E_ALL ^ E_NOTICE);
                         $dataGlobal = $data['id'];//$listing;
                         $hasError = false;
                         if ($syncStatus) {
-
+                            //Update price
                             if ($postData && array_key_exists('price', $postData)) {
-                                $priceEtsy = $postData['price'];
+                                $origPrice = $postData['price'];
                             } else {
-                                $priceEtsy = $data['price'];
+                                $origPrice = $data['price'];
                             }
+                            if ($postData['pricing_rule'] == 'original') {
+                                $finalPrice = $origPrice;
+                            } else {
+                                if ($postData['affect_strategy'] == 'percentage') {
+                                    $delta = round($origPrice*(floatval($postData['affect_value'])/100), 2);
+                                } else {
+                                    $delta = $postData['affect_value'];
+                                }
+                                if ($postData['pricing_rule'] == 'increase') {
+                                    $finalPrice = $origPrice + $delta;
+                                } else {
+                                    $finalPrice = $origPrice - $delta;
+                                }
+                            }
+                            $params['price'] = $finalPrice;
 
                             if ($data['listing_id']) {
                                 $obliUpd = array('listing_id' => $data['listing_id']);
                                 $resultApi = $listingModel->updateListing($obliUpd, $params);
                             } else {
-                                $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-                                if ($new_pricing) {
-                                    $params['price'] = $priceEtsy;
-                                } else {
-                                    $params['price'] = $data['price'];
-                                }
                                 $resultApi = $listingModel->createListing(null, $params);
                             }
                             if ($resultApi['status'] == true) {
 
                                 $result = json_decode(json_decode($resultApi['result']), true);
                                 $result = $result['results'][0];
-                                $statusOperation = $listingModel->saveDetails($result, $data['idproduct'], $priceEtsy, $dataGlobal);
+                                $statusOperation = $listingModel->saveDetails($result, $data['idproduct'], $params['price'], $dataGlobal);
                                 /*********************************/
 
                                 $postData['creation_tsz'] = $result['creation_tsz'];
