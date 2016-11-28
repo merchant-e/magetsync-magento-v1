@@ -1,3 +1,20 @@
+##[0.9.7.5] - 2016-11-28
+### Added
+- Support for Attribute Templates
+- New Pricing Rules (Increase/Decrease prices globally using Attribute Templates)
+- New Image Reset Option (with its own cron task)
+- Auto trimming long custom option names/values to fit Etsy limit
+- New Observer for when Magento products are restocked (credit memo)
+
+### Changed 
+- Added new measures to prevent excessive API calls when using auto-queue
+- New Draft label for products in Draft state
+
+### Bug
+- Fixed PHP array incompatibility with older PHP versions
+- Fixed Permissions for non-admin users (Access Denied error)
+
+
 ##[0.9.7.1] - 2016-10-15
 ### Added
 - Support for Qty updates when importing stock via CSV
