@@ -139,6 +139,13 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid extends Mage_Adminhtml_Bl
             'confirm' => Mage::helper('magetsync')->__('You are about to queue product(s) on Etsy. If you have filled out all the required information please proceed.'),
         ));
 
+        // reset and re-synchronize images on Etsy
+        $this->getMassactionBlock()->addItem('resetimages', array(
+            'label'=> Mage::helper('magetsync')->__('Reset Images'),
+            'url'  => $this->getUrl('*/*/resetimages', array('' => '')),
+            'confirm' => Mage::helper('magetsync')->__('You are about to re-upload the images on Etsy.'),
+        ));
+
 	$this->getMassactionBlock()->addItem('deleteoption', array('label'=> Mage::helper('magetsync')->__('Delete'),'url'  => $this->getUrl('*/*/deleteoption'),'confirm' => Mage::helper('magetsync')->__('Are you sure?'),));
         return $this;
     }

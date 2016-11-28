@@ -119,39 +119,39 @@ error_reporting(E_ALL ^ E_NOTICE);
             }
         }
 
-	/**         
-	 * Method To Delete Expired products from listing		
-	 */        
-	public function deleteoptionAction() {            
-		try{				
-			if(!$this->verifyEtsyApi()){ return; }				
-				$data = $this->getRequest()->getPost();
-				$deleteCount = 0;								
-				if(!isset($data['listingids']) || empty($data['listingids'])){					
-					Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select item(s)'));
-				}else{
-					foreach($data['listingids'] as $listId){
-					$listingModel = Mage::getModel('magetsync/listing')->load($listId);						
-					if($listingModel->getSync() == '5'){							
-					$listingModel->delete();							
-					$deleteCount++;						
-				}else if(
-					$listingModel->getSync() == '1'){
-					Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()),array('synchronizedEtsy' => 0));
-					$listingModel->delete();
-					$deleteCount++;
-				}
-			}
-				Mage::getSingleton('adminhtml/session')
-					->addSuccess(Mage::helper('adminhtml')->__('Total of %d record(s) were successfully deleted', $deleteCount));
-			}				 
-				$this->_redirect('adminhtml/magetsync_index/index');
-				return;
-		} catch (Exception $e) {
-			Mage::logException($e);
-			return;
-		}
-	}
+    /**         
+     * Method To Delete Expired products from listing       
+     */        
+    public function deleteoptionAction() {            
+        try{                
+            if(!$this->verifyEtsyApi()){ return; }              
+                $data = $this->getRequest()->getPost();
+                $deleteCount = 0;                               
+                if(!isset($data['listingids']) || empty($data['listingids'])){                  
+                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select item(s)'));
+                }else{
+                    foreach($data['listingids'] as $listId){
+                    $listingModel = Mage::getModel('magetsync/listing')->load($listId);                     
+                    if($listingModel->getSync() == '5'){                            
+                    $listingModel->delete();                            
+                    $deleteCount++;                     
+                }else if(
+                    $listingModel->getSync() == '1'){
+                    Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()),array('synchronizedEtsy' => 0));
+                    $listingModel->delete();
+                    $deleteCount++;
+                }
+            }
+                Mage::getSingleton('adminhtml/session')
+                    ->addSuccess(Mage::helper('adminhtml')->__('Total of %d record(s) were successfully deleted', $deleteCount));
+            }                
+                $this->_redirect('adminhtml/magetsync_index/index');
+                return;
+        } catch (Exception $e) {
+            Mage::logException($e);
+            return;
+        }
+    }
         /**
          * Method for creating and listing categories
          */
@@ -597,6 +597,50 @@ error_reporting(E_ALL ^ E_NOTICE);
                 }
             }
         }
+
+        /**
+     * Method for resetting images on etsy
+     */
+    public function resetimagesAction() {
+        try{
+            $data = $this->getRequest()->getPost();
+            if (!$this->verifyEtsyApi()) {
+                return;
+            }
+            $data = $this->getRequest()->getPost();
+            $listingModel = Mage::getModel('magetsync/listing');
+            $listings = $listingModel->getCollection()
+                ->addFieldToSelect('*')
+                ->addFieldToFilter('id', array('in' => $data['listingids']))
+                ->load();
+            if(count($data['listingids']) > 3){
+                $cnt = 0;
+                foreach ($listings as $listing) {
+                    $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE);
+                    $listing->save();
+                    $cnt++;
+                }
+                if ($cnt) {
+                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
+                }else{
+                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
+                }
+                $this->_redirect('adminhtml/magetsync_index/index');
+            }
+            else{
+                /// images 
+                foreach ($listings as $listing) {
+                    $observerObj = Mage::getModel('magetsync/observer');
+                    $observerObj->imagesResetEtsy($listing);
+                }
+                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__("Images have been re-uploaded."));
+                $this->_redirect('adminhtml/magetsync_index/index');
+            }
+        } catch (Exception $e) {
+            Mage::logException($e);
+            return;
+        }
+    }
 
 
         /**
