@@ -52,4 +52,40 @@
             <block type="magetsync/adminhtml_global_shippingTemplate" name="admin_shippingtemplate"/>
         </reference>
     </adminhtml_magetsync_shippingtemplate_index>
+    <adminhtml_magetsync_attributetemplate_index>
+        <reference name="content">
+            <block type="core/template" name="notice_listing" before="content" template="magetsync/templates-notice.phtml" after="breadcrumbs" />
+            <block type="magetsync/adminhtml_attributeTemplate" name="admin_attributetemplate"/>
+        </reference>
+    </adminhtml_magetsync_attributetemplate_index>
+
+    <adminhtml_magetsync_attributetemplate_edit>
+        <reference name="left">
+            <block type="magetsync/adminhtml_attributeTemplate_edit_tabs" name="magetsync.attributetemplate.edit.tabs" />
+        </reference>
+        <reference name="content">
+            <block type="magetsync/adminhtml_attributeTemplate_edit" name="magetsync.attributetemplate.edit" />
+        </reference>
+    </adminhtml_magetsync_attributetemplate_edit>
+
+    <adminhtml_magetsync_attributetemplate_productstab>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="magetsync/adminhtml_attributeTemplate_edit_tab_products" name="magetsync.attributetemplate.edit.tab.products"/>
+            <block type="adminhtml/widget_grid_serializer" name="magetsync.serializer.products">
+                <action method="initSerializerBlock">
+                    <grid_block_name>magetsync.attributetemplate.edit.tab.products</grid_block_name>
+                    <data_callback>getSelectedProducts</data_callback>
+                    <hidden_input_name>in_products</hidden_input_name>
+                    <reload_param_name>products</reload_param_name>
+                </action>
+            </block>
+        </block>
+    </adminhtml_magetsync_attributetemplate_productstab>
+
+    <adminhtml_magetsync_attributetemplate_productsgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="magetsync/adminhtml_attributeTemplate_edit_tab_products" name="magetsync.attributetemplate.edit.tab.products"/>
+        </block>
+    </adminhtml_magetsync_attributetemplate_productsgrid>
+
 </layout>

@@ -313,196 +313,193 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param $attributes
      * @return mixed
      */
-    public function saveListingSynchronized($productModel,$attributes = null, $is_qty_validation = false)
+    public function saveListingSynchronized($productModel, $attributes = null, $is_qty_validation = false)
     {
-        try
-        {
-        $listingModel = Mage::getModel('magetsync/listing');
-        $dataProduct = $productModel->getData();
+        try {
+            $listingModel = Mage::getModel('magetsync/listing');
+            $dataProduct = $productModel->getData();
 
-       if($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE || $dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE ) {
+            if ($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE || $dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
 
-           if($attributes == null) {
-               $attributes = array();
-           }
+                if ($attributes == null) {
+                    $attributes = array();
+                }
 
-           $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $dataProduct['entity_id']);
-           $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+                $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $dataProduct['entity_id']);
+                $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
 
-           $dataSave = array('idproduct' => $dataProduct['entity_id'], 'sync' => Merchante_MagetSync_Model_Listing::STATE_INQUEUE);
+                $dataSave = array('idproduct' => $dataProduct['entity_id'], 'sync' => Merchante_MagetSync_Model_Listing::STATE_INQUEUE);
 
-           $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
+                $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
 
-           if($is_qty_validation) {
-               if (array_key_exists('quantity', $dataSave) && $dataSave['quantity'] == 0) {
-                   return array('success' => false, 'error' => 'This product can not be synchronized because has quantity 0.');
-               }
-           }
+                if ($is_qty_validation) {
+                    if (array_key_exists('quantity', $dataSave) && $dataSave['quantity'] == 0) {
+                        return array('success' => false, 'error' => 'This product can not be synchronized because has quantity 0.');
+                    }
+                }
 
-           $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-           if(!$new_pricing) {
-               $attrPrice = array_key_exists('price', $attributes);
-               if ($attrPrice) {
-                   $dataSave['price'] = $attributes['price'];
-               } else {
-                   $attrPriceSpc = array_key_exists('special_price', $attributes);
-                   if ($attrPriceSpc) {
-                       $dataSave['price'] = $attributes['special_price'];
-                   } else {
+                $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
+                if (!$new_pricing) {
+                    $attrPrice = array_key_exists('price', $attributes);
+                    if ($attrPrice) {
+                        $dataSave['price'] = $attributes['price'];
+                    } else {
+                        $attrPriceSpc = array_key_exists('special_price', $attributes);
+                        if ($attrPriceSpc) {
+                            $dataSave['price'] = $attributes['special_price'];
+                        } else {
 
-                       $today = new DateTime("now");
-                       if ($dataProduct['special_price'] != '') {
-                           $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
-                           if ($useSpecialPrice) {
-                               if ($dataProduct['special_from_date']) {
-                                   $fromDate = new DateTime($dataProduct['special_from_date']);
-                                   if ($fromDate <= $today) {
-                                       if ($dataProduct['special_to_date']) {
-                                           $toDate = new DateTime($dataProduct['special_to_date']);
-                                           if ($toDate >= $today) {
-                                               $dataSave['price'] = $dataProduct['special_price'];
-                                           } else {
-                                               $dataSave['price'] = $dataProduct['price'];
-                                           }
-                                       } else {
-                                           $dataSave['price'] = $dataProduct['special_price'];
-                                       }
-                                   } else {
-                                       $dataSave['price'] = $dataProduct['price'];
-                                   }
-                               } else {
-                                   if ($dataProduct['special_to_date']) {
-                                       $toDate = new DateTime($dataProduct['special_to_date']);
-                                       if ($toDate >= $today) {
-                                           $dataSave['price'] = $dataProduct['special_price'];
-                                       } else {
-                                           $dataSave['price'] = $dataProduct['price'];
-                                       }
-                                   } else {
-                                       $dataSave['price'] = $dataProduct['special_price'];
-                                   }
-                               }
-                           } else {
-                               $dataSave['price'] = $dataProduct['price'];
-                           }
-                       } else {
-                           $dataSave['price'] = $dataProduct['price'];
-                       }
-                   }
-               }
-           }
-           $attrMetaKey = array_key_exists('meta_keyword',$attributes);
-           if($attrMetaKey) {
-               $text = $attributes['meta_keyword'];
-           }else {
-               $text = $dataProduct['meta_keyword'];
-           }
-           $dataSplit = explode(',', $text);
-           $dataTag = '';
-           $i = 1;
-           if ($dataSplit != null && count($dataSplit) > 0) {
-               foreach ($dataSplit as $data) {
-                   if (strlen($data) <= 20) {
-                       if ($i <= 13) {
-                           $dataTag = $dataTag . ',' . $data;
-                           $i = $i + 1;
-                       } else {
-                           break;
-                       }
-                   }
-               }
-               if ($dataTag == '') {
-                   $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
-               }
-           } else {
-               $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
-           }
-           $dataSave['tags'] = substr($dataTag, 1);
+                            $today = new DateTime("now");
+                            if ($dataProduct['special_price'] != '') {
+                                $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
+                                if ($useSpecialPrice) {
+                                    if ($dataProduct['special_from_date']) {
+                                        $fromDate = new DateTime($dataProduct['special_from_date']);
+                                        if ($fromDate <= $today) {
+                                            if ($dataProduct['special_to_date']) {
+                                                $toDate = new DateTime($dataProduct['special_to_date']);
+                                                if ($toDate >= $today) {
+                                                    $dataSave['price'] = $dataProduct['special_price'];
+                                                } else {
+                                                    $dataSave['price'] = $dataProduct['price'];
+                                                }
+                                            } else {
+                                                $dataSave['price'] = $dataProduct['special_price'];
+                                            }
+                                        } else {
+                                            $dataSave['price'] = $dataProduct['price'];
+                                        }
+                                    } else {
+                                        if ($dataProduct['special_to_date']) {
+                                            $toDate = new DateTime($dataProduct['special_to_date']);
+                                            if ($toDate >= $today) {
+                                                $dataSave['price'] = $dataProduct['special_price'];
+                                            } else {
+                                                $dataSave['price'] = $dataProduct['price'];
+                                            }
+                                        } else {
+                                            $dataSave['price'] = $dataProduct['special_price'];
+                                        }
+                                    }
+                                } else {
+                                    $dataSave['price'] = $dataProduct['price'];
+                                }
+                            } else {
+                                $dataSave['price'] = $dataProduct['price'];
+                            }
+                        }
+                    }
+                }
+                $attrMetaKey = array_key_exists('meta_keyword', $attributes);
+                if ($attrMetaKey) {
+                    $text = $attributes['meta_keyword'];
+                } else {
+                    $text = $dataProduct['meta_keyword'];
+                }
+                $dataSplit = explode(',', $text);
+                $dataTag = '';
+                $i = 1;
+                if ($dataSplit != null && count($dataSplit) > 0) {
+                    foreach ($dataSplit as $data) {
+                        if (strlen($data) <= 20) {
+                            if ($i <= 13) {
+                                $dataTag = $dataTag . ',' . $data;
+                                $i = $i + 1;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if ($dataTag == '') {
+                        $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
+                    }
+                } else {
+                    $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
+                }
+                $dataSave['tags'] = substr($dataTag, 1);
 
-           $attrTitle = array_key_exists('name',$attributes);
-           if($attrTitle)
-           {
-               $dataSave['title'] = ucfirst($attributes['name']);
-           }else {
-               $dataSave['title'] = ucfirst($dataProduct['name']);
-           }
+                $attrTitle = array_key_exists('name', $attributes);
+                if ($attrTitle) {
+                    $dataSave['title'] = ucfirst($attributes['name']);
+                } else {
+                    $dataSave['title'] = ucfirst($dataProduct['name']);
+                }
 
-           $attrDescription = array_key_exists('description',$attributes);
-           if($attrDescription) {
-               $textNoHtml = strip_tags($attributes['description'],'<br></br><br/><br />');
-               $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
-               $dataSave['description'] = $newDescription;
-           }else{
-               $textNoHtml = strip_tags($dataProduct['description'],'<br></br><br/><br />');
-               $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
-               $dataSave['description'] = $newDescription;
-           }
+                $attrDescription = array_key_exists('description', $attributes);
+                if ($attrDescription) {
+                    $textNoHtml = strip_tags($attributes['description'], '<br></br><br/><br />');
+                    $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                    $dataSave['description'] = $newDescription;
+                } else {
+                    $textNoHtml = strip_tags($dataProduct['description'], '<br></br><br/><br />');
+                    $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                    $dataSave['description'] = $newDescription;
+                }
 
-		/// getting custom title field flag from the configuration
-		$isCustomTitle = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute');
-		if($isCustomTitle){
-			$isCustomTitleAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_code');
-			// getting custom attribute code for title
-			if(!empty($isCustomTitleAttribute)){
-				$customTitle = $productModel->getData($isCustomTitleAttribute);
-				if(!empty($customTitle)){
-					$dataSave['title'] = ucfirst($customTitle);
-				}
-			}
-			
-		}
-		
-		/// getting custom description field flag from the configuration
-		$isCustomDescription = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute');
-		
-		if($isCustomDescription){
-			$isCustomDescriptionAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute_code');
-			// getting custom attribute code for title
-			if(!empty($isCustomDescriptionAttribute)){
-				$customDesc = $productModel->getData($isCustomDescriptionAttribute);
-				
-				if(!empty($customDesc)){
-					$textNoHtml = strip_tags($customDesc,'<br></br><br/><br />');
-					$newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
-					$dataSave['description'] = $newDescription;
-					
-				}
-			}
-		}
-           if ($query == null) {
-               $listingModel->setData($dataSave);
-               $listingModel->save();
-               return array('success' => true);
-           } else {
+                /// getting custom title field flag from the configuration
+                $isCustomTitle = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute');
+                if ($isCustomTitle) {
+                    $isCustomTitleAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_code');
+                    // getting custom attribute code for title
+                    if (!empty($isCustomTitleAttribute)) {
+                        $customTitle = $productModel->getData($isCustomTitleAttribute);
+                        if (!empty($customTitle)) {
+                            $dataSave['title'] = ucfirst($customTitle);
+                        }
+                    }
 
-               /* Condition for saving in massive */
-               $attrSync = array_key_exists('synchronizedEtsy',$attributes);
-               if($attrSync) {
-                   $syncEtsy = $attributes['synchronizedEtsy'];
-               }else{
-                   $syncEtsy = $productModel->getData("synchronizedEtsy");
-               }
+                }
 
-               if ($syncEtsy == 1) {
-                   $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_ENABLED;
-               }
+                /// getting custom description field flag from the configuration
+                $isCustomDescription = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute');
 
-               $this->handleSyncStatusUpdate($dataSave, $query);
+                if ($isCustomDescription) {
+                    $isCustomDescriptionAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute_code');
+                    // getting custom attribute code for title
+                    if (!empty($isCustomDescriptionAttribute)) {
+                        $customDesc = $productModel->getData($isCustomDescriptionAttribute);
 
-               $dataSave['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED;
-               $listingModel
-                   ->addData($dataSave)
-                   ->setId($query[0]['id']);
-               $listingModel->save();
+                        if (!empty($customDesc)) {
+                            $textNoHtml = strip_tags($customDesc, '<br></br><br/><br />');
+                            $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                            $dataSave['description'] = $newDescription;
 
-               return array('success' => true);
-           }
-       }else{
-           return array('success' => false, 'error' => 'Invalid product type.');
-       }
-        }catch (Exception $e)
-        {
-            Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_qty.log');
+                        }
+                    }
+                }
+                if ($query == null) {
+                    $listingModel->setData($dataSave);
+                    $listingModel->save();
+                    return array('success' => true);
+                } else {
+
+                    /* Condition for saving in massive */
+                    $attrSync = array_key_exists('synchronizedEtsy', $attributes);
+                    if ($attrSync) {
+                        $syncEtsy = $attributes['synchronizedEtsy'];
+                    } else {
+                        $syncEtsy = $productModel->getData("synchronizedEtsy");
+                    }
+
+                    if ($syncEtsy == 1) {
+                        $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_ENABLED;
+                    }
+
+                    $this->handleSyncStatusUpdate($dataSave, $query);
+
+                    $dataSave['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED;
+                    $listingModel
+                        ->addData($dataSave)
+                        ->setId($query[0]['id']);
+                    $listingModel->save();
+
+                    return array('success' => true);
+                }
+            } else {
+                return array('success' => false, 'error' => 'Invalid product type.');
+            }
+        } catch (Exception $e) {
+            Mage::log("Error: " . print_r($e->getMessage(), true), null, 'magetsync_qty.log');
             return array('success' => false, 'error' => $e->getMessage());
         }
     }
