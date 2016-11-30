@@ -137,7 +137,11 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         }
                         $postData['attribute_template_id'] = $attributeTemplateId;
 
-                        $origPrice = $createdListingsData[$listing->getIdproduct()];
+                        if ($listing->getPrice()) {
+                            $origPrice = $listing->getPrice();
+                        } else {
+                            $origPrice = $createdListingsData[$listing->getIdproduct()];
+                        }
                         if ($postData['pricing_rule'] == 'original') {
                             $finalPrice = $origPrice;
                         } else {

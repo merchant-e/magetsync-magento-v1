@@ -58,8 +58,11 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
                     'class' => 'save',
                 ), 0, 100);
             }
-            // Do not allow delete listing product directly except In Queue'
-            if (!$this->isInQueue($syncState)) {
+            
+            $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+            if ($deleteFailedAllowed && $syncState == Merchante_MagetSync_Model_Listing::STATE_FAILED) {
+                //Keep delete button
+            } else {
                 $this->_removeButton('delete');
             }
         // Mass attribute update
