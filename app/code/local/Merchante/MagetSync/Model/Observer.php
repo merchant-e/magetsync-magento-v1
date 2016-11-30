@@ -119,20 +119,14 @@ class Merchante_MagetSync_Model_Observer
                 . ') AND enabled =' . Merchante_MagetSync_Model_Listing::LISTING_ENABLED . ' AND sync !=' . Merchante_MagetSync_Model_Listing::STATE_INQUEUE . ' AND sync !='
                 . Merchante_MagetSync_Model_Listing::STATE_FAILED . ' AND sync !=' . Merchante_MagetSync_Model_Listing::STATE_EXPIRED .
                 ' AND sync !=' . Merchante_MagetSync_Model_Listing::STATE_FORCE_DELETE);
-            $results = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
-            foreach ($results as $item) {
-                $product = Mage::getModel('catalog/product')->load($item['idproduct']);
+            $listings = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+            foreach ($listings as $listing) {
+                $product = Mage::getModel('catalog/product')->load($listing['idproduct']);
                 $dataProduct = $product->getData();
                 $qty = 0;
                 $params = array();
                 $postData = array();
                 if ($product['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                    /*if($product['is_in_stock'])
-                    {
-                        $qty = $product->getStockItem()->getQty();
-                    }else {
-                        $qty = 0;
-                    }*/
                     $stock = $product->getStockItem();
                     if ($stock->getIsInStock()) {
                         $qty = $stock->getQty();
@@ -154,93 +148,98 @@ class Merchante_MagetSync_Model_Observer
 
                 $autoSync = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_auto_sync');
                 if ($autoSync == '1') {
-                    if ($item['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
+                    if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
 
-                        $taxonomyID = $listingModel->getTaxonomyID($item, null);
+                        $taxonomyID = $listingModel->getTaxonomyID($listing, null);
 
-                        $newDescription = $listingModel->composeDescription($item['description'], $item['prepended_template'], $item['appended_template']);
+                        $newDescription = $listingModel->composeDescription($listing['description'], $listing['prepended_template'], $listing['appended_template']);
                         $style = array();
-                        $style[] = $item['style_one'];
-                        $style[] = $item['style_two'];
+                        $style[] = $listing['style_one'];
+                        $style[] = $listing['style_two'];
 
                         $styleData = implode(',', $style);
 
-                        $supply = isset($item['is_supply']) ? $item['is_supply'] : 1;
+                        $supply = isset($listing['is_supply']) ? $listing['is_supply'] : 1;
                         //Boolean field in Etsy but not 'Yes/No' in frontEnd
                         if ($supply == 1) {
                             $dataSuppley = 0;
                         } else {
                             $dataSuppley = 1;
                         }
-                        $renewalOption = (isset($item['should_auto_renew']) && $item['should_auto_renew']) ? $item['should_auto_renew'] : 0;
+                        $renewalOption = (isset($listing['should_auto_renew']) && $listing['should_auto_renew']) ? $listing['should_auto_renew'] : 0;
 
-                        if (isset($item['tags'])) {
+                        if (isset($listing['tags'])) {
                             $search = array(';', '.', '/', '\\');
-                            $item['tags'] = str_replace($search, '', $item['tags']);
-                            $newTagsAux = explode(',', strtolower($item['tags']));
+                            $listing['tags'] = str_replace($search, '', $listing['tags']);
+                            $newTagsAux = explode(',', strtolower($listing['tags']));
                             $newTags = array_unique($newTagsAux);
-                            $item['tags'] = implode(',', $newTags);
+                            $listing['tags'] = implode(',', $newTags);
                         }
 
-                        $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-                        if (!$new_pricing) {
-                            $today = new DateTime("now");
-                            if ($dataProduct['special_price'] != '') {
-                                $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
-                                if ($useSpecialPrice) {
-                                    if ($dataProduct['special_from_date']) {
-                                        $fromDate = new DateTime($dataProduct['special_from_date']);
-                                        if ($fromDate <= $today) {
-                                            if ($dataProduct['special_to_date']) {
-                                                $toDate = new DateTime($dataProduct['special_to_date']);
-                                                if ($toDate >= $today) {
-                                                    $postData['price'] = $dataProduct['special_price'];
-                                                } else {
-                                                    $postData['price'] = $dataProduct['price'];
-                                                }
-                                            } else {
-                                                $postData['price'] = $dataProduct['special_price'];
-                                            }
-                                        } else {
-                                            $postData['price'] = $dataProduct['price'];
-                                        }
-                                    } else {
+                        $postData['price'] = $dataProduct['price'];
+                        if ($dataProduct['special_price'] != '') {
+                            $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
+                            if ($useSpecialPrice) {
+                                $today = new DateTime("now");
+                                if ($dataProduct['special_from_date']) {
+                                    $fromDate = new DateTime($dataProduct['special_from_date']);
+                                    if ($fromDate <= $today) {
                                         if ($dataProduct['special_to_date']) {
                                             $toDate = new DateTime($dataProduct['special_to_date']);
                                             if ($toDate >= $today) {
                                                 $postData['price'] = $dataProduct['special_price'];
-                                            } else {
-                                                $postData['price'] = $dataProduct['price'];
                                             }
                                         } else {
                                             $postData['price'] = $dataProduct['special_price'];
                                         }
                                     }
                                 } else {
-                                    $postData['price'] = $dataProduct['price'];
+                                    if ($dataProduct['special_to_date']) {
+                                        $toDate = new DateTime($dataProduct['special_to_date']);
+                                        if ($toDate >= $today) {
+                                            $postData['price'] = $dataProduct['special_price'];
+                                        }
+                                    } else {
+                                        $postData['price'] = $dataProduct['special_price'];
+                                    }
                                 }
-                            } else {
-                                $postData['price'] = $dataProduct['price'];
                             }
                         }
+                        $origPrice = $postData['price'];
+                        if ($listing['pricing_rule'] == 'original') {
+                            $finalPrice = $origPrice;
+                        } else {
+                            if ($listing['affect_strategy'] == 'percentage') {
+                                $delta = round($origPrice*(floatval($listing['affect_value'])/100), 2);
+                            } else {
+                                $delta = $listing['affect_value'];
+                            }
+                            if ($listing['pricing_rule'] == 'increase') {
+                                $finalPrice = $origPrice + $delta;
+                            } else {
+                                $finalPrice = $origPrice - $delta;
+                            }
+                        }
+                        $postData['price'] = $finalPrice;
+
 
                         $params = array(
                             'description' => $newDescription,
-                            'materials' => $item['materials'],
-                            //'price'=>              $postData['price'],
-                            'shipping_template_id' => $item['shipping_template_id'],
-                            'shop_section_id' => $item['shop_section_id'],
-                            'title' => $item['title'],
-                            'tags' => $item['tags'],
+                            'materials' => $listing['materials'],
+                            'price'=> $postData['price'],
+                            'shipping_template_id' => $listing['shipping_template_id'],
+                            'shop_section_id' => $listing['shop_section_id'],
+                            'title' => $listing['title'],
+                            'tags' => $listing['tags'],
                             'taxonomy_id' => $taxonomyID,
-                            'who_made' => $item['who_made'],
+                            'who_made' => $listing['who_made'],
                             'is_supply' => $dataSuppley,
-                            'when_made' => $item['when_made'],
-                            'recipient' => $item['recipient'],
-                            'occasion' => $item['occasion'],
+                            'when_made' => $listing['when_made'],
+                            'recipient' => $listing['recipient'],
+                            'occasion' => $listing['occasion'],
                             'style' => $styleData,
                             'should_auto_renew' => $renewalOption,
-                            'language' => $item['language']);
+                            'language' => $listing['language']);
                     }
                 }
 
@@ -286,18 +285,18 @@ class Merchante_MagetSync_Model_Observer
                         }
                     }
                 }
-                $obliUpd = array('listing_id' => $item['listing_id']);
+                $obliUpd = array('listing_id' => $listing['listing_id']);
                 $resultApiUpd = $listingModel->updateListing($obliUpd, $params);
                 if ($resultApiUpd['status'] == true) {
                     if ($autoSync == '1') {
-                        if ($item['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
+                        if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
                             $result = json_decode(json_decode($resultApiUpd['result']), true);
                             $result = $result['results'][0];
-                            $statusProcess = $listingModel->saveDetails($result, $item['idproduct'], $item['price'], $item['id']);
+                            $statusProcess = $listingModel->saveDetails($result, $listing['idproduct'], $listing['price'], $listing['id']);
                             if ($statusProcess['status']) {
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_SYNCED;
                                 $logData = Mage::getModel('magetsync/logData');
-                                $logData->remove($item['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING);
+                                $logData->remove($listing['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING);
                             } else {
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_FAILED;
                                 if ($statusProcess['message']) {
@@ -309,7 +308,7 @@ class Merchante_MagetSync_Model_Observer
                                     $errorMessage = Mage::helper('magetsync')->__('Error processing details');
                                 }
 
-                                Merchante_MagetSync_Model_LogData::magetsync($item['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                Merchante_MagetSync_Model_LogData::magetsync($listing['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING,
                                     $errorMessage, Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
 
                                 Mage::log("Error: " . print_r($errorMessage, true), null, 'magetsync_inventory.log');
@@ -321,7 +320,7 @@ class Merchante_MagetSync_Model_Observer
                     //$postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_SYNCED;
                 } else {
                     $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_FAILED;
-                    Merchante_MagetSync_Model_LogData::magetsync($item['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                    Merchante_MagetSync_Model_LogData::magetsync($listing['id'], Merchante_MagetSync_Model_LogData::TYPE_LISTING,
                         $resultApiUpd['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
                     if (strpos($resultApiUpd['message'], 'The listing is not editable, must be active or expired but is removed') !== false) {
                         $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_FORCE_DELETE;
@@ -330,7 +329,7 @@ class Merchante_MagetSync_Model_Observer
                 }
                 $listingModel
                     ->addData($postData)
-                    ->setId($item['id']);
+                    ->setId($listing['id']);
                 $listingModel->save();
             }
         }
@@ -551,13 +550,7 @@ class Merchante_MagetSync_Model_Observer
                     if ($data['listing_id']) {
                         continue;
                     } else { // loop to add new listing and sync the product
-                        $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
                         $listingProduct = Mage::getModel('catalog/product')->load($data['idproduct']);
-                        if ($new_pricing) {
-                            $price = $data['price'];
-                        } else {
-                            $price = round($listingProduct->getPrice(), 2);
-                        }
 
                         $qty = round($listingProduct->getStockItem()->getQty(), 2);
 
@@ -597,7 +590,7 @@ class Merchante_MagetSync_Model_Observer
                             'materials' => !empty($data['materials']) ? $data['materials'] : '',
                             'state' => $stateListing,
                             'quantity' => $qty,
-                            'price' => $price,
+                            'price' => $data['price'],
                             'shipping_template_id' => !empty($data['shipping_template_id']) ? $data['shipping_template_id'] : '',
                             'shop_section_id' => !empty($data['shop_section_id']) ? $data['shop_section_id'] : '',
                             'title' => !empty($data['title']) ? $data['title'] : '',

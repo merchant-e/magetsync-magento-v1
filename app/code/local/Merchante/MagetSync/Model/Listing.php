@@ -338,58 +338,44 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     }
                 }
 
-                $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-                if (!$new_pricing) {
-                    $attrPrice = array_key_exists('price', $attributes);
-                    if ($attrPrice) {
-                        $dataSave['price'] = $attributes['price'];
+                if (array_key_exists('price', $attributes)) {
+                    $dataSave['price'] = $attributes['price'];
+                } else {
+                    if (array_key_exists('special_price', $attributes)) {
+                        $dataSave['price'] = $attributes['special_price'];
                     } else {
-                        $attrPriceSpc = array_key_exists('special_price', $attributes);
-                        if ($attrPriceSpc) {
-                            $dataSave['price'] = $attributes['special_price'];
-                        } else {
-
-                            $today = new DateTime("now");
-                            if ($dataProduct['special_price'] != '') {
-                                $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
-                                if ($useSpecialPrice) {
-                                    if ($dataProduct['special_from_date']) {
-                                        $fromDate = new DateTime($dataProduct['special_from_date']);
-                                        if ($fromDate <= $today) {
-                                            if ($dataProduct['special_to_date']) {
-                                                $toDate = new DateTime($dataProduct['special_to_date']);
-                                                if ($toDate >= $today) {
-                                                    $dataSave['price'] = $dataProduct['special_price'];
-                                                } else {
-                                                    $dataSave['price'] = $dataProduct['price'];
-                                                }
-                                            } else {
-                                                $dataSave['price'] = $dataProduct['special_price'];
-                                            }
-                                        } else {
-                                            $dataSave['price'] = $dataProduct['price'];
-                                        }
-                                    } else {
+                        $dataSave['price'] = $dataProduct['price'];
+                        if ($dataProduct['special_price'] != '') {
+                            $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
+                            if ($useSpecialPrice) {
+                                $today = new DateTime("now");
+                                if ($dataProduct['special_from_date']) {
+                                    $fromDate = new DateTime($dataProduct['special_from_date']);
+                                    if ($fromDate <= $today) {
                                         if ($dataProduct['special_to_date']) {
                                             $toDate = new DateTime($dataProduct['special_to_date']);
                                             if ($toDate >= $today) {
                                                 $dataSave['price'] = $dataProduct['special_price'];
-                                            } else {
-                                                $dataSave['price'] = $dataProduct['price'];
                                             }
                                         } else {
                                             $dataSave['price'] = $dataProduct['special_price'];
                                         }
                                     }
                                 } else {
-                                    $dataSave['price'] = $dataProduct['price'];
+                                    if ($dataProduct['special_to_date']) {
+                                        $toDate = new DateTime($dataProduct['special_to_date']);
+                                        if ($toDate >= $today) {
+                                            $dataSave['price'] = $dataProduct['special_price'];
+                                        }
+                                    } else {
+                                        $dataSave['price'] = $dataProduct['special_price'];
+                                    }
                                 }
-                            } else {
-                                $dataSave['price'] = $dataProduct['price'];
                             }
                         }
                     }
                 }
+
                 $attrMetaKey = array_key_exists('meta_keyword', $attributes);
                 if ($attrMetaKey) {
                     $text = $attributes['meta_keyword'];
