@@ -137,7 +137,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                     foreach ($data['listingids'] as $listId) {
                         $listingModel = Mage::getModel('magetsync/listing')->load($listId);
                         $syncState = $listingModel->getSync();
-                        $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+                        $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_delete/magetsync_field_enable_failed_items_deletion');
 
                         if ($syncState == Merchante_MagetSync_Model_Listing::STATE_EXPIRED
                             || $syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
@@ -148,7 +148,11 @@ error_reporting(E_ALL ^ E_NOTICE);
                                 $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
                                 $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listingModel->getIdproduct());
                             }
-                            Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()), array('synchronizedEtsy' => 0));
+                            $defaultStoreID = Mage::app()
+                                ->getWebsite(true)
+                                ->getDefaultGroup()
+                                ->getDefaultStoreId();
+                            Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()), array('synchronizedEtsy' => 0), $defaultStoreID);
                             $listingModel->delete();
                             $deleteCount++;
                         }
@@ -674,7 +678,7 @@ error_reporting(E_ALL ^ E_NOTICE);
             $listingModel = Mage::getModel('magetsync/listing');
             $data = $listingModel->load($value)->getData();
             try {
-                $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+                $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_delete/magetsync_field_enable_failed_items_deletion');
                 $resultApi['status'] = true;
                 if ($data['listing_id'] && !$deleteFailedAllowed) {
                     $resultApi['status'] = false;
