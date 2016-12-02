@@ -123,40 +123,41 @@ error_reporting(E_ALL ^ E_NOTICE);
         /**
          * Method To Delete Expired products from listing
          */
-        public function deleteoptionAction() {
-            try{
-                if(!$this->verifyEtsyApi()){ return; }
-                    $data = $this->getRequest()->getPost();
-                    $deleteCount = 0;
-                    if(!isset($data['listingids']) || empty($data['listingids'])){
-                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select item(s)'));
-                    }else{
-                        foreach($data['listingids'] as $listId){
+        public function deleteoptionAction()
+        {
+            try {
+                if (!$this->verifyEtsyApi()) {
+                    return;
+                }
+                $data = $this->getRequest()->getPost();
+                $deleteCount = 0;
+                if (!isset($data['listingids']) || empty($data['listingids'])) {
+                    Mage::getSingleton('adminhtml/session')->addError(Mage::helper('adminhtml')->__('Please select item(s)'));
+                } else {
+                    foreach ($data['listingids'] as $listId) {
                         $listingModel = Mage::getModel('magetsync/listing')->load($listId);
-                        if($listingModel->getSync() == Merchante_MagetSync_Model_Listing::STATE_EXPIRED){
+                        $syncState = $listingModel->getSync();
+                        $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+
+                        if ($syncState == Merchante_MagetSync_Model_Listing::STATE_EXPIRED
+                            || $syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
+                            || $syncState == Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE
+                            || ($deleteFailedAllowed && $syncState == Merchante_MagetSync_Model_Listing::STATE_FAILED)
+                        ) {
                             if ($attrTemplateId = $listingModel->getAttributeTemplateId()) {
                                 $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
                                 $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listingModel->getIdproduct());
                             }
+                            Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()), array('synchronizedEtsy' => 0));
                             $listingModel->delete();
                             $deleteCount++;
-                    } else if($listingModel->getSync() == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
-                             || $listingModel->getSync() == Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE)
-                    {
-                        if ($attrTemplateId = $listingModel->getAttributeTemplateId()) {
-                            $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
-                            $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listingModel->getIdproduct());
                         }
-                        Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()),array('synchronizedEtsy' => 0));
-                        $listingModel->delete();
-                        $deleteCount++;
                     }
-                }
                     Mage::getSingleton('adminhtml/session')
                         ->addSuccess(Mage::helper('adminhtml')->__('Total of %d record(s) were successfully deleted', $deleteCount));
                 }
-                    $this->_redirect('adminhtml/magetsync_index/index');
-                    return;
+                $this->_redirect('adminhtml/magetsync_index/index');
+                return;
             } catch (Exception $e) {
                 Mage::logException($e);
                 return;
@@ -447,7 +448,6 @@ error_reporting(E_ALL ^ E_NOTICE);
                             'description' => $newDescription,//$data['description'],
                             'materials' => $listingModel->emptyField($postData['materials'], $data['materials']),
                             'state' => $stateListing,
-                            //'price'=>              $data['price'],
                             'quantity' => $data['quantity'],
                             'shipping_template_id' => $listingModel->emptyField($postData['shipping_template_id'], $data['shipping_template_id']),
                             'shop_section_id' => $listingModel->emptyField($postData['shop_section_id'], $data['shop_section_id']),
@@ -667,17 +667,20 @@ error_reporting(E_ALL ^ E_NOTICE);
          */
         public function deleteAction()
         {
-            if(!$this->verifyEtsyApi()){ return; }
+            if (!$this->verifyEtsyApi()) {
+                return;
+            }
             $value = $this->getRequest()->getParam('id');
             $listingModel = Mage::getModel('magetsync/listing');
-            $data =  $listingModel->load($value)->getData();
-            try
-            {
-              if($data['listing_id']) {
-                  $resultApi['status'] = false;
-                  $resultApi['message'] = Mage::helper('magetsync')->__('You can not delete this listing because it is already synchronized');
-              }else{ $resultApi['status'] = true; }
-                if($resultApi['status'] == true) {
+            $data = $listingModel->load($value)->getData();
+            try {
+                $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+                $resultApi['status'] = true;
+                if ($data['listing_id'] && !$deleteFailedAllowed) {
+                    $resultApi['status'] = false;
+                    $resultApi['message'] = Mage::helper('magetsync')->__('You can not delete this listing because it is already synchronized');
+                }
+                if ($resultApi['status'] == true) {
                     $listingModel->setId($this->getRequest()
                         ->getParam('id'))
                         ->delete();
@@ -689,20 +692,17 @@ error_reporting(E_ALL ^ E_NOTICE);
                         ->setData('synchronizedEtsy', '0')
                         ->save();
                     Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__('Successfully deleted'));
-                }else
-                {
+                } else {
                     Mage::getSingleton('adminhtml/session')
                         ->addError($resultApi['message']);
                 }
                 $this->_redirect('*/*/');
-            }
-            catch (Exception $e)
-            {
+            } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')
                     ->addError($e->getMessage());
                 $this->_redirect('*/*/edit', array('listing_id' => $this->getRequest()->getParam('listing_id')));
             }
-             $this->_redirect('*/*/');
+            $this->_redirect('*/*/');
         }
 
         /**

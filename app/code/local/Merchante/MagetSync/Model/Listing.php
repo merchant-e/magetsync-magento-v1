@@ -188,6 +188,27 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 $listingModel = Mage::getModel('magetsync/listing');
                 $productModel = Mage::getModel('catalog/product');
                 $resource = Mage::getSingleton('core/resource');
+                // generating regular expressions based on the SKU config
+                $regularExpression = "";
+                $skuType = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_sku_type');
+                if($skuType == "alphanumeric"){
+                    $alphabetRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_start_from');
+                    $alphabetRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_end_to');
+                    $numericRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_start_from');
+                    $numericRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_end_to');
+                    $regularExpression = "/[a-zA-Z]{".$alphabetRangeStart.",".$alphabetRangeEnd."}[0-9]{".$numericRangeStart.",".$numericRangeEnd."}/";
+                }
+                else if($skuType == "alphabets"){
+                    $alphabetRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_start_from');
+                    $alphabetRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_end_to');
+                    $regularExpression = "/[a-zA-Z]{".$alphabetRangeStart.",".$alphabetRangeEnd."}/";
+                }
+                else if($skuType == "numeric"){
+                    $numericRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_start_from');
+                    $numericRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_end_to');
+                    $regularExpression = "/[0-9]{".$numericRangeStart.",".$numericRangeEnd."}/";
+                }
+
                 foreach ($result as $item) {
                     $queryM = $mappingModel->getCollection()->addFieldToSelect('etsy_id')->getSelect()->where('etsy_id = ?', $item['listing_id']);
                     $queryM = $resource->getConnection('core_read')->fetchAll($queryM);
@@ -195,12 +216,33 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         $query = $listingModel->getCollection()->addFieldToSelect('listing_id')->getSelect()->where('listing_id = ?', $item['listing_id']);
                         $query = $resource->getConnection('core_read')->fetchAll($query);
                         if (!$query) {
-                            $productsCollection = $productModel->getCollection()
+                            $skuSearch = false;
+                            // checking if the regular expression is set
+                            if(!empty($regularExpression)){
+                                preg_match($regularExpression, $item['title'], $sku_array);
+                                if(!empty($sku_array)){ // if any match found
+                                    $productsCollection = $productModel->getCollection()
+                                                        ->addAttributeToSelect('name')
+                                                        ->addAttributeToSelect('sku')
+                                                        ->addAttributeToSelect('entity_id')
+                                                        ->addAttributeToFilter(
+                                                            array(
+                                                                array('attribute' => 'name', 'like' => $item['title']),
+                                                                array('attribute' => 'sku', 'like' => $sku_array[0]),
+                                                            )
+                                                        );
+                                    $skuSearch = true;
+                                }
+                            }
+                            if(!$skuSearch){
+                                $productsCollection = $productModel->getCollection()
                                 ->addAttributeToSelect('name')
                                 ->addAttributeToSelect('sku')
                                 ->addAttributeToSelect('entity_id')
-                                ->addAttributeToFilter('name', array('eq' => $item['title']));//->addAttributeToFilter('synchronizedEtsy',0);
+                                ->addAttributeToFilter('name', array('eq' => $item['title']));//->addAttributeToFilter('synchronizedEtsy',0);    
+                            }
                             $queryProduct = $productsCollection->getData();
+
                             if ($queryProduct) {
                                 $queryAux = $listingModel->getCollection()->addFieldToSelect('idproduct')->getSelect()->where('idproduct = ?', $queryProduct[0]['id']);
                                 $queryAux = $resource->getConnection('core_read')->fetchAll($queryAux);
@@ -338,58 +380,44 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     }
                 }
 
-                $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-                if (!$new_pricing) {
-                    $attrPrice = array_key_exists('price', $attributes);
-                    if ($attrPrice) {
-                        $dataSave['price'] = $attributes['price'];
+                if (array_key_exists('price', $attributes)) {
+                    $dataSave['price'] = $attributes['price'];
+                } else {
+                    if (array_key_exists('special_price', $attributes)) {
+                        $dataSave['price'] = $attributes['special_price'];
                     } else {
-                        $attrPriceSpc = array_key_exists('special_price', $attributes);
-                        if ($attrPriceSpc) {
-                            $dataSave['price'] = $attributes['special_price'];
-                        } else {
-
-                            $today = new DateTime("now");
-                            if ($dataProduct['special_price'] != '') {
-                                $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
-                                if ($useSpecialPrice) {
-                                    if ($dataProduct['special_from_date']) {
-                                        $fromDate = new DateTime($dataProduct['special_from_date']);
-                                        if ($fromDate <= $today) {
-                                            if ($dataProduct['special_to_date']) {
-                                                $toDate = new DateTime($dataProduct['special_to_date']);
-                                                if ($toDate >= $today) {
-                                                    $dataSave['price'] = $dataProduct['special_price'];
-                                                } else {
-                                                    $dataSave['price'] = $dataProduct['price'];
-                                                }
-                                            } else {
-                                                $dataSave['price'] = $dataProduct['special_price'];
-                                            }
-                                        } else {
-                                            $dataSave['price'] = $dataProduct['price'];
-                                        }
-                                    } else {
+                        $dataSave['price'] = $dataProduct['price'];
+                        if ($dataProduct['special_price'] != '') {
+                            $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
+                            if ($useSpecialPrice) {
+                                $today = new DateTime("now");
+                                if ($dataProduct['special_from_date']) {
+                                    $fromDate = new DateTime($dataProduct['special_from_date']);
+                                    if ($fromDate <= $today) {
                                         if ($dataProduct['special_to_date']) {
                                             $toDate = new DateTime($dataProduct['special_to_date']);
                                             if ($toDate >= $today) {
                                                 $dataSave['price'] = $dataProduct['special_price'];
-                                            } else {
-                                                $dataSave['price'] = $dataProduct['price'];
                                             }
                                         } else {
                                             $dataSave['price'] = $dataProduct['special_price'];
                                         }
                                     }
                                 } else {
-                                    $dataSave['price'] = $dataProduct['price'];
+                                    if ($dataProduct['special_to_date']) {
+                                        $toDate = new DateTime($dataProduct['special_to_date']);
+                                        if ($toDate >= $today) {
+                                            $dataSave['price'] = $dataProduct['special_price'];
+                                        }
+                                    } else {
+                                        $dataSave['price'] = $dataProduct['special_price'];
+                                    }
                                 }
-                            } else {
-                                $dataSave['price'] = $dataProduct['price'];
                             }
                         }
                     }
                 }
+
                 $attrMetaKey = array_key_exists('meta_keyword', $attributes);
                 if ($attrMetaKey) {
                     $text = $attributes['meta_keyword'];
