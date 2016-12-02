@@ -286,24 +286,18 @@ class Merchante_MagetSync_Model_Observer
                     $params['description'] = $newDescription;
                                 
                 }
-<<<<<<< HEAD
             }
         }
-                $obliUpd = array('listing_id' => $item['listing_id']);
-=======
                 $obliUpd = array('listing_id' => $listing['listing_id']);
->>>>>>> development
+
                 $resultApiUpd = $listingModel->updateListing($obliUpd, $params);
                 if ($resultApiUpd['status'] == true) {
                     if ($autoSync == '1') {
                         if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
                             $result = json_decode(json_decode($resultApiUpd['result']), true);
                             $result = $result['results'][0];
-<<<<<<< HEAD
-                            $statusProcess = $listingModel->saveDetails($result, $item['idproduct'], $item['price'], $item['id'], 1);
-=======
                             $statusProcess = $listingModel->saveDetails($result, $listing['idproduct'], $listing['price'], $listing['id']);
->>>>>>> development
+
                             if ($statusProcess['status']) {
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_SYNCED;
                                 $logData = Mage::getModel('magetsync/logData');
@@ -558,15 +552,10 @@ class Merchante_MagetSync_Model_Observer
                     $data = $listing->getData();
                     // checking if the product is already there in the list synchronizing only images
                     if ($data['listing_id']) {
-<<<<<<< HEAD
-                       continue;
-                    }
-                    else{ // loop to add new listing and sync the product
-                        $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-=======
+
                         continue;
                     } else { // loop to add new listing and sync the product
->>>>>>> development
+
                         $listingProduct = Mage::getModel('catalog/product')->load($data['idproduct']);
 
                         $qty = round($listingProduct->getStockItem()->getQty(), 2);
