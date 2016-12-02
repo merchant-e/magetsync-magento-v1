@@ -2,13 +2,13 @@
 ### Added
 - Support for Attribute Templates
 - New Pricing Rules (Increase/Decrease prices globally using Attribute Templates)
-- New Image Reset Option (with its own cron task)
-- Auto trimming long custom option names/values to fit Etsy limit
-- New Observer for when Magento products are restocked (credit memo)
+- Option to re-upload product images for previouly synced products (New Image Reset Option - with its own cron task)
+- New Observer for when Magento products are restocked (credit memo/order cancelled)
 
 ### Changed 
 - Added new measures to prevent excessive API calls when using auto-queue
-- New Draft label for products in Draft state
+- New 'Draft' label for products in Draft state
+- Long custom options labels/values are auto trimmed to Etsy limit (20 chars)
 
 ### Bug
 - Fixed PHP array incompatibility with older PHP versions
@@ -26,7 +26,7 @@
 - Create test products in 'draft' state to prevent Etsy charges
 - New Delete option under Actions menu in Listings Manager. Deletes and resets 'Synchronize with Etsy' attribute.
 
-### Bug
+### Fixed
 - Fixed issue preventing stock from updating in Listings Manager after a new Etsy order
 
 ### Changed
