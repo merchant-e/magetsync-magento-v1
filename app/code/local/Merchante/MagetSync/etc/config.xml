@@ -5,7 +5,7 @@
 <config>
 	<modules>
 		<Merchante_MagetSync>
-			<version>0.2.1</version>
+			<version>0.2.4</version>
 		</Merchante_MagetSync>
 	</modules>
 	<frontend>
@@ -40,8 +40,7 @@
             <adminhtml>
                 <args>
                     <modules>
-                        <magetsync
-                                after="Mage_Adminhtml">Merchante_MagetSync_Adminhtml</magetsync>
+                        <magetsync after="Mage_Adminhtml">Merchante_MagetSync_Adminhtml</magetsync>
                     </modules>
                 </args>
             </adminhtml>
@@ -79,9 +78,14 @@
                  <sort_order>2</sort_order>
                  <action>adminhtml/magetsync_mapping</action>
               </mapping>
+              <attributeTemplate translate="title" module="adminhtml">
+                  <title>Attribute Templates</title>
+                  <sort_order>3</sort_order>
+                  <action>adminhtml/magetsync_attributeTemplate</action>
+              </attributeTemplate>
               <global translate="title" module="adminhtml">
                   <title>Global Options</title>
-                  <sort_order>3</sort_order>
+                  <sort_order>4</sort_order>
                   <children>
                       <shopSection translate="title" module="adminhtml">
                           <title>Shop Sections</title>
@@ -102,7 +106,7 @@
               </global>
               <configuration_magetsync translate="title" module="adminhtml">
                   <title>Configuration</title>
-                  <sort_order>4</sort_order>
+                  <sort_order>5</sort_order>
                   <action>adminhtml/system_config/edit/section/magetsync_section</action>
               </configuration_magetsync>
           </children>
@@ -122,7 +126,7 @@
                                      <magetsync_section_templates translate="title">
                                          <title>Templates</title>
                                      </magetsync_section_templates>
-				     <magetsync_section_draftmode translate="title">
+				                     <magetsync_section_draftmode translate="title">
                                          <title>Draft Mode</title>
                                      </magetsync_section_draftmode>
                                  </children>
@@ -153,6 +157,9 @@
                                      </template>
                                  </children>
                              </global>
+                             <attributeTemplate translate="title" module="adminhtml">
+                                 <title>Attribute Templates</title>
+                             </attributeTemplate>
                              <configuration_magetsync translate="title" module="adminhtml">
                                  <title>Configuration</title>
                              </configuration_magetsync>
@@ -230,12 +237,15 @@
                  <imageEtsy>
                      <table>magetsync_imageetsy</table>
                  </imageEtsy>
-		  <mappingEtsy>
+		         <mappingEtsy>
                      <table>magetsync_mappingetsy</table>
                  </mappingEtsy>
                  <logData>
                      <table>magetsync_logdata</table>
                  </logData>
+                 <attributeTemplate>
+                     <table>magetsync_attributetemplate</table>
+                 </attributeTemplate>
 		      </entities>
 		</magetsync_mysql4>
 		</models>
@@ -417,6 +427,14 @@
                     <model>magetsync/observer::checkListingsExpired</model>
                 </run>
             </magetsync_checklistingsexpired>
+            <magetsync_imagereset>
+                <schedule>
+                    <cron_expr>*/1 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>magetsync/observer::imageResetCron</model>
+                </run>
+            </magetsync_imagereset>
         </jobs>
   </crontab>
 </config>

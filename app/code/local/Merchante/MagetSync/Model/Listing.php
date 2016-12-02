@@ -313,196 +313,193 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param $attributes
      * @return mixed
      */
-    public function saveListingSynchronized($productModel,$attributes = null, $is_qty_validation = false)
+    public function saveListingSynchronized($productModel, $attributes = null, $is_qty_validation = false)
     {
-        try
-        {
-        $listingModel = Mage::getModel('magetsync/listing');
-        $dataProduct = $productModel->getData();
+        try {
+            $listingModel = Mage::getModel('magetsync/listing');
+            $dataProduct = $productModel->getData();
 
-       if($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE || $dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE ) {
+            if ($dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE || $dataProduct['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
 
-           if($attributes == null) {
-               $attributes = array();
-           }
+                if ($attributes == null) {
+                    $attributes = array();
+                }
 
-           $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $dataProduct['entity_id']);
-           $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+                $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $dataProduct['entity_id']);
+                $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
 
-           $dataSave = array('idproduct' => $dataProduct['entity_id'], 'sync' => Merchante_MagetSync_Model_Listing::STATE_INQUEUE);
+                $dataSave = array('idproduct' => $dataProduct['entity_id'], 'sync' => Merchante_MagetSync_Model_Listing::STATE_INQUEUE);
 
-           $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
+                $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
 
-           if($is_qty_validation) {
-               if (array_key_exists('quantity', $dataSave) && $dataSave['quantity'] == 0) {
-                   return array('success' => false, 'error' => 'This product can not be synchronized because has quantity 0.');
-               }
-           }
+                if ($is_qty_validation) {
+                    if (array_key_exists('quantity', $dataSave) && $dataSave['quantity'] == 0) {
+                        return array('success' => false, 'error' => 'This product can not be synchronized because has quantity 0.');
+                    }
+                }
 
-           $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
-           if(!$new_pricing) {
-               $attrPrice = array_key_exists('price', $attributes);
-               if ($attrPrice) {
-                   $dataSave['price'] = $attributes['price'];
-               } else {
-                   $attrPriceSpc = array_key_exists('special_price', $attributes);
-                   if ($attrPriceSpc) {
-                       $dataSave['price'] = $attributes['special_price'];
-                   } else {
+                $new_pricing = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing');
+                if (!$new_pricing) {
+                    $attrPrice = array_key_exists('price', $attributes);
+                    if ($attrPrice) {
+                        $dataSave['price'] = $attributes['price'];
+                    } else {
+                        $attrPriceSpc = array_key_exists('special_price', $attributes);
+                        if ($attrPriceSpc) {
+                            $dataSave['price'] = $attributes['special_price'];
+                        } else {
 
-                       $today = new DateTime("now");
-                       if ($dataProduct['special_price'] != '') {
-                           $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
-                           if ($useSpecialPrice) {
-                               if ($dataProduct['special_from_date']) {
-                                   $fromDate = new DateTime($dataProduct['special_from_date']);
-                                   if ($fromDate <= $today) {
-                                       if ($dataProduct['special_to_date']) {
-                                           $toDate = new DateTime($dataProduct['special_to_date']);
-                                           if ($toDate >= $today) {
-                                               $dataSave['price'] = $dataProduct['special_price'];
-                                           } else {
-                                               $dataSave['price'] = $dataProduct['price'];
-                                           }
-                                       } else {
-                                           $dataSave['price'] = $dataProduct['special_price'];
-                                       }
-                                   } else {
-                                       $dataSave['price'] = $dataProduct['price'];
-                                   }
-                               } else {
-                                   if ($dataProduct['special_to_date']) {
-                                       $toDate = new DateTime($dataProduct['special_to_date']);
-                                       if ($toDate >= $today) {
-                                           $dataSave['price'] = $dataProduct['special_price'];
-                                       } else {
-                                           $dataSave['price'] = $dataProduct['price'];
-                                       }
-                                   } else {
-                                       $dataSave['price'] = $dataProduct['special_price'];
-                                   }
-                               }
-                           } else {
-                               $dataSave['price'] = $dataProduct['price'];
-                           }
-                       } else {
-                           $dataSave['price'] = $dataProduct['price'];
-                       }
-                   }
-               }
-           }
-           $attrMetaKey = array_key_exists('meta_keyword',$attributes);
-           if($attrMetaKey) {
-               $text = $attributes['meta_keyword'];
-           }else {
-               $text = $dataProduct['meta_keyword'];
-           }
-           $dataSplit = explode(',', $text);
-           $dataTag = '';
-           $i = 1;
-           if ($dataSplit != null && count($dataSplit) > 0) {
-               foreach ($dataSplit as $data) {
-                   if (strlen($data) <= 20) {
-                       if ($i <= 13) {
-                           $dataTag = $dataTag . ',' . $data;
-                           $i = $i + 1;
-                       } else {
-                           break;
-                       }
-                   }
-               }
-               if ($dataTag == '') {
-                   $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
-               }
-           } else {
-               $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
-           }
-           $dataSave['tags'] = substr($dataTag, 1);
+                            $today = new DateTime("now");
+                            if ($dataProduct['special_price'] != '') {
+                                $useSpecialPrice = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_special_price');
+                                if ($useSpecialPrice) {
+                                    if ($dataProduct['special_from_date']) {
+                                        $fromDate = new DateTime($dataProduct['special_from_date']);
+                                        if ($fromDate <= $today) {
+                                            if ($dataProduct['special_to_date']) {
+                                                $toDate = new DateTime($dataProduct['special_to_date']);
+                                                if ($toDate >= $today) {
+                                                    $dataSave['price'] = $dataProduct['special_price'];
+                                                } else {
+                                                    $dataSave['price'] = $dataProduct['price'];
+                                                }
+                                            } else {
+                                                $dataSave['price'] = $dataProduct['special_price'];
+                                            }
+                                        } else {
+                                            $dataSave['price'] = $dataProduct['price'];
+                                        }
+                                    } else {
+                                        if ($dataProduct['special_to_date']) {
+                                            $toDate = new DateTime($dataProduct['special_to_date']);
+                                            if ($toDate >= $today) {
+                                                $dataSave['price'] = $dataProduct['special_price'];
+                                            } else {
+                                                $dataSave['price'] = $dataProduct['price'];
+                                            }
+                                        } else {
+                                            $dataSave['price'] = $dataProduct['special_price'];
+                                        }
+                                    }
+                                } else {
+                                    $dataSave['price'] = $dataProduct['price'];
+                                }
+                            } else {
+                                $dataSave['price'] = $dataProduct['price'];
+                            }
+                        }
+                    }
+                }
+                $attrMetaKey = array_key_exists('meta_keyword', $attributes);
+                if ($attrMetaKey) {
+                    $text = $attributes['meta_keyword'];
+                } else {
+                    $text = $dataProduct['meta_keyword'];
+                }
+                $dataSplit = explode(',', $text);
+                $dataTag = '';
+                $i = 1;
+                if ($dataSplit != null && count($dataSplit) > 0) {
+                    foreach ($dataSplit as $data) {
+                        if (strlen($data) <= 20) {
+                            if ($i <= 13) {
+                                $dataTag = $dataTag . ',' . $data;
+                                $i = $i + 1;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if ($dataTag == '') {
+                        $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
+                    }
+                } else {
+                    $dataTag = $this->categoryProductsTags($dataProduct['entity_id']);
+                }
+                $dataSave['tags'] = substr($dataTag, 1);
 
-           $attrTitle = array_key_exists('name',$attributes);
-           if($attrTitle)
-           {
-               $dataSave['title'] = ucfirst($attributes['name']);
-           }else {
-               $dataSave['title'] = ucfirst($dataProduct['name']);
-           }
+                $attrTitle = array_key_exists('name', $attributes);
+                if ($attrTitle) {
+                    $dataSave['title'] = ucfirst($attributes['name']);
+                } else {
+                    $dataSave['title'] = ucfirst($dataProduct['name']);
+                }
 
-           $attrDescription = array_key_exists('description',$attributes);
-           if($attrDescription) {
-               $textNoHtml = strip_tags($attributes['description'],'<br></br><br/><br />');
-               $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
-               $dataSave['description'] = $newDescription;
-           }else{
-               $textNoHtml = strip_tags($dataProduct['description'],'<br></br><br/><br />');
-               $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
-               $dataSave['description'] = $newDescription;
-           }
+                $attrDescription = array_key_exists('description', $attributes);
+                if ($attrDescription) {
+                    $textNoHtml = strip_tags($attributes['description'], '<br></br><br/><br />');
+                    $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                    $dataSave['description'] = $newDescription;
+                } else {
+                    $textNoHtml = strip_tags($dataProduct['description'], '<br></br><br/><br />');
+                    $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                    $dataSave['description'] = $newDescription;
+                }
 
-		/// getting custom title field flag from the configuration
-		$isCustomTitle = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute');
-		if($isCustomTitle){
-			$isCustomTitleAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_code');
-			// getting custom attribute code for title
-			if(!empty($isCustomTitleAttribute)){
-				$customTitle = $productModel->getData($isCustomTitleAttribute);
-				if(!empty($customTitle)){
-					$dataSave['title'] = ucfirst($customTitle);
-				}
-			}
-			
-		}
-		
-		/// getting custom description field flag from the configuration
-		$isCustomDescription = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute');
-		
-		if($isCustomDescription){
-			$isCustomDescriptionAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute_code');
-			// getting custom attribute code for title
-			if(!empty($isCustomDescriptionAttribute)){
-				$customDesc = $productModel->getData($isCustomDescriptionAttribute);
-				
-				if(!empty($customDesc)){
-					$textNoHtml = strip_tags($customDesc,'<br></br><br/><br />');
-					$newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/',PHP_EOL,$textNoHtml);
-					$dataSave['description'] = $newDescription;
-					
-				}
-			}
-		}
-           if ($query == null) {
-               $listingModel->setData($dataSave);
-               $listingModel->save();
-               return array('success' => true);
-           } else {
+                /// getting custom title field flag from the configuration
+                $isCustomTitle = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute');
+                if ($isCustomTitle) {
+                    $isCustomTitleAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_code');
+                    // getting custom attribute code for title
+                    if (!empty($isCustomTitleAttribute)) {
+                        $customTitle = $productModel->getData($isCustomTitleAttribute);
+                        if (!empty($customTitle)) {
+                            $dataSave['title'] = ucfirst($customTitle);
+                        }
+                    }
 
-               /* Condition for saving in massive */
-               $attrSync = array_key_exists('synchronizedEtsy',$attributes);
-               if($attrSync) {
-                   $syncEtsy = $attributes['synchronizedEtsy'];
-               }else{
-                   $syncEtsy = $productModel->getData("synchronizedEtsy");
-               }
+                }
 
-               if ($syncEtsy == 1) {
-                   $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_ENABLED;
-               }
+                /// getting custom description field flag from the configuration
+                $isCustomDescription = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute');
 
-               $this->handleSyncStatusUpdate($dataSave, $query);
+                if ($isCustomDescription) {
+                    $isCustomDescriptionAttribute = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_description_attribute_code');
+                    // getting custom attribute code for title
+                    if (!empty($isCustomDescriptionAttribute)) {
+                        $customDesc = $productModel->getData($isCustomDescriptionAttribute);
 
-               $dataSave['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED;
-               $listingModel
-                   ->addData($dataSave)
-                   ->setId($query[0]['id']);
-               $listingModel->save();
+                        if (!empty($customDesc)) {
+                            $textNoHtml = strip_tags($customDesc, '<br></br><br/><br />');
+                            $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                            $dataSave['description'] = $newDescription;
 
-               return array('success' => true);
-           }
-       }else{
-           return array('success' => false, 'error' => 'Invalid product type.');
-       }
-        }catch (Exception $e)
-        {
-            Mage::log("Error: ".print_r($e->getMessage(), true),null,'magetsync_qty.log');
+                        }
+                    }
+                }
+                if ($query == null) {
+                    $listingModel->setData($dataSave);
+                    $listingModel->save();
+                    return array('success' => true);
+                } else {
+
+                    /* Condition for saving in massive */
+                    $attrSync = array_key_exists('synchronizedEtsy', $attributes);
+                    if ($attrSync) {
+                        $syncEtsy = $attributes['synchronizedEtsy'];
+                    } else {
+                        $syncEtsy = $productModel->getData("synchronizedEtsy");
+                    }
+
+                    if ($syncEtsy == 1) {
+                        $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_ENABLED;
+                    }
+
+                    $this->handleSyncStatusUpdate($dataSave, $query);
+
+                    $dataSave['quantity_has_changed'] = Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED;
+                    $listingModel
+                        ->addData($dataSave)
+                        ->setId($query[0]['id']);
+                    $listingModel->save();
+
+                    return array('success' => true);
+                }
+            } else {
+                return array('success' => false, 'error' => 'Invalid product type.');
+            }
+        } catch (Exception $e) {
+            Mage::log("Error: " . print_r($e->getMessage(), true), null, 'magetsync_qty.log');
             return array('success' => false, 'error' => $e->getMessage());
         }
     }
@@ -653,7 +650,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param $idListing
      * @return bool
      */
-    public function saveDetails($result,$idProduct,$priceBase,$idListing)
+    public function saveDetails($result,$idProduct,$priceBase,$idListing,$inventoryCall=0)
     {
         try {
             $statusOperation = array('status'=>true,'msg'=>'');
@@ -841,174 +838,174 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 $singleData['variations']  = json_encode(array(), 128);
             }
 
-                $resultVariationApi = Mage::getModel('magetsync/variation')->createListingVariations($obliVariation, $singleData);
-                if ($resultVariationApi['status']) {
-                    $resultVariation = json_decode(json_decode($resultVariationApi['result']), true);
-                    $resultVariation = $resultVariation['results'][0];
+            $resultVariationApi = Mage::getModel('magetsync/variation')->createListingVariations($obliVariation, $singleData);
+            if ($resultVariationApi['status']) {
+                $resultVariation = json_decode(json_decode($resultVariationApi['result']), true);
+                $resultVariation = $resultVariation['results'][0];
 
-                    if($result['state'] == 'edit')
-                    {
-                        $stateListing = Merchante_MagetSync_Model_Listing::STATE_INACTIVE;
-                    }else
-                    {
-                        $stateListing = Merchante_MagetSync_Model_Listing::STATE_ACTIVE;
-                    }
+                if($result['state'] == 'edit')
+                {
+                    $stateListing = Merchante_MagetSync_Model_Listing::STATE_INACTIVE;
+                }else
+                {
+                    $stateListing = Merchante_MagetSync_Model_Listing::STATE_ACTIVE;
+                }
 
-                    $listingModel = Mage::getModel('magetsync/listing');
-                    if($singleVariationGlobal)
+                $listingModel = Mage::getModel('magetsync/listing');
+                if($singleVariationGlobal)
+                {
+                    if(!$hasPrice)
                     {
-                        if(!$hasPrice)
-                        {
-                            $obliUpd = array('listing_id' => $result['listing_id']);
-                            $listingModel->updateListing($obliUpd, array('price' => $priceBase,'state' => $stateListing));
-                        }
-                    }else{
                         $obliUpd = array('listing_id' => $result['listing_id']);
                         $listingModel->updateListing($obliUpd, array('price' => $priceBase,'state' => $stateListing));
                     }
                 }else{
-
-                    Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                        $resultVariationApi['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
-
+                    $obliUpd = array('listing_id' => $result['listing_id']);
+                    $listingModel->updateListing($obliUpd, array('price' => $priceBase,'state' => $stateListing));
                 }
+            }else{
 
+                Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                    $resultVariationApi['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
 
-            /**********************************/
-            $h = 0;
-            /******************************
-             * Upload Image section
-             *****************************/
+            }
 
-            $newImages = array();
-            if (count($dataPro['media_gallery']['images']) > 0) {
-                $excluded = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
-                if ($excluded == '1') {
-                    foreach ($dataPro['media_gallery']['images'] as $imageAux) {
-                        if ($imageAux['disabled'] != '1') {
-                            $newImages[] = $imageAux;
-                            if ($result['listing_id']) {
-                                $imageModel = Mage::getModel('magetsync/imageEtsy')->getCollection();
-                                $queryVerify = $imageModel->getSelect()->where('file = ?', $imageAux['file']);
-                                $queryVerify = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($queryVerify);
-                                if($queryVerify) {
-                                    $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($queryVerify[0]['listing_image_id']));
-                                    $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
-                                    if($resultImageApiDelete['status']) {
-                                        $resultDeleteVerify = Mage::getModel('magetsync/imageEtsy')->setId($queryVerify[0]['id'])->delete();
-                                    }else{
-                                        Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                                            $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+            if($inventoryCall == 0){
+                /**********************************/
+                $h = 0;
+                /******************************
+                 * Upload Image section
+                 *****************************/
+                $newImages = array();
+                if (count($dataPro['media_gallery']['images']) > 0) {
+                    $excluded = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
+                    if ($excluded == '1') {
+                        foreach ($dataPro['media_gallery']['images'] as $imageAux) {
+                            if ($imageAux['disabled'] != '1') {
+                                $newImages[] = $imageAux;
+                                if ($result['listing_id']) {
+                                    $imageModel = Mage::getModel('magetsync/imageEtsy')->getCollection();
+                                    $queryVerify = $imageModel->getSelect()->where('file = ?', $imageAux['file']);
+                                    $queryVerify = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($queryVerify);
+                                    if($queryVerify) {
+                                        $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($queryVerify[0]['listing_image_id']));
+                                        $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
+                                        if($resultImageApiDelete['status']) {
+                                            $resultDeleteVerify = Mage::getModel('magetsync/imageEtsy')->setId($queryVerify[0]['id'])->delete();
+                                        }else{
+                                            Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                                $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                } else {
-                    $newImages = $dataPro['media_gallery']['images'];
-                }
-
-                //We sort and cut the array of images
-                $imageUrl = $productModel->getImage();
-                $resultIndex = $this->searchForFile($imageUrl, $newImages);
-                if(isset($resultIndex)) {
-                    $valueDelete = $newImages[$resultIndex];
-                    unset($newImages[$resultIndex]);
-                    //arsort($newImages);
-                    usort($newImages, function($a, $b)
-                    {
-                        return strcmp($a->position, $b->position);
-                    });
-                    if(count($newImages) >= 5)
-                    {
-                        $newImages = array_slice($newImages,0,4);
-                    }
-                    array_push($newImages, $valueDelete);
-                }
-            }
-
-            $paramImg        = array('listing_id'=>$result['listing_id']);
-            $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
-            $totalImages = 0;
-            if($resultTotalImgs['status']) {
-                $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
-                $totalImagesAux = $resultTotalImgs['count'];
-                $totalImages = isset($totalImagesAux) ? $totalImagesAux : 0;
-            }else{
-                Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                    $resultTotalImgs['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
-            }
-
-            foreach ($newImages as $image) {
-                //We control that the number of images always
-                //be 5 or less (Etsy restriction)
-                if ($h < (5 - $totalImages)) {
-                    $imageModel   = Mage::getModel('magetsync/imageEtsy')->getCollection();
-                    $query        = $imageModel->getSelect()->where('file = ?', $image['file']);
-                    $query        = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
-                    $file         = Mage::getBaseDir('media') . '/catalog/product' . $image['file'];
-                    $info         = pathinfo($file);
-                    $ext          = $info['extension'];
-                    $mime         = Mage::getModel('magetsync/listing')->mimetypes[$ext];
-                    $obligatory   = array('listing_id' => $result['listing_id']);
-                    $etsyModel    = Mage::getModel('magetsync/etsy');
-                    $url          = Merchante_MagetSync_Model_Etsy::$merchApi . 'Listing/saveImageUpload';
-                    //According to the PHP_VERSION we use file_contents
-                    //in different ways
-                    if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
-                        $tempImage = curl_file_create($file,$mime,'tempImage');
-                        $post         = array('file_contents' => $tempImage);
-                    }else {
-                        $post = array('file_contents' => '@' . $file);
+                    } else {
+                        $newImages = $dataPro['media_gallery']['images'];
                     }
 
-                    $resultUpload = $etsyModel->curlConnect($url, $post, 2);
-
-                    $resultUpload = json_decode($resultUpload, true);
-                    if ($resultUpload['success'] == true) {
-                        $file = $resultUpload['upload'];
-                        if ($query == null) {
-                            $params = array('@image' => '@'.$file. ';type=' . $mime, 'name' => $file);
-                        } else {
-                            $params = array('@image' => '@'.$file. ';type=' . $mime, 'listing_image_id' => intval($query[0]['listing_image_id']), 'name' => $file);
-                            $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($query[0]['listing_image_id']));
-                            $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
-                            if(!$resultImageApiDelete['status'])
-                            {
-                                Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                                    $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
-
-                            }
+                    //We sort and cut the array of images
+                    $imageUrl = $productModel->getImage();
+                    $resultIndex = $this->searchForFile($imageUrl, $newImages);
+                    if(isset($resultIndex)) {
+                        $valueDelete = $newImages[$resultIndex];
+                        unset($newImages[$resultIndex]);
+                        //arsort($newImages);
+                        usort($newImages, function($a, $b)
+                        {
+                            return strcmp($a->position, $b->position);
+                        });
+                        if(count($newImages) >= 5)
+                        {
+                            $newImages = array_slice($newImages,0,4);
                         }
-                        $resultImageApi = Mage::getModel('magetsync/listing')->uploadListingImage($obligatory, $params);
+                        array_push($newImages, $valueDelete);
+                    }
+                }
 
-                        if ($resultImageApi['status']) {
-                            $resultImage = json_decode(json_decode($resultImageApi['result']), true);
-                            $resultImage = $resultImage['results'][0];
-                            $imageData = array('listing_id' => $resultImage['listing_id'], 'listing_image_id' => $resultImage['listing_image_id'], 'file' => $image['file']);
-                            if ($query[0]['id']) {
-                                $resultSaveImage = Mage::getModel('magetsync/imageEtsy')->load($query[0]['id'])
-                                    ->addData($imageData)
-                                    ->setId($query[0]['id']);
-                                $resultSaveImage->save();
+                $paramImg        = array('listing_id'=>$result['listing_id']);
+                $resultTotalImgs = Mage::getModel('magetsync/listing')->findAllListingImages($paramImg);
+                $totalImages = 0;
+                if($resultTotalImgs['status']) {
+                    $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
+                    $totalImagesAux = $resultTotalImgs['count'];
+                    $totalImages = isset($totalImagesAux) ? $totalImagesAux : 0;
+                }else{
+                    Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                        $resultTotalImgs['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+                }
+
+                foreach ($newImages as $image) {
+                    //We control that the number of images always
+                    //be 5 or less (Etsy restriction)
+                    if ($h < (5 - $totalImages)) {
+                        $imageModel   = Mage::getModel('magetsync/imageEtsy')->getCollection();
+                        $query        = $imageModel->getSelect()->where('file = ?', $image['file']);
+                        $query        = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+                        $file         = Mage::getBaseDir('media') . '/catalog/product' . $image['file'];
+                        $info         = pathinfo($file);
+                        $ext          = $info['extension'];
+                        $mime         = Mage::getModel('magetsync/listing')->mimetypes[$ext];
+                        $obligatory   = array('listing_id' => $result['listing_id']);
+                        $etsyModel    = Mage::getModel('magetsync/etsy');
+                        $url          = Merchante_MagetSync_Model_Etsy::$merchApi . 'Listing/saveImageUpload';
+                        //According to the PHP_VERSION we use file_contents
+                        //in different ways
+                        if (version_compare(PHP_VERSION, '5.6.0', '>=')) {
+                            $tempImage = curl_file_create($file,$mime,'tempImage');
+                            $post         = array('file_contents' => $tempImage);
+                        }else {
+                            $post = array('file_contents' => '@' . $file);
+                        }
+
+                        $resultUpload = $etsyModel->curlConnect($url, $post, 2);
+
+                        $resultUpload = json_decode($resultUpload, true);
+                        if ($resultUpload['success'] == true) {
+                            $file = $resultUpload['upload'];
+                            if ($query == null) {
+                                $params = array('@image' => '@'.$file. ';type=' . $mime, 'name' => $file);
                             } else {
-                                $imageEtsyModel = Mage::getModel('magetsync/imageEtsy');
-                                $imageEtsyModel->setData($imageData);
-                                $imageEtsyModel->save();
+                                $params = array('@image' => '@'.$file. ';type=' . $mime, 'listing_image_id' => intval($query[0]['listing_image_id']), 'name' => $file);
+                                $obligatoryDelete = array('listing_id' => $result['listing_id'], 'listing_image_id' => intval($query[0]['listing_image_id']));
+                                $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
+                                if(!$resultImageApiDelete['status'])
+                                {
+                                    Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                        $resultImageApiDelete['message'],Merchante_MagetSync_Model_LogData::LEVEL_WARNING);
+
+                                }
                             }
-                        } else {
-                            throw new Exception($resultImageApi['message']);
+                            $resultImageApi = Mage::getModel('magetsync/listing')->uploadListingImage($obligatory, $params);
+
+                            if ($resultImageApi['status']) {
+                                $resultImage = json_decode(json_decode($resultImageApi['result']), true);
+                                $resultImage = $resultImage['results'][0];
+                                $imageData = array('listing_id' => $resultImage['listing_id'], 'listing_image_id' => $resultImage['listing_image_id'], 'file' => $image['file']);
+                                if ($query[0]['id']) {
+                                    $resultSaveImage = Mage::getModel('magetsync/imageEtsy')->load($query[0]['id'])
+                                        ->addData($imageData)
+                                        ->setId($query[0]['id']);
+                                    $resultSaveImage->save();
+                                } else {
+                                    $imageEtsyModel = Mage::getModel('magetsync/imageEtsy');
+                                    $imageEtsyModel->setData($imageData);
+                                    $imageEtsyModel->save();
+                                }
+                            } else {
+                                throw new Exception($resultImageApi['message']);
+                            }
+                        }else{
+
+                            Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                $resultUpload['message'],Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
+
                         }
-                    }else{
-
-                        Merchante_MagetSync_Model_LogData::magetsync($idListing,Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                            $resultUpload['message'],Merchante_MagetSync_Model_LogData::LEVEL_ERROR);
-
+                        $h = $h + 1;
                     }
-                    $h = $h + 1;
                 }
             }
-
+            
             return array('status'=>$statusOperation);
         }catch (Exception $e)
         {

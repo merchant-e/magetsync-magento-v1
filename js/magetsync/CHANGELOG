@@ -1,14 +1,19 @@
-##[0.9.7.2] - 2016-11-18
-### Changed
-- Long variation labels/values are auto trimmed to Etsy limit (20 chars)
-
+##[0.9.7.5] - 2016-11-28
 ### Added
-- Option to re-upload product images for previouly synced products (overcoming Etsy limitation)
-- New observer to keep inventory updated when an item is restocked in Magento (order cancelled)
-- New label for draft state
+- Support for Attribute Templates
+- New Pricing Rules (Increase/Decrease prices globally using Attribute Templates)
+- Option to re-upload product images for previouly synced products (New Image Reset Option - with its own cron task)
+- New Observer for when Magento products are restocked (credit memo/order cancelled)
 
-### Fixed
-- Admin access restriction
+### Changed 
+- Added new measures to prevent excessive API calls when using auto-queue
+- New 'Draft' label for products in Draft state
+- Long custom options labels/values are auto trimmed to Etsy limit (20 chars)
+
+### Bug
+- Fixed PHP array incompatibility with older PHP versions
+- Fixed Permissions for non-admin users (Access Denied error)
+
 
 ##[0.9.7.1] - 2016-10-15
 ### Added

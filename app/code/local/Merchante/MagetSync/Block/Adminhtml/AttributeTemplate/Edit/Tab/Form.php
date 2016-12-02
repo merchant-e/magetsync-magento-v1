@@ -1,15 +1,14 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2016 Merchant-e
  *
- * Class for creating Listing form
- * Class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form
+ * Class for creating template form
+ * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form
  */
-class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form
+class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     /**
-     * Method for creating form inputs
      * @return Mage_Adminhtml_Block_Widget_Form
      */
     protected function _prepareForm()
@@ -20,7 +19,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $fieldsetGlobal = $form->addFieldset('magetsync_form_global_section',
             array('legend'=>Mage::helper('magetsync')->__("Global Section")));
 
-        $prependedTemplate = $fieldsetGlobal->addField('prepended_template', 'select', array(
+        $fieldsetGlobal->addField('prepended_template', 'select', array(
             'name'  => 'prepended_template',
             'required' => false,
             'label'     => Mage::helper('magetsync')->__("Prepend Global Note"),
@@ -30,7 +29,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 2   => Mage::helper('magetsync')->__('Note').' 2'
             ),
         ));
-        $appendedTemplate = $fieldsetGlobal->addField('appended_template', 'select', array(
+        $fieldsetGlobal->addField('appended_template', 'select', array(
             'name'  => 'appended_template',
             'required' => false,
             'label'     => Mage::helper('magetsync')->__("Append Global Note"),
@@ -41,9 +40,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             ),
         ));
 
-
-
-        $renewalOption = $fieldsetGlobal->addField('should_auto_renew', 'select', array(
+        $fieldsetGlobal->addField('should_auto_renew', 'select', array(
             'name'  => 'should_auto_renew',
             'required' => false,
             'label'     => Mage::helper('magetsync')->__("Automatically renew listing"),
@@ -67,7 +64,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'onchange' => 'getNextData(this)',
         ));
 
-        $whatIs = $fieldsetAbout->addField('is_supply', 'select', array(
+        $fieldsetAbout->addField('is_supply', 'select', array(
             'name'  => 'is_supply',
             'class'  => 'validate-select',
             'required' => true,
@@ -80,7 +77,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             ),
         ));
 
-        $whereMade = $fieldsetAbout->addField('when_made', 'select', array(
+        $fieldsetAbout->addField('when_made', 'select', array(
             'name'  => 'when_made',
             'class'  => 'validate-select',
             'required' => true,
@@ -89,71 +86,18 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'values'    => Mage::getModel('magetsync/whenMade')->toOptionArray(),
         ));
 
-
-        /**
-         * Validation on event 'change'
-         */
-        $whoMade->setAfterElementHtml("
-                <script type=\"text/javascript\">
-                    function getNextData(selectElement){
-                         if(selectElement.value != '')
-                         {
-                            document.getElementById('is_supply').disabled = false;
-                            $('is_supply').observe('change', function(e){
-                                  var value = document.getElementById('is_supply').value;
-                                  if(value != null)
-                                  {
-                                    document.getElementById('when_made').disabled = false;
-                                  }
-                                  else
-                                  {
-                                    document.getElementById('when_made').value = '';
-                                    document.getElementById('when_made').disabled = true;
-                                  }
-                             });
-                         }
-                         else
-                         {
-                            document.getElementById('is_supply').value = '';
-                            document.getElementById('when_made').value = '';
-                            document.getElementById('is_supply').disabled = true;
-                            document.getElementById('when_made').disabled = true;
-                         }
-                    }
-                </script>");
-
-        //Single listing edit
-        if(!Mage::registry('magetsync_massive')) {
-            $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Renderer_Pricing');
-            $pricingRule = $fieldsetAbout->addField('pricing_rule', 'pricingrule', array(
-                'name'  => 'price',
-                'required' => true,
-                'label'     => Mage::helper('magetsync')->__("Price")
-            ));
-            $pricingRule->setAfterElementHtml("
-                <script type='text/javascript'>
-                    $('custom-price').observe('change', tootglePriceInput);
-                    function tootglePriceInput(evt) {
-                        var priceInput = $('price');
-                        if (evt.element().checked == true) {
-                            priceInput.disabled = false;
-                        } else {
-                            priceInput.disabled = true;
-                            priceInput.value = $('orig-price-val').value;
-                        }
-                    }
-                </script>
-            ");
-        //Mass attribute update
-        } else {
-            $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Renderer_MassPricing');
-            $pricingRule = $fieldsetAbout->addField('pricing_rule', 'pricingrule', array(
-                'name'  => 'pricing_rule',
-                'label'     => Mage::helper('magetsync')->__("Pricing Rule"),
-                'rules'    => Mage::getModel('magetsync/attributeTemplate')->toPricingRuleOptionArray(),
-                'strategies'    => Mage::getModel('magetsync/attributeTemplate')->toPricingStrategyOptionArray(),
-            ));
-            $pricingRule->setAfterElementHtml("
+        $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Renderer_Pricing');
+        $pricingRule = $fieldsetAbout->addField('pricing_rule', 'pricingrule', array(
+            'name'  => 'pricing_rule',
+            'class'  => 'validate-select',
+            'required' => true,
+            'label'     => Mage::helper('magetsync')->__("Pricing Rule"),
+            'disabled' => false,
+            'rules'    => Mage::getModel('magetsync/attributeTemplate')->toPricingRuleOptionArray(),
+            'strategies'    => Mage::getModel('magetsync/attributeTemplate')->toPricingStrategyOptionArray(),
+            'style'     => 'width:100px;',
+        ));
+        $pricingRule->setAfterElementHtml("
             <script type=\"text/javascript\">
                 $('affect_value').observe('keyup', calculateEstimatePrice);
                 $('affect_strategy').observe('change', calculateEstimatePrice);
@@ -189,7 +133,38 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 togglePricing($('pricing_rule'));
             </script>
         ");
-        }
+
+        /**
+         * Validation on event 'change'
+         */
+        $whoMade->setAfterElementHtml("
+                <script type=\"text/javascript\">
+                    function getNextData(selectElement){
+                         if(selectElement.value != '')
+                         {
+                            document.getElementById('is_supply').disabled = false;
+                            $('is_supply').observe('change', function(e){
+                                  var value = document.getElementById('is_supply').value;
+                                  if(value != null)
+                                  {
+                                    document.getElementById('when_made').disabled = false;
+                                  }
+                                  else
+                                  {
+                                    document.getElementById('when_made').value = '';
+                                    document.getElementById('when_made').disabled = true;
+                                  }
+                             });
+                         }
+                         else
+                         {
+                            document.getElementById('is_supply').value = '';
+                            document.getElementById('when_made').value = '';
+                            document.getElementById('is_supply').disabled = true;
+                            document.getElementById('when_made').disabled = true;
+                         }
+                    }
+                </script>");
 
 
         $dataMagetsy = Mage::registry('magetsync_data');
@@ -536,19 +511,19 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $fieldsetSearch = $form->addFieldset('magetsync_form_search',
             array('legend'=> Mage::helper('magetsync')->__("Search information")));
 
-        $recipient = $fieldsetSearch->addField('recipient', 'select', array(
+        $fieldsetSearch->addField('recipient', 'select', array(
             'name'  => 'recipient',
             'label'     => Mage::helper('magetsync')->__("Recipient"),
             'values'    => Mage::getModel('magetsync/recipient')->toOptionArray(),
         ));
 
-        $occasion = $fieldsetSearch->addField('occasion', 'select', array(
+        $fieldsetSearch->addField('occasion', 'select', array(
             'name'  => 'occasion',
             'label'     => Mage::helper('magetsync')->__("Occasion"),
             'values'    => Mage::getModel('magetsync/occasion')->toOptionArray(),
         ));
 
-        $materials = $fieldsetSearch->addField('materials', 'text',
+        $fieldsetSearch->addField('materials', 'text',
             array(
                 'label' => Mage::helper('magetsync')->__("Materials"),
                 'name' => 'materials',
@@ -589,7 +564,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $fieldsetSS = $form->addFieldset('magetsync_form_ss',
             array('legend'=> Mage::helper('magetsync')->__("Shipping and Shop information")));
 
-        $shopSection = $fieldsetSS->addField('shop_section_id', 'select', array(
+        $fieldsetSS->addField('shop_section_id', 'select', array(
             'name'  => 'shop_section_id',
             'label'     => Mage::helper('magetsync')->__("Shop section"),
             'class'  => 'validate-select',
@@ -605,7 +580,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'values'    => Mage::getModel('magetsync/shippingTemplate')->toOptionArray(),
         ));
 
-        $valuesListing =  Mage::registry('magetsync_data')->getData();
+        $valuesAttributeTemplate =  Mage::registry('magetsync_data')->getData();
         $subCategoryAux    = '';
         $subSubCategoryAux = '';
         $subCategoryAux4   = '';
@@ -614,15 +589,13 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $subCategoryAux7   = '';
         $style2Aux         = '';
 
-        if($valuesListing['subcategory_id'] == null){ $subCategoryAux = '$(\'subcategory_id\').up(0).up(0).hide();';}
-        if($valuesListing['subsubcategory_id'] == null){ $subSubCategoryAux = '$(\'subsubcategory_id\').up(0).up(0).hide();';}
-        if($valuesListing['subcategory4_id'] == null){ $subCategoryAux4 = '$(\'subcategory4_id\').up(0).up(0).hide();';}
-        if($valuesListing['subcategory5_id'] == null){ $subCategoryAux5 = '$(\'subcategory5_id\').up(0).up(0).hide();';}
-        if($valuesListing['subcategory6_id'] == null){ $subCategoryAux6 = '$(\'subcategory6_id\').up(0).up(0).hide();';}
-        if($valuesListing['subcategory7_id'] == null){ $subCategoryAux7 = '$(\'subcategory7_id\').up(0).up(0).hide();';}
-
-        if($valuesListing['style_one'] == null && $valuesListing['style_two'] == null){ $style2Aux = '$(\'style_two\').up(0).up(0).hide();';}
-
+        if($valuesAttributeTemplate['subcategory_id'] == null){ $subCategoryAux = '$(\'subcategory_id\').up(0).up(0).hide();';}
+        if($valuesAttributeTemplate['subsubcategory_id'] == null){ $subSubCategoryAux = '$(\'subsubcategory_id\').up(0).up(0).hide();';}
+        if($valuesAttributeTemplate['subcategory4_id'] == null){ $subCategoryAux4 = '$(\'subcategory4_id\').up(0).up(0).hide();';}
+        if($valuesAttributeTemplate['subcategory5_id'] == null){ $subCategoryAux5 = '$(\'subcategory5_id\').up(0).up(0).hide();';}
+        if($valuesAttributeTemplate['subcategory6_id'] == null){ $subCategoryAux6 = '$(\'subcategory6_id\').up(0).up(0).hide();';}
+        if($valuesAttributeTemplate['subcategory7_id'] == null){ $subCategoryAux7 = '$(\'subcategory7_id\').up(0).up(0).hide();';}
+        if($valuesAttributeTemplate['style_one'] == null && $valuesAttributeTemplate['style_two'] == null){ $style2Aux = '$(\'style_two\').up(0).up(0).hide();';}
 
         $shippingTemplate->setAfterElementHtml("<script type=\"text/javascript\">
                     ".$subCategoryAux."
@@ -634,38 +607,12 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                     ".$style2Aux."
                 </script>");
 
-        /**
-         * Field for transport multiple listings selects
-         */
-        $ids = $fieldsetSS->addField('listingids', 'hidden', array(
-            'name'  => 'listingids',
-        ));
-
-
-        $fieldsetLog = $form->addFieldset('magetsync_form_log',
-            array('legend'=> Mage::helper('magetsync')->__("Log Section")));
-
-        /*********************************
-         * Log Section (.phtml)
-         ********************************/
-        $entry_field = $fieldsetLog->addField('log_section', 'editor', array(
-            'name'      => 'log_section',
-            'label'     => Mage::helper('magetsync')->__("Log Section")
-        ));
-        $log_section = $form->getElement('log_section');
-        $log_section->setRenderer(
-            $this->getLayout()->createBlock('magetsync/adminhtml_listing_edit_renderer_listing')
-        );
-        /***********************************************************************/
-
-
         if ( Mage::registry('magetsync_data') )
         {
             $form->setValues(Mage::registry('magetsync_data')->getData());
             $form->getElement('is_supply')->setDisabled(false);
             $form->getElement('when_made')->setDisabled(false);
         }
-            $form->addValues(array('listingids' => Mage::registry('magetsync_massive')));
 
 
         return parent::_prepareForm();
