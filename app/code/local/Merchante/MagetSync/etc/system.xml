@@ -590,6 +590,39 @@
 					</magetsync_field_deletelistings>
 				</fields>
 			</magetsync_group_delete>
+             <magetsync_group_resize_images translate="label comment">
+                <label>Resize Images</label>
+                <comment>This setting is used to resize the oversized listing manager product images to Etsy's recommendation(1000px).</comment>
+                <expanded>1</expanded>
+                <sort_order>3</sort_order>
+                <show_in_default>1</show_in_default>
+                <show_in_website>0</show_in_website>
+                <show_in_store>0</show_in_store>
+                <fields>
+                    <magetsync_field_resize_images translate="label comment">
+                        <label>Resize</label>
+                        <frontend_type>button</frontend_type>
+                        <comment>Caution: This button will resize the images for listing manager products.</comment>
+                        <frontend_model>magetsync/buttonResizeListings</frontend_model>
+                        <sort_order>2</sort_order>
+                        <show_in_default>1</show_in_default>
+                        <show_in_website>1</show_in_website>
+                        <show_in_store>1</show_in_store>
+                    </magetsync_field_resize_images>
+
+                    <magetsync_field_delete_resize_images translate="label comment">
+                        <label>Delete Resized Images</label>
+                        <frontend_type>button</frontend_type>
+                        <comment>Caution: This button will delete the resized images for all the listing manager products. Note: It will keep the original images intact.</comment>
+                        <frontend_model>magetsync/buttonDeleteResizeListings</frontend_model>
+                        <sort_order>3</sort_order>
+                        <show_in_default>1</show_in_default>
+                        <show_in_website>1</show_in_website>
+                        <show_in_store>1</show_in_store>
+                    </magetsync_field_delete_resize_images>
+
+                </fields>
+            </magetsync_group_resize_images>
 				
 		</groups>
         </magetsync_section_draftmode>
