@@ -187,8 +187,7 @@ error_reporting(E_ALL ^ E_NOTICE);
         /**
          * Method edit for listing
          */
-        public function editAction()
-          {
+        public function editAction(){
                if($this->getRequest()->getParam('id')== null){ $testId = 0; }
                else { $testId = $this->getRequest()->getParam('id'); }
                $testModel = Mage::getModel('magetsync/listing')->load($testId);

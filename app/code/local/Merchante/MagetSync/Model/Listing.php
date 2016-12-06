@@ -190,24 +190,37 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 $resource = Mage::getSingleton('core/resource');
                 // generating regular expressions based on the SKU config
                 $regularExpression = "";
-                $skuType = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_sku_type');
-                if($skuType == "alphanumeric"){
-                    $alphabetRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_start_from');
-                    $alphabetRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_end_to');
-                    $numericRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_start_from');
-                    $numericRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_end_to');
-                    $regularExpression = "/[a-zA-Z]{".$alphabetRangeStart.",".$alphabetRangeEnd."}[0-9]{".$numericRangeStart.",".$numericRangeEnd."}/";
+                $skupattern = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_sku_pattern');
+                $regularExpression = "/";
+                $a = 0;
+                $n = 0;
+                $strlen = strlen($skupattern);
+                $strtoarray = str_split($skupattern, 1);
+                foreach($strtoarray as $key => $array) {
+                    if(strtoupper($array) == "A") {
+                        if($n != 0) {
+                            $regularExpression .= "[0-9]{1,$n}";
+                            $n = 0;
+                        }
+                        $a++;
+                    }
+                    elseif(strtoupper($array) == "N") {
+                        if($a != 0) {
+                            $regularExpression .= "[a-zA-Z]{1,$a}";
+                            $a = 0;
+                        }
+                        $n++;
+                    }
+                    if($strlen == $key+1) {
+                        if($a == 0 && $n != 0) {
+                            $regularExpression .= "[0-9]{1,$n}";
+                        }
+                        elseif($n == 0 && $a != 0) {
+                            $regularExpression .= "[a-zA-Z]{1,$a}";
+                        }
+                    }
                 }
-                else if($skuType == "alphabets"){
-                    $alphabetRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_start_from');
-                    $alphabetRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_alphabet_range_end_to');
-                    $regularExpression = "/[a-zA-Z]{".$alphabetRangeStart.",".$alphabetRangeEnd."}/";
-                }
-                else if($skuType == "numeric"){
-                    $numericRangeStart = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_start_from');
-                    $numericRangeEnd = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_mapping/magetsync_field_numeric_range_end_to');
-                    $regularExpression = "/[0-9]{".$numericRangeStart.",".$numericRangeEnd."}/";
-                }
+                $regularExpression .= "/";
 
                 foreach ($result as $item) {
                     $queryM = $mappingModel->getCollection()->addFieldToSelect('etsy_id')->getSelect()->where('etsy_id = ?', $item['listing_id']);
