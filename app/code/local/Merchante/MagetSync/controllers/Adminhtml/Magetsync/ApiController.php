@@ -231,5 +231,3 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ApiController extends Mage_Adminht
     }
 
 }
-
-?>
