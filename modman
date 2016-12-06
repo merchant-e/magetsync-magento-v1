@@ -1,4 +1,4 @@
-CaCerts                                                               CACerts
+CaCerts                                                               CACerts/
 app/code/local/Merchante/*                                            app/code/local/Merchante/
 app/design/adminhtml/default/default/layout/*                         app/design/frontend/base/default/layout/
 app/design/adminhtml/default/default/template/magetsync/*             app/designf/adminhtml/default/default/template/magetsync/
