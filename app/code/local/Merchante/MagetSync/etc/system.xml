@@ -476,7 +476,6 @@
 					</magetsync_field_listing_draft_mode>
 				</fields>
 	        </magetsync_group_draft>
-
             <magetsync_group_mapping translate="label comment">
                 <label>Mapping Items Etsy SKU Format</label>
                 <expanded>1</expanded>
@@ -487,78 +486,19 @@
                 <show_in_website>1</show_in_website>
                 <show_in_store>1</show_in_store>
                 <fields>
-                    <magetsync_field_sku_type translate="label comment">
-                        <label>Etsy SKU Type</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/skuEtsy_source</source_model>
-                         <comment><![CDATA[Set format for title SKU.
-                            <script type="text/javascript">
-        /*document.observe("dom:loaded",function(){
-            if($('magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_sku_type').value != 'alphabets' || $('magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_sku_type').value != 'alphanumeric'){
-                Element.up($('row_magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_alphabet_range_start_from')).hide();
-                Element.up($('row_magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_alphabet_range_start_to')).hide();
-            }
-        });
-        Event.observe('magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_sku_type', 'change', function(){
-            if(this.value != 'alphabets' && this.value != 'alphanumeric'){
-                Element.up($('row_magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_alphabet_range_end_to')).hide();
-                Element.up($('row_magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_alphabet_range_end_to')).hide();
-            }else{
-               Element.up($('row_magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_alphabet_range_end_to')).show();
-                Element.up($('row_magetsync_section_draftmode_magetsync_group_mapping_magetsync_field_alphabet_range_end_to')).show();
-            }
-        });*/
-    </script>]]></comment>
-                        <sort_order>1</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_sku_type>
-
-                    <magetsync_field_alphabet_range_start_from translate="label comment">
-                        <label>Alphabet Range Start</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/range_source</source_model>
-                        <sort_order>2</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_alphabet_range_start_from>
-
-                    <magetsync_field_alphabet_range_end_to translate="label comment">
-                        <label>Alphabet Range End</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/range_source</source_model>
-                        <sort_order>3</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_alphabet_range_end_to>
-
-                    <magetsync_field_numeric_range_start_from translate="label comment">
-                        <label>Numeric Range Start</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/range_source</source_model>
-                        <sort_order>4</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_numeric_range_start_from>
-
-                    <magetsync_field_numeric_range_end_to translate="label comment">
-                        <label>Numeric Range End</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/range_source</source_model>
-                        <sort_order>5</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_numeric_range_end_to>
-
+                    <magetsync_field_sku_pattern translate="label comment">
+                            <label>SKU Pattern</label>
+                            <comment>AAANNN(A - Alphabet, N - Numeric), Add place holder A for Alphabet and N for Numeric to create a pattern for SKUs. The eg. SKU for AAANNN is  ABL004.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <frontend_class>validate-alphanum</frontend_class>
+                            <frontend_input>text</frontend_input>
+                        </magetsync_field_sku_pattern>
                 </fields>
             </magetsync_group_mapping>
             
-			
 			<magetsync_group_delete translate="label comment">
 				<label>Reset Option</label>
 				<comment>This setting is only available for users who wish to remove all items from the Listings Manager</comment>
@@ -590,6 +530,39 @@
 					</magetsync_field_deletelistings>
 				</fields>
 			</magetsync_group_delete>
+             <magetsync_group_resize_images translate="label comment">
+                <label>Resize Images</label>
+                <comment>This setting is used to resize the oversized listing manager product images to Etsy's recommendation(1000px).</comment>
+                <expanded>1</expanded>
+                <sort_order>3</sort_order>
+                <show_in_default>1</show_in_default>
+                <show_in_website>0</show_in_website>
+                <show_in_store>0</show_in_store>
+                <fields>
+                    <magetsync_field_resize_images translate="label comment">
+                        <label>Resize</label>
+                        <frontend_type>button</frontend_type>
+                        <comment>Caution: This button will resize the images for listing manager products.</comment>
+                        <frontend_model>magetsync/buttonResizeListings</frontend_model>
+                        <sort_order>2</sort_order>
+                        <show_in_default>1</show_in_default>
+                        <show_in_website>1</show_in_website>
+                        <show_in_store>1</show_in_store>
+                    </magetsync_field_resize_images>
+
+                    <magetsync_field_delete_resize_images translate="label comment">
+                        <label>Delete Resized Images</label>
+                        <frontend_type>button</frontend_type>
+                        <comment>Caution: This button will delete the resized images for all the listing manager products. Note: It will keep the original images intact.</comment>
+                        <frontend_model>magetsync/buttonDeleteResizeListings</frontend_model>
+                        <sort_order>3</sort_order>
+                        <show_in_default>1</show_in_default>
+                        <show_in_website>1</show_in_website>
+                        <show_in_store>1</show_in_store>
+                    </magetsync_field_delete_resize_images>
+
+                </fields>
+            </magetsync_group_resize_images>
 				
 		</groups>
         </magetsync_section_draftmode>

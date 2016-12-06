@@ -137,7 +137,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                     foreach ($data['listingids'] as $listId) {
                         $listingModel = Mage::getModel('magetsync/listing')->load($listId);
                         $syncState = $listingModel->getSync();
-                        $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+                        $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_delete/magetsync_field_enable_failed_items_deletion');
 
                         if ($syncState == Merchante_MagetSync_Model_Listing::STATE_EXPIRED
                             || $syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE
@@ -148,7 +148,11 @@ error_reporting(E_ALL ^ E_NOTICE);
                                 $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
                                 $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listingModel->getIdproduct());
                             }
-                            Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()), array('synchronizedEtsy' => 0));
+                            $defaultStoreID = Mage::app()
+                                ->getWebsite(true)
+                                ->getDefaultGroup()
+                                ->getDefaultStoreId();
+                            Mage::getSingleton('catalog/product_action')->updateAttributes(array($listingModel->getIdproduct()), array('synchronizedEtsy' => 0), $defaultStoreID);
                             $listingModel->delete();
                             $deleteCount++;
                         }
@@ -187,8 +191,7 @@ error_reporting(E_ALL ^ E_NOTICE);
         /**
          * Method edit for listing
          */
-        public function editAction()
-          {
+        public function editAction(){
                if($this->getRequest()->getParam('id')== null){ $testId = 0; }
                else { $testId = $this->getRequest()->getParam('id'); }
                $testModel = Mage::getModel('magetsync/listing')->load($testId);
@@ -617,7 +620,7 @@ error_reporting(E_ALL ^ E_NOTICE);
             }
         }
 
-        /**
+    /**
      * Method for resetting images on etsy
      */
     public function resetimagesAction() {
@@ -640,7 +643,7 @@ error_reporting(E_ALL ^ E_NOTICE);
                     $cnt++;
                 }
                 if ($cnt) {
-                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__($cnt . " products were queued to have their images updated."));
+                    Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
                 }else{
                     Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($cnt . " products were queued for image resetting."));
                 }
@@ -662,6 +665,93 @@ error_reporting(E_ALL ^ E_NOTICE);
     }
 
 
+    /**
+     * Method for resizing images for etsy
+     */
+    public function resizeimagesAction() {
+        try{
+            $listings = Mage::getModel('magetsync/listing')->getCollection();
+            /// images 
+            $totalImages = 0;
+            $resizedImages = 0;
+            $overSizedImages = 0;
+            $selectedProducts = count($listings);
+            foreach ($listings as $listing) {
+                $idProduct = $listing->getIdproduct();
+                $productModel = Mage::getModel('catalog/product')->load($idProduct);
+                $dataPro = $productModel->getData();
+                $newImages = array();
+                foreach ($productModel->getMediaGalleryImages() as $_image){
+                    $fileInfoArray = pathinfo($_image->getPath());
+                    $imageName = $fileInfoArray['basename'];
+                    $imageDirectory = $fileInfoArray['dirname'];
+                    $imageObj = new Varien_Image($_image->getPath());
+                    $image_width = $imageObj->getOriginalWidth();
+                    $image_height = $imageObj->getOriginalHeight();
+                    $resizePathFull = $imageDirectory.DS."etsy_".$imageName;
+                    // resize if the width or height is greater than 1000px ETSY's recommendation
+                    if($image_height > 1000 || $image_width > 1000){
+                        $imageObj->constrainOnly(TRUE);
+                        $imageObj->keepAspectRatio(TRUE);
+                        //$imageObj->keepFrame(TRUE);
+                        if($image_width >= $image_height){
+                            $imageObj->resize(1000,null);
+                        }
+                        else{
+                            $imageObj->resize(null,1000);
+                        }
+                        $imageObj->save($resizePathFull);
+                        if(file_exists($resizePathFull)){
+                            $resizedImages++;
+                        }
+                        $overSizedImages++;
+                    }
+                    $totalImages++;
+                }
+            }
+            $result = array('success' => true,'msg' => "Selected Products:".$selectedProducts.", Total images:".$totalImages.", Oversized:".$overSizedImages.", Re-sized:".$resizedImages);
+            echo json_encode($result,true);
+        } catch (Exception $e) {
+            $result = array('success' => false,'msg' => $e->getMessage());
+            echo json_encode($result,true);
+        }
+        return;
+    }
+
+
+    public function deleteresizeimagesAction() {
+        try{
+            $listings = Mage::getModel('magetsync/listing')->getCollection();
+            /// images 
+            $totalImages = 0;
+            $deletedResizedImages = 0;
+            $selectedProducts = count($listings);
+            foreach ($listings as $listing) {
+                $idProduct = $listing->getIdproduct();
+                $productModel = Mage::getModel('catalog/product')->load($idProduct);
+                $dataPro = $productModel->getData();
+                $newImages = array();
+                foreach ($productModel->getMediaGalleryImages() as $_image){
+                    $fileInfoArray = pathinfo($_image->getPath());
+                    $imageName = $fileInfoArray['basename'];
+                    $imageDirectory = $fileInfoArray['dirname'];
+                    $resizePathFull = $imageDirectory.DS."etsy_".$imageName;
+                    if(file_exists($resizePathFull)){
+                        if(unlink($resizePathFull)){
+                           $deletedResizedImages++;
+                        }
+                        $totalImages++;
+                    }
+                }
+            }
+            $result = array('success' => true,'msg' => "Selected Products:".$selectedProducts.", Total Resized images:".$totalImages.", Deleted Images:".$deletedResizedImages);
+            echo json_encode($result,true);
+        } catch (Exception $e) {
+            $result = array('success' => false,'msg' => $e->getMessage());
+            echo json_encode($result,true);
+        }
+        return;
+    }
         /**
          * Method delete for listing
          */
@@ -674,7 +764,7 @@ error_reporting(E_ALL ^ E_NOTICE);
             $listingModel = Mage::getModel('magetsync/listing');
             $data = $listingModel->load($value)->getData();
             try {
-                $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_enable_failed_items_deletion');
+                $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_delete/magetsync_field_enable_failed_items_deletion');
                 $resultApi['status'] = true;
                 if ($data['listing_id'] && !$deleteFailedAllowed) {
                     $resultApi['status'] = false;

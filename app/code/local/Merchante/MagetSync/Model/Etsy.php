@@ -139,6 +139,10 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
 
          $url = self::$merchApi.$name.'/'.$service;
          $response = $this->curlConnect($url,$data);
+         $log = array("url" => $url, "response" => $response);
+         //$log = json_encode($log, true);
+         error_log(print_r($log,1), null, '../etsy_log.log');
+         Mage::log(print_r($log,1), null, 'etsy_log.log');
          $result = json_decode($response,true);
          return $result;
      }
