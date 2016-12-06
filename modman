@@ -1,7 +1,7 @@
 CaCerts                                                               CACerts
 app/code/local/Merchante/*                                            app/code/local/Merchante/
 app/design/adminhtml/default/default/layout/*                         app/design/frontend/base/default/layout/
-app/designf/adminhtml/default/default/template/magetsync/*            app/designf/adminhtml/default/default/template/magetsync/
+app/design/adminhtml/default/default/template/magetsync/*             app/designf/adminhtml/default/default/template/magetsync/
 app/locale/*                                                          app/locale/
 app/etc/modules/Merchante_MagetSync.xml                               app/etc/modules/Merchante_MagetSync.xml
 js/*                                                                  js/
