@@ -44,7 +44,7 @@
                             <comment><![CDATA[Select the default language of your Etsy store.]]></comment>
                             <frontend_type>select</frontend_type>
                             <sort_order>2</sort_order>
-                            <source_model>magetsync/languageEtsy_source</source_model>
+                            <source_model>magetsync/sources_languageEtsy_source</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -151,7 +151,7 @@
                         <comment><![CDATA[Select a Magento store to associate with all Etsy orders/inventory.]]></comment>
                         <frontend_type>select</frontend_type>
                         <sort_order>1</sort_order>
-                        <source_model>magetsync/magentoStore_source</source_model>
+                        <source_model>magetsync/sources_magentoStore_source</source_model>
                         <show_in_default>1</show_in_default>
                         <show_in_website>1</show_in_website>
                         <show_in_store>1</show_in_store>
@@ -159,7 +159,7 @@
                     <magetsync_field_auto_sync translate="label comment">
                         <label>Auto Sync Product Attributes</label>
                         <frontend_type>select</frontend_type>
-                        <source_model>magetsync/excludeOption_source</source_model>
+                        <source_model>magetsync/sources_excludeOption_source</source_model>
                         <comment>Synchronize attribute updates automatically.</comment>
                         <sort_order>2</sort_order>
                         <show_in_default>1</show_in_default>
@@ -169,7 +169,7 @@
                     <magetsync_field_exclude_pictures translate="label comment">
                         <label>Exclude Product Images</label>
                         <frontend_type>select</frontend_type>
-                        <source_model>magetsync/excludeOption_source</source_model>
+                        <source_model>magetsync/sources_excludeOption_source</source_model>
                         <comment>Upload product images with status: excluded.</comment>
                         <sort_order>3</sort_order>
                         <show_in_default>1</show_in_default>
@@ -179,7 +179,7 @@
                     <magetsync_field_special_price translate="label comment">
                         <label>Use Special Price on Etsy Listings</label>
                         <frontend_type>select</frontend_type>
-                        <source_model>magetsync/excludeOption_source</source_model>
+                        <source_model>magetsync/sources_excludeOption_source</source_model>
                         <comment>Use your products 'Special Price' when available</comment>
                         <sort_order>4</sort_order>
                         <show_in_default>1</show_in_default>
@@ -190,7 +190,7 @@
 					<magetsync_field_change_product_title_attribute translate="label comment">
                         <label>Change Product Title Attribute</label>
                         <frontend_type>select</frontend_type>
-                        <source_model>magetsync/excludeOption_source</source_model>
+                        <source_model>magetsync/sources_excludeOption_source</source_model>
                         <comment>Set different product title for Etsy.</comment>
                         <sort_order>6</sort_order>
                         <show_in_default>1</show_in_default>
@@ -212,7 +212,7 @@
 					<magetsync_field_change_product_description_attribute translate="label comment">
                         <label>Change Product Description Attribute</label>
                         <frontend_type>select</frontend_type>
-                        <source_model>magetsync/excludeOption_source</source_model>
+                        <source_model>magetsync/sources_excludeOption_source</source_model>
                         <comment>Set different description for Etsy.</comment>
                         <sort_order>8</sort_order>
                         <show_in_default>1</show_in_default>
@@ -245,7 +245,7 @@
                         <magetsync_field_sizing_scale translate="label comment">
                             <label>Size Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_sizingOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_sizingOptions_source</source_model>
                             <comment>Scale used for Size variation.</comment>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
@@ -255,7 +255,7 @@
                         <magetsync_field_weight_scale translate="label comment">
                             <label>Weight Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_weightOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_weightOptions_source</source_model>
                             <comment>Scale used for Weight variation.</comment>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
@@ -265,7 +265,7 @@
                         <magetsync_field_height_scale translate="label comment">
                             <label>Height Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_heightOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_heightOptions_source</source_model>
                             <comment>Scale used for Height variation.</comment>
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
@@ -275,7 +275,7 @@
                         <magetsync_field_length_scale translate="label comment">
                             <label>Length Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_lengthOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_lengthOptions_source</source_model>
                             <comment>Scale used for Length variation.</comment>
                             <sort_order>4</sort_order>
                             <show_in_default>1</show_in_default>
@@ -285,7 +285,7 @@
                         <magetsync_field_width_scale translate="label comment">
                             <label>Width Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_widthOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_widthOptions_source</source_model>
                             <comment>Scale used for Width variation.</comment>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
@@ -295,7 +295,7 @@
                         <magetsync_field_diameter_scale translate="label comment">
                             <label>Diameter Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_diameterOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_diameterOptions_source</source_model>
                             <comment>Scale used for Diameter variation.</comment>
                             <sort_order>6</sort_order>
                             <show_in_default>1</show_in_default>
@@ -305,7 +305,7 @@
                         <magetsync_field_dimension_scale translate="label comment">
                             <label>Dimension Scale</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>magetsync/measurements_dimensionOptions_source</source_model>
+                            <source_model>magetsync/sources_measurements_dimensionOptions_source</source_model>
                             <comment>Scale used for Dimension variation.</comment>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
@@ -467,7 +467,7 @@
 					<magetsync_field_listing_draft_mode translate="label comment">
 						<label>Create Listings in Draft Mode</label>
 						<frontend_type>select</frontend_type>
-						<source_model>magetsync/excludeOption_source</source_model>
+						<source_model>magetsync/sources_excludeOption_source</source_model>
 						<comment>Set listing status for products to draft.</comment>
 						<sort_order>1</sort_order>
 						<show_in_default>1</show_in_default>
@@ -511,7 +511,7 @@
                     <magetsync_field_enable_failed_items_deletion translate="label comment">
                         <label>Enable Failed Items Deletion</label>
                         <frontend_type>select</frontend_type>
-                        <source_model>magetsync/excludeOption_source</source_model>
+                        <source_model>magetsync/sources_excludeOption_source</source_model>
                         <comment>When it's set to yes, failed items could be deletable from both the actions dropdown menu and/or 'Delete' button within the listing.</comment>
                         <sort_order>1</sort_order>
                         <show_in_default>1</show_in_default>
