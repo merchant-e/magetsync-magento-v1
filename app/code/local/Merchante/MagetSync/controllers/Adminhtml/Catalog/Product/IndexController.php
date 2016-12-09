@@ -18,6 +18,9 @@ class Merchante_MagetSync_Adminhtml_Catalog_Product_IndexController extends Mage
             $productIds = (isset($data['product']) ? $data['product'] : null);
 
             if (!is_array($productIds)) {
+                Mage::getSingleton('adminhtml/session')
+                    ->settestData(false);
+                $this->_redirect('adminhtml/catalog_product/index');
                 return;
             }
             /** @var Mage_Catalog_Model_Resource_Product_Collection $products */
