@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
-
 /**
  * @copyright  Copyright (c) 2015 Merchant-e
  *
@@ -27,15 +25,17 @@ class Merchante_MagetSync_Model_Observer
         $track_number = $info->getData();
         $track_number = $track_number['track_number'];
         $orderId = $observer->getEvent()->getTrack()->getOrderId();
-        if($carrier == 'australiapost')
-        {
+
+        if($carrier == 'australiapost') {
             $carrier = 'australia-post';
         }
+
         $shop = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop');
         $receipt = Mage::getModel('magetsync/receipt');
         $orderECollection = Mage::getModel('magetsync/orderEtsy')->getCollection();
         $query = $orderECollection->getSelect()->where('order_id = ?',$orderId);
         $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+
         if($query) {
             $obligatory = array('shop_id' => $shop,'receipt_id' => $query[0]['receipt_id']);
             $params = array('tracking_code' => $track_number, 'carrier_name' => $carrier);
@@ -47,13 +47,24 @@ class Merchante_MagetSync_Model_Observer
                 Mage::log("Error: " . print_r($dataApi['message'], true), null, 'magetsync_track.log');
             }
         }
+
         return;
         } catch (Exception $e){
-            Mage::log("Error: ".print_r($e, true),null,'magetsync_track.log');
+            Mage::log('Error: ' . print_r($e, true), null, 'magetsync_track.log');
+
             return;
         }
     }
 
+    /**
+     * Set option array
+     *
+     * @param $values
+     * @param $arrOptions
+     * @param $optionID
+     * @param string $option_type_id
+     * @return mixed
+     */
     public function setOptionArray($values,$arrOptions,$optionID,$option_type_id = 'option_type_id')
     {
         if ($values) {
@@ -62,37 +73,58 @@ class Merchante_MagetSync_Model_Observer
         } else {
             $arrOptions[$optionID] = '0';
         }
+
         return $arrOptions;
     }
 
     /**
+     * Create order
+     * Using by crontab
+     *
      * @param $observer
      * @return boolean
+     * @event
      */
     public function createOrder($observer)
     {
        try {
+           /** @var Merchante_MagetSync_Model_Order $orderModel */
            $orderModel = Mage::getModel('magetsync/order');
+
            return $orderModel->makeOrder();
-       }catch (Exception $e)
-        {
+       } catch (Exception $e) {
             Mage::log("Error: " . print_r($e->getMessage(), true), null, 'magetsync_order.log');
             return false;
-        }
+       }
     }
 
+    /**
+     * Check listings expire
+     * Using by crontab
+     *
+     * @param $observer
+     */
     public function checkListingsExpired($observer)
     {
+        /** @var Merchante_MagetSync_Model_Etsy $etsyModel */
         $etsyModel = Mage::getModel('magetsync/etsy');
+
         if ($etsyModel->verifyDataConfiguration()) {
+            /** @var Merchante_MagetSync_Model_Listing $listingModel */
             $listingModel = Mage::getModel('magetsync/listing');
+
             $query = $listingModel->getCollection()->getSelect()->where('(sync =' . Merchante_MagetSync_Model_Listing::SYNCED .
                 ' OR sync =' . Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC
                 . ') AND enabled =' . Merchante_MagetSync_Model_Listing::LISTING_ENABLED);
+
+            /** @var [] $results */
             $results = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+
+            /** @var [] $item */
             foreach ($results as $item) {
 
                 $shop = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop');
+
                 if ($shop) {
                     $obliUpd = array('listing_id' => $item['listing_id'], 'shop_id' => $shop);
                     $resultApiGet = $listingModel->getShopListingExpired($obliUpd, null);
@@ -112,9 +144,17 @@ class Merchante_MagetSync_Model_Observer
 
     }
 
+    /**
+     * Check product inventory
+     * Using by crontab
+     *
+     * @param $observer
+     */
     public function checkInventory($observer)
     {
+        /** @var Merchante_MagetSync_Model_Etsy $etsyModel */
         $etsyModel = Mage::getModel('magetsync/etsy');
+
         if ($etsyModel->verifyDataConfiguration()) {
             $listingModel = Mage::getModel('magetsync/listing');
             $query = $listingModel->getCollection()->getSelect()->where('(quantity_has_changed =' . Merchante_MagetSync_Model_Listing::QUANTITY_HAS_CHANGED .
