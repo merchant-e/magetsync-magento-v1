@@ -22,9 +22,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ApiController extends Mage_Adminht
     public function authorizeAction()
     {
         try {
-            $tokenCustomer  = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_tokencustomer');
-            $shop_name      = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop');
-            $language       = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language');
+            $tokenCustomer = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_tokencustomer');
+            $shop_name = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop');
+            $language = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language');
 
             if ($language == null) {
                 Mage::getSingleton('adminhtml/session')
@@ -54,21 +54,21 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ApiController extends Mage_Adminht
                 return;
             }
 
-            $bverifier              = '';
-            $btoken                 = '';
-            $btokenSecret           = '';
-            $access_token           = '';
-            $access_token_secret    = '';
+            $bverifier = '';
+            $btoken = '';
+            $btokenSecret = '';
+            $access_token = '';
+            $access_token_secret = '';
 
             /** @var Merchante_MagetSync_Model_Etsy $etsyModel */
-            $etsyModel     = Mage::getModel('magetsync/etsy');
+            $etsyModel = Mage::getModel('magetsync/etsy');
 
             /** @var [] $configuration */
             $configuration = $etsyModel->getConfiguration();
 
             if ($configuration != null && count($configuration) > 0) {
-                $btokenSecret        = $configuration['TokenSecret'];
-                $access_token        = $configuration['AccessToken'];
+                $btokenSecret = $configuration['TokenSecret'];
+                $access_token = $configuration['AccessToken'];
                 $access_token_secret = $configuration['AccessTokenSecret'];
             }
 
