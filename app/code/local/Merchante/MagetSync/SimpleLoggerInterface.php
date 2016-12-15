@@ -1,7 +1,8 @@
 <?php
 /**
  * Simple logger interface.
- *
+ * @copyright  Copyright (c) 2016 Merchant-e
+ * Class Merchante_MagetSync_SimpleLoggerInterface
  */
 interface Merchante_MagetSync_SimpleLoggerInterface
 {

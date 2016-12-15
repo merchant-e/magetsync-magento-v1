@@ -3,6 +3,8 @@
 /**
  * Simple logger class to quickly log after initialization of log files setup.
  *
+ * @copyright  Copyright (c) 2016 Merchant-e
+ *  Class Merchante_MagetSync_Model_SimpleLogger
  */
 class Merchante_MagetSync_Model_SimpleLogger implements Merchante_MagetSync_SimpleLoggerInterface
 {
