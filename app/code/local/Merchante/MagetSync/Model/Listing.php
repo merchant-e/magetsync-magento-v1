@@ -11,15 +11,6 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
     /**
      *
      */
-    public function _construct()
-   	{
-        parent::_construct();
-        $this->_init('magetsync/listing');
-   	}
-
-    /**
-     *
-     */
     const STATE_INQUEUE      = 1;
     const STATE_SYNCED       = 2;
     const STATE_FAILED       = 3;
@@ -47,6 +38,15 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @var string
      */
     public $name = 'Listing';
+
+    /**
+     * Constructor
+     */
+    public function _construct()
+    {
+        parent::_construct();
+        $this->_init('magetsync/listing');
+    }
 
     /**
      * @param $obligatory
@@ -1198,6 +1198,15 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
         } catch (Exception $e) {
             Mage::logException($e);
             return;
+        }
+    }
+
+    public function getPreparedDataToSend()
+    {
+        $data = $this->getData();
+
+        if ($data['listing_id']) {
+            throw new Exception();
         }
     }
 }
