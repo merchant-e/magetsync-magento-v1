@@ -1,0 +1,108 @@
+<config>
+    <menu>
+        <magetsync translate="title" module="adminhtml">
+            <title>MagetSync</title>
+            <sort_order>81</sort_order>
+            <children>
+                <listing translate="title" module="adminhtml">
+                    <title>Listings Manager</title>
+                    <sort_order>1</sort_order>
+                    <action>adminhtml/magetsync_index</action>
+                </listing>
+                <mapping module="adminhtml">
+                    <title>Mappings</title>
+                    <sort_order>2</sort_order>
+                    <action>adminhtml/magetsync_mapping</action>
+                </mapping>
+                <attributeTemplate translate="title" module="adminhtml">
+                    <title>Attribute Templates</title>
+                    <sort_order>3</sort_order>
+                    <action>adminhtml/magetsync_attributeTemplate</action>
+                </attributeTemplate>
+                <global translate="title" module="adminhtml">
+                    <title>Global Options</title>
+                    <sort_order>4</sort_order>
+                    <children>
+                        <shopSection translate="title" module="adminhtml">
+                            <title>Shop Sections</title>
+                            <sort_order>1</sort_order>
+                            <action>adminhtml/magetsync_shopSection</action>
+                        </shopSection>
+                        <shippingTemplate translate="title" module="adminhtml">
+                            <title>Shipping Profiles</title>
+                            <sort_order>2</sort_order>
+                            <action>adminhtml/magetsync_shippingTemplate</action>
+                        </shippingTemplate>
+                        <template translate="title" module="adminhtml">
+                            <title>Templates</title>
+                            <sort_order>3</sort_order>
+                            <action>adminhtml/system_config/edit/section/magetsync_section_templates</action>
+                        </template>
+                    </children>
+                </global>
+                <configuration_magetsync translate="title" module="adminhtml">
+                    <title>Configuration</title>
+                    <sort_order>5</sort_order>
+                    <action>adminhtml/system_config/edit/section/magetsync_section</action>
+                </configuration_magetsync>
+            </children>
+        </magetsync>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <magetsync_section translate="title">
+                                        <title>MagetSync</title>
+                                    </magetsync_section>
+                                    <magetsync_section_templates translate="title">
+                                        <title>Templates</title>
+                                    </magetsync_section_templates>
+                                    <magetsync_section_draftmode translate="title">
+                                        <title>Draft Mode</title>
+                                    </magetsync_section_draftmode>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                    <magetsync translate="title" module="adminhtml">
+                        <title>MagetSync</title>
+                        <sort_order>81</sort_order>
+                        <children>
+                            <listing translate="title" module="adminhtml">
+                                <title>Listings Manager</title>
+                            </listing>
+                            <mapping module="adminhtml">
+                                <title>Mappings</title>
+                            </mapping>
+                            <global translate="title" module="adminhtml">
+                                <title>Global Options</title>
+                                <children>
+                                    <shopSection translate="title" module="adminhtml">
+                                        <title>Shop Sections</title>
+                                    </shopSection>
+                                    <shippingTemplate translate="title" module="adminhtml">
+                                        <title>Shipping Profiles</title>
+                                    </shippingTemplate>
+                                    <template translate="title" module="adminhtml">
+                                        <title>Templates</title>
+                                    </template>
+                                </children>
+                            </global>
+                            <attributeTemplate translate="title" module="adminhtml">
+                                <title>Attribute Templates</title>
+                            </attributeTemplate>
+                            <configuration_magetsync translate="title" module="adminhtml">
+                                <title>Configuration</title>
+                            </configuration_magetsync>
+                        </children>
+                    </magetsync>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>
