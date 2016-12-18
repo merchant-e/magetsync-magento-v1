@@ -33,15 +33,22 @@ class Merchante_MagetSync_Helper_Config extends Mage_Core_Helper_Abstract
      */
     protected function getSectionsConfigValue($sectionName, $groupName, $fieldName, $storeId = null)
     {
-        if (
-            ! isset($this->configSectionsData[$sectionName]) ||
-            null === $this->configSectionsData[$sectionName]
-        ) {
-            $this->configSectionsData[$sectionName]
-                = Mage::getStoreConfig($sectionName, $groupName, $fieldName, $storeId);
+        if ($storeId == null) {
+            $storeId = Mage::app()
+                           ->getWebsite(true)
+                           ->getDefaultGroup()
+                           ->getDefaultStoreId();
         }
 
-        $result = isset($this->configSectionsData[$sectionName][$groupName][$fieldName]) ?: '';
+        if (
+            ! isset($this->configSectionsData[$sectionName][$storeId]) ||
+            null === $this->configSectionsData[$sectionName][$storeId]
+        ) {
+            $this->configSectionsData[$sectionName][$storeId]
+                = Mage::getStoreConfig($sectionName, $storeId);
+        }
+
+        $result = isset($this->configSectionsData[$sectionName][$storeId][$groupName][$fieldName]) ?: '';
 
         return $result;
     }
@@ -137,7 +144,7 @@ class Merchante_MagetSync_Helper_Config extends Mage_Core_Helper_Abstract
      */
     public function isLogExceptionEnabled()
     {
-        return (bool) $this->getMagetSyncSectionValue('magetsync_group_debug', 'enable_log');
+        return (bool) $this->getMagetSyncSectionValue('magetsync_group_debug', 'enable_exception_log');
     }
 
 }

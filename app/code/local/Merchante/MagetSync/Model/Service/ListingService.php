@@ -3,13 +3,25 @@
 /**
  * Class ListingService
  */
-class Merchante_MagetSync_Model_Service_ListingService
+class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSync_Model_Service_Abstract
 {
 
     /**
      * @var Merchante_MagetSync_Model_Listing
      */
     protected $listingModel;
+
+    /**
+     * Constructor
+     *
+     * Merchante_MagetSync_Model_Service_ListingService constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setLogBaseName($this->getModel());
+    }
 
     /**
      * Get listing model
@@ -236,7 +248,7 @@ class Merchante_MagetSync_Model_Service_ListingService
                     $errorMsg = $e->getMessage();
                 }
 
-                Mage::log("Error: " . print_r($errorMsg, true), null, 'magetsync_listing.log');
+                $listing->log("Error: " . print_r($errorMsg, true));
 
                 if ($listing->getId()) {
                     Merchante_MagetSync_Model_LogData::magetsync(
@@ -256,4 +268,5 @@ class Merchante_MagetSync_Model_Service_ListingService
             }
         }
     }
+
 }

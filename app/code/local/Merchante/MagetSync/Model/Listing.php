@@ -540,7 +540,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 return array('success' => false, 'error' => 'Invalid product type.');
             }
         } catch (Exception $e) {
-            Mage::log("Error: " . print_r($e->getMessage(), true), null, 'magetsync_qty.log');
+            $this->logException("Error: " . print_r($e->getMessage(), true));
             return array('success' => false, 'error' => $e->getMessage());
         }
     }

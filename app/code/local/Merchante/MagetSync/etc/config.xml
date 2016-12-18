@@ -289,6 +289,7 @@
         <magetsync_section>
             <magetsync_group_debug>
                 <enable_log>0</enable_log>
+                <enable_exception_log>0</enable_exception_log>
             </magetsync_group_debug>
         </magetsync_section>
     </default>
