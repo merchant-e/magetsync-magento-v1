@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
 
 /**
  * @copyright  Copyright (c) 2015 Merchant-e
@@ -7,21 +6,39 @@ error_reporting(E_ALL ^ E_NOTICE);
  */
 class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
 {
+
+    /**
+     * Name of default exception log file
+     */
+    const DEFAULT_EXCEPTION_LOG_FILE = 'etsy.log';
+
+    /**
+     * Name of default error log file
+     */
+    const DEFAULT_ERROR_LOG_FILE     = 'etsy.log';
+
     /**
      * @var null
      */
     public $OAuth = null;
+
     /**
      * @var null
      */
     public $apiInfo = null;
+
     /**
      * @var string
      */
     public static $merchApi = "https://api.magetsync.net/public/v1/";
 
     /**
-     *
+     * @var Merchante_MagetSync_Model_SimpleLogger
+     */
+    protected $logger = [];
+
+    /**
+     * Constructor
      */
     public function _construct()
     {
@@ -146,9 +163,9 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
             "url"      => $url,
             "response" => $response
         );
-        //$log = json_encode($log, true);
-        error_log(print_r($log, 1), null, '../etsy_log.log');
-        Mage::log(print_r($log, 1), null, 'etsy_log.log');
+
+        //Mage::log(print_r($log, 1), null, 'etsy_log.log');
+        $this->log(print_r($log, 1));
         $result = json_decode($response, true);
 
         return $result;
@@ -213,6 +230,66 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
         } catch (Exception $e) {
             Mage::log("Error: " . print_r($e, true), null, 'magetsync_curl.log');
         }
+    }
+
+    /**
+     * Get (Create) logger object
+     *
+     * @return Merchante_MagetSync_SimpleLoggerInterface
+     * @throws Merchante_MagetSync_ApiClientException
+     */
+    protected function getLogger($loggerBaseName)
+    {
+        if (!isset($this->logger[$loggerBaseName]) || $this->logger[$loggerBaseName] === null) {
+            /** @var Merchante_MagetSync_Model_SimpleLogger logger[$loggerBaseName] */
+            $this->logger[$loggerBaseName] = Mage::getModel('magetsync/simpleLogger');
+
+            if (false === $this->logger[$loggerBaseName]) {
+                throw new Merchante_MagetSync_ApiClientException("No logger class found");
+            }
+
+            $this->logger[$loggerBaseName]->setExceptionLogFile('magetsync' . DS . $loggerBaseName . '.log');
+            $this->logger[$loggerBaseName]->setLogFile('magetsync' . DS . $loggerBaseName. '.log');
+            $this->logger[$loggerBaseName]->setLogMessagePrefix(sprintf('[%s]', $loggerBaseName));
+        }
+
+        return $this->logger[$loggerBaseName];
+    }
+
+    /**
+     * Log into file
+     *
+     * @param $message
+     * @throws Merchante_MagetSync_ApiClientException
+     */
+    protected function log($message)
+    {
+        if (!Mage::helper('magetsync/config')->isLogEnabled()) {
+
+            return;
+        }
+
+        $loggerBaseName = strtolower(get_called_class());
+
+        $this->getLogger($loggerBaseName)->log($message);
+    }
+
+    /**
+     * Log exception
+     *
+     * @param $message
+     * @throws Merchante_MagetSync_ApiClientException
+     */
+    protected function logException($message)
+    {
+        if (!Mage::helper('magetsync/config')->isLogExceptionEnabled()) {
+
+            return;
+        }
+
+        $loggerBaseName = strtolower(get_called_class());
+
+        $this->getLogger($loggerBaseName)->logException($message);
     }
 
 }
