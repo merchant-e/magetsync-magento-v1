@@ -125,9 +125,9 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
             'accessToken'       => $accessToken,
             'accessTokenSecret' => $accessTokenSecret
         );
-        $isDraftMode = Mage::getStoreConfig(
-            'magetsync_section_draftmode/magetsync_group_draft/magetsync_field_listing_draft_mode'
-        );
+
+        $isDraftMode = Mage::helper('magetsync/config')->isListingDraftMode();
+
         if ($isDraftMode &&
             ($service != "uploadListingImage" && $service != "deleteListingImage" && $service != "findAllListingImages")
         ) {

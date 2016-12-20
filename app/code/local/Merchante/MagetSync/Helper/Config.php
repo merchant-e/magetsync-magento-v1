@@ -48,7 +48,7 @@ class Merchante_MagetSync_Helper_Config extends Mage_Core_Helper_Abstract
                 = Mage::getStoreConfig($sectionName, $storeId);
         }
 
-        $result = isset($this->configSectionsData[$sectionName][$storeId][$groupName][$fieldName]) ?: '';
+        $result = $this->configSectionsData[$sectionName][$storeId][$groupName][$fieldName] ?: '';
 
         return $result;
     }
@@ -124,7 +124,7 @@ class Merchante_MagetSync_Helper_Config extends Mage_Core_Helper_Abstract
      */
     public function getMagetSyncLanguage($storeId = null)
     {
-        return $this->getMagetSyncSectionValue('magetsync_group', 'magetsync_group', $storeId);
+        return $this->getMagetSyncSectionValue('magetsync_group', 'magetsync_field_language', $storeId);
     }
 
     /**
@@ -145,6 +145,16 @@ class Merchante_MagetSync_Helper_Config extends Mage_Core_Helper_Abstract
     public function isLogExceptionEnabled()
     {
         return (bool) $this->getMagetSyncSectionValue('magetsync_group_debug', 'enable_exception_log');
+    }
+
+    /**
+     * Is draft mode enable
+     *
+     * @return bool
+     */
+    public function isListingDraftMode()
+    {
+        return (bool) $this->getDraftmodeSectionValue('magetsync_group_draft','magetsync_field_listing_draft_mode');
     }
 
 }

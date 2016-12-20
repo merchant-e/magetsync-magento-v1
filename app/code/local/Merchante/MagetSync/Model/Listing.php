@@ -1226,7 +1226,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
             return array('status' => $statusOperation);
         } catch (Exception $e) {
-            $this->logException($e);
+            Mage::logException($e);
 
             return array(
                 'status'  => false,
