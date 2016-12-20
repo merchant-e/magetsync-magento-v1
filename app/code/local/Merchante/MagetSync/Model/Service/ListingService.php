@@ -3,13 +3,25 @@
 /**
  * Class ListingService
  */
-class Merchante_MagetSync_Model_Service_ListingService
+class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSync_Model_Service_Abstract
 {
 
     /**
      * @var Merchante_MagetSync_Model_Listing
      */
     protected $listingModel;
+
+    /**
+     * Constructor
+     *
+     * Merchante_MagetSync_Model_Service_ListingService constructor.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->setLogBaseName($this->getModel());
+    }
 
     /**
      * Get listing model
@@ -49,7 +61,7 @@ class Merchante_MagetSync_Model_Service_ListingService
      *
      * @param Merchante_MagetSync_Model_Listing $listing
      * @return array
-     * @throws ListingServiceException
+     * @throws Merchante_MagetSync_ListingServiceException
      */
     protected function prepareData(Merchante_MagetSync_Model_Listing $listing)
     {
@@ -58,10 +70,6 @@ class Merchante_MagetSync_Model_Service_ListingService
         # Add new listing and sync the product
         /** @var Mage_Catalog_Model_Product $listingProduct */
         $listingProduct = Mage::getModel('catalog/product')->load($data['idproduct']);
-
-        if (!$listingProduct->getId()) {
-            throw new ListingServiceException(sprintf('Product with ID %s does not exists', $data['idproduct']));
-        }
 
         $qty = round($listingProduct->getStockItem()->getQty(), 2);
 
@@ -76,7 +84,7 @@ class Merchante_MagetSync_Model_Service_ListingService
         $language = Mage::helper('magetsync/config')->getMagetSyncLanguage();
 
         if (empty($language)) {
-            throw new ListingServiceException(Mage::helper('magetsync')->__('Must configure Etsy\'s language'));
+            throw new Merchante_MagetSync_ListingServiceException(Mage::helper('magetsync')->__('Must configure Etsy\'s language'));
         }
 
         $stateListing = Merchante_MagetSync_Model_Listing::STATE_ACTIVE;
@@ -123,14 +131,6 @@ class Merchante_MagetSync_Model_Service_ListingService
     public function processListingApi(Merchante_MagetSync_Model_Listing $listing)
     {
         $data = $listing->getData();
-
-        # checking if the product is already there in the list synchronizing only images
-        if ($data['listing_id']) {
-            throw new Merchante_MagetSync_ListingServiceException(
-                'Listing already exists',
-                Merchante_MagetSync_ListingServiceException::ALREADY_EXISTS
-            );
-        }
 
         $params = $this->prepareData($listing);
 
@@ -193,7 +193,12 @@ class Merchante_MagetSync_Model_Service_ListingService
             }
         }
         $listing->addData($postData);
-        $listing->save();
+
+        try {
+            $listing->save();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
 
         if ($hasError == true) {
             Merchante_MagetSync_Model_LogData::magetsync(
@@ -212,7 +217,7 @@ class Merchante_MagetSync_Model_Service_ListingService
     }
 
     /**
-     *
+     * Process collection API
      */
     public function processListingCollectionApi()
     {
@@ -222,6 +227,11 @@ class Merchante_MagetSync_Model_Service_ListingService
 
         /** @var Merchante_MagetSync_Model_Listing $listing */
         foreach ($listings as $listing) {
+
+            if ($listing->getListingId()) {
+                continue;
+            }
+
             if ($iterationCntr > Merchante_MagetSync_Model_Observer::AUTOQUEUE_ITERATIONS_LIMIT) {
                 break;
             }
@@ -236,7 +246,7 @@ class Merchante_MagetSync_Model_Service_ListingService
                     $errorMsg = $e->getMessage();
                 }
 
-                Mage::log("Error: " . print_r($errorMsg, true), null, 'magetsync_listing.log');
+                $listing->log("Error: " . print_r($errorMsg, true));
 
                 if ($listing->getId()) {
                     Merchante_MagetSync_Model_LogData::magetsync(
@@ -256,4 +266,5 @@ class Merchante_MagetSync_Model_Service_ListingService
             }
         }
     }
+
 }

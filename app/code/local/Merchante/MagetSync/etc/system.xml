@@ -25,11 +25,11 @@
                     <comment><![CDATA[<div class=\'box\'>Please fill out details below and save configuration before authorizing. <a href="http://support.magetsync.com/hc/en-us/articles/207289067" class="link-store-scope" title="What is this?" target="_blank">Help</a></div>]]></comment>
                     <sort_order>1</sort_order>
                     <frontend_type>text</frontend_type>
-                     <show_in_default>1</show_in_default>
+                    <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                         <magetsync_field_upgrade translate="label comment">
+                        <magetsync_field_upgrade translate="label comment">
                             <label>Subscription</label>
                             <frontend_type>button</frontend_type>
                             <frontend_model>magetsync/buttonUpgrade</frontend_model>
@@ -112,125 +112,161 @@
                         </magetsync_field_inc>
                     </fields>
                 </magetsync_group>
-				<magetsync_group_settings translate="label comment">
-					<label>Settings</label>
-					<expanded>1</expanded>
-					<comment></comment>
-					<sort_order>2</sort_order>
-					<frontend_type>text</frontend_type>
-					<show_in_default>1</show_in_default>
-					<show_in_website>1</show_in_website>
-					<show_in_store>1</show_in_store>
-					<fields>
-					<magetsync_field_open_ssl translate="label comment">
-						<label>Disable OpenSSL</label>
-						<frontend_type>select</frontend_type>
-						<source_model>adminhtml/system_config_source_yesno</source_model>
-						<comment>Enable this option if you're experiencing issues authorizing your store.</comment>
-						<sort_order>1</sort_order>
-						<show_in_default>1</show_in_default>
-						<show_in_website>1</show_in_website>
-						<show_in_store>1</show_in_store>
-					</magetsync_field_open_ssl>
-					</fields>
-					</magetsync_group_settings>
-				
+                <magetsync_group_settings translate="label comment">
+                    <label>Settings</label>
+                    <expanded>1</expanded>
+                    <comment></comment>
+                    <sort_order>2</sort_order>
+                    <frontend_type>text</frontend_type>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_open_ssl translate="label comment">
+                            <label>Disable OpenSSL</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <comment>Enable this option if you're experiencing issues authorizing your store.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_open_ssl>
+                    </fields>
+                </magetsync_group_settings>
+
+                <magetsync_group_debug translate="label comment">
+                    <label>Debug</label>
+                    <expanded>1</expanded>
+                    <sort_order>2</sort_order>
+                    <frontend_type>text</frontend_type>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enable_log translate="label comment">
+                            <label>Enable log</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <comment>Enable this option if you want to log process.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_log>
+                        <enable_exception_log translate="label comment">
+                            <label>Enable exception log</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <comment>Enable this option if you want to log exceptions.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_exception_log>
+                    </fields>
+                </magetsync_group_debug>
+
                 <magetsync_group_options translate="label comment">
-                <label>Catalog Specific Options</label>
-                <expanded>1</expanded>
-                <comment></comment>
-                <sort_order>3</sort_order>
-                <frontend_type>text</frontend_type>
-                <show_in_default>1</show_in_default>
-                <show_in_website>1</show_in_website>
-                <show_in_store>1</show_in_store>
-                <fields>
-                    <magetsync_field_magento_store translate="label comment">
-                        <label>Default Magento Store</label>
-                        <validate>validate-select</validate>
-                        <comment><![CDATA[Select a Magento store to associate with all Etsy orders/inventory.]]></comment>
-                        <frontend_type>select</frontend_type>
-                        <sort_order>1</sort_order>
-                        <source_model>magetsync/sources_magentoStore_source</source_model>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_magento_store>
-                    <magetsync_field_auto_sync translate="label comment">
-                        <label>Auto Sync Product Attributes</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/sources_excludeOption_source</source_model>
-                        <comment>Synchronize attribute updates automatically.</comment>
-                        <sort_order>2</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_auto_sync>
-                    <magetsync_field_exclude_pictures translate="label comment">
-                        <label>Exclude Product Images</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/sources_excludeOption_source</source_model>
-                        <comment>Upload product images with status: excluded.</comment>
-                        <sort_order>3</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_exclude_pictures>
-                    <magetsync_field_special_price translate="label comment">
-                        <label>Use Special Price on Etsy Listings</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/sources_excludeOption_source</source_model>
-                        <comment>Use your products 'Special Price' when available</comment>
-                        <sort_order>4</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_special_price>
-					
-					<magetsync_field_change_product_title_attribute translate="label comment">
-                        <label>Change Product Title Attribute</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/sources_excludeOption_source</source_model>
-                        <comment>Set different product title for Etsy.</comment>
-                        <sort_order>6</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_change_product_title_attribute>
-					
-					<magetsync_field_change_product_title_code translate="label">
+                    <label>Catalog Specific Options</label>
+                    <expanded>1</expanded>
+                    <comment></comment>
+                    <sort_order>3</sort_order>
+                    <frontend_type>text</frontend_type>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_magento_store translate="label comment">
+                            <label>Default Magento Store</label>
+                            <validate>validate-select</validate>
+                            <comment><![CDATA[Select a Magento store to associate with all Etsy orders/inventory.]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>1</sort_order>
+                            <source_model>magetsync/sources_magentoStore_source</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_magento_store>
+                        <magetsync_field_auto_sync translate="label comment">
+                            <label>Auto Sync Product Attributes</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>Synchronize attribute updates automatically.</comment>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_auto_sync>
+                        <magetsync_field_exclude_pictures translate="label comment">
+                            <label>Exclude Product Images</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>Upload product images with status: excluded.</comment>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_exclude_pictures>
+                        <magetsync_field_special_price translate="label comment">
+                            <label>Use Special Price on Etsy Listings</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>Use your products 'Special Price' when available</comment>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_special_price>
+
+                        <magetsync_field_change_product_title_attribute translate="label comment">
+                            <label>Change Product Title Attribute</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>Set different product title for Etsy.</comment>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_change_product_title_attribute>
+
+                        <magetsync_field_change_product_title_code translate="label">
                             <label>Title Attribute Code</label>
-							<comment><![CDATA[Insert attribute code only e.g. <em>etsy_title</em>]]></comment>
+                            <comment><![CDATA[Insert attribute code only e.g. <em>etsy_title</em>]]></comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-							<depends><magetsync_field_change_product_title_attribute>1</magetsync_field_change_product_title_attribute></depends>
-                    </magetsync_field_change_product_title_code>
-					
-					<magetsync_field_change_product_description_attribute translate="label comment">
-                        <label>Change Product Description Attribute</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/sources_excludeOption_source</source_model>
-                        <comment>Set different description for Etsy.</comment>
-                        <sort_order>8</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_change_product_description_attribute>
-					
-					<magetsync_field_change_product_description_attribute_code translate="label">
+                            <depends>
+                                <magetsync_field_change_product_title_attribute>1</magetsync_field_change_product_title_attribute>
+                            </depends>
+                        </magetsync_field_change_product_title_code>
+
+                        <magetsync_field_change_product_description_attribute translate="label comment">
+                            <label>Change Product Description Attribute</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>Set different description for Etsy.</comment>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_change_product_description_attribute>
+
+                        <magetsync_field_change_product_description_attribute_code translate="label">
                             <label>Description Attribute code</label>
-							<comment><![CDATA[Insert attribute code only e.g. <em>etsy_description</em>]]></comment>
+                            <comment><![CDATA[Insert attribute code only e.g. <em>etsy_description</em>]]></comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-							<depends><magetsync_field_change_product_description_attribute>1</magetsync_field_change_product_description_attribute></depends>
-                    </magetsync_field_change_product_description_attribute_code>
-                </fields>
+                            <depends>
+                                <magetsync_field_change_product_description_attribute>1</magetsync_field_change_product_description_attribute>
+                            </depends>
+                        </magetsync_field_change_product_description_attribute_code>
+                    </fields>
                 </magetsync_group_options>
                 <magetsync_group_variations translate="label comment">
                     <label>Variations Specific Options</label>
@@ -324,37 +360,39 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                    <magetsync_field_column_order translate="label">
-                        <label>Enable \'Source\' Column in Order Grid</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
-                        <sort_order>1</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_column_order>
-                    <magetsync_field_enable_prefix translate="label">
-                        <label>Set a Prefix for Your Etsy Orders</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>adminhtml/system_config_source_yesno</source_model>
-                        <sort_order>2</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_enable_prefix>
-                    <magetsync_field_order_prefix translate="label comment">
-                        <label>Order Number Prefix</label>
-                        <frontend_input>text</frontend_input>
-                        <comment><![CDATA[e.g. <em>etsy_</em>, this will appear as <em>etsy_[ordernumber]</em>]]></comment>
-                        <sort_order>3</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                        <depends><magetsync_field_enable_prefix>1</magetsync_field_enable_prefix></depends>
-                    </magetsync_field_order_prefix>
+                        <magetsync_field_column_order translate="label">
+                            <label>Enable \'Source\' Column in Order Grid</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_column_order>
+                        <magetsync_field_enable_prefix translate="label">
+                            <label>Set a Prefix for Your Etsy Orders</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_enable_prefix>
+                        <magetsync_field_order_prefix translate="label comment">
+                            <label>Order Number Prefix</label>
+                            <frontend_input>text</frontend_input>
+                            <comment><![CDATA[e.g. <em>etsy_</em>, this will appear as <em>etsy_[ordernumber]</em>]]></comment>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends>
+                                <magetsync_field_enable_prefix>1</magetsync_field_enable_prefix>
+                            </depends>
+                        </magetsync_field_order_prefix>
                         <magetsync_field_was_shipped_orders translate="label comment">
                             <label>Import Old Etsy Orders</label>
-							<comment><![CDATA[Only imports completed Etsy orders. <br /><strong>Important:</strong> Previously sold products must exist in Magento and under the <em>Listings Manager</em> so that orders can be created.]]></comment>
+                            <comment><![CDATA[Only imports completed Etsy orders. <br /><strong>Important:</strong> Previously sold products must exist in Magento and under the <em>Listings Manager</em> so that orders can be created.]]></comment>
                             <frontend_type>button</frontend_type>
                             <frontend_model>magetsync/buttonImportOrders</frontend_model>
                             <sort_order>4</sort_order>
@@ -362,133 +400,133 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </magetsync_field_was_shipped_orders>
-                </fields>
+                    </fields>
                 </magetsync_group_sales_order>
-			</groups>
+            </groups>
         </magetsync_section>
         <magetsync_section_templates translate="label" module="magetsync">
-        <label>Templates</label>
-        <sort_order>20</sort_order>
-        <frontend_type>text</frontend_type>
-        <show_in_default>1</show_in_default>
-        <show_in_website>1</show_in_website>
-        <show_in_store>1</show_in_store>
-        <tab>magetsync_tab</tab>
-        <groups>
-            <magetsync_group_description_area1 translate="label comment">
-            <sort_order>0</sort_order>
+            <label>Templates</label>
+            <sort_order>20</sort_order>
+            <frontend_type>text</frontend_type>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
-            <frontend_model>magetsync/adminhtml_configuration_template_form</frontend_model>
-            </magetsync_group_description_area1>
-            <magetsync_group_notes_1 translate="label comment">
-                <label>Global Notes 1</label>
-                <expanded>1</expanded>
-                <frontend_type>text</frontend_type>
-                <sort_order>1</sort_order>
-                <show_in_default>1</show_in_default>
-                <show_in_website>1</show_in_website>
-                <show_in_store>1</show_in_store>
-                <fields>
-                    <magetsync_field_prepend_one translate="label">
-                        <label>Prepend Global Note 1</label>
-                        <frontend_type>textarea</frontend_type>
-                        <comment>This text will be added at the beginning of the Etsy listing description field</comment>
-                        <sort_order>1</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_prepend_one>
+            <tab>magetsync_tab</tab>
+            <groups>
+                <magetsync_group_description_area1 translate="label comment">
+                    <sort_order>0</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <frontend_model>magetsync/adminhtml_configuration_template_form</frontend_model>
+                </magetsync_group_description_area1>
+                <magetsync_group_notes_1 translate="label comment">
+                    <label>Global Notes 1</label>
+                    <expanded>1</expanded>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_prepend_one translate="label">
+                            <label>Prepend Global Note 1</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>This text will be added at the beginning of the Etsy listing description field</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_prepend_one>
 
-                    <magetsync_field_append_one translate="label comment">
-                        <label>Append Global Note 1</label>
-                        <frontend_type>textarea</frontend_type>
-                        <comment>This text will be added at the end of the Etsy listing description field</comment>
-                        <sort_order>2</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_append_one>
-                </fields>
-            </magetsync_group_notes_1>
-            <magetsync_group_notes_2 translate="label">
-				<label>Global Notes 2</label>
-				<expanded>0</expanded>
-				<frontend_type>text</frontend_type>
-				<sort_order>3</sort_order>
-				<show_in_default>1</show_in_default>
-				<show_in_website>1</show_in_website>
-				<show_in_store>1</show_in_store>
-				<fields>
-				<magetsync_field_prepend_two translate="label comment">
-					<label>Prepend Global Note 2</label>
-					<frontend_type>textarea</frontend_type>
-					<comment>This text will be added at the beginning of the Etsy listing description field</comment>
-					<sort_order>1</sort_order>
-					<show_in_default>1</show_in_default>
-					<show_in_website>1</show_in_website>
-					<show_in_store>1</show_in_store>
-				</magetsync_field_prepend_two>
-				<magetsync_field_append_two translate="label comment">
-					<label>Append Global Note 2</label>
-					<frontend_type>textarea</frontend_type>
-					<comment>This text will be added at the end of the Etsy listing description field</comment>
-					<sort_order>2</sort_order>
-					<show_in_default>1</show_in_default>
-					<show_in_website>1</show_in_website>
-					<show_in_store>1</show_in_store>
-				</magetsync_field_append_two>
-				</fields>
-            </magetsync_group_notes_2>
-        </groups>
+                        <magetsync_field_append_one translate="label comment">
+                            <label>Append Global Note 1</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>This text will be added at the end of the Etsy listing description field</comment>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_append_one>
+                    </fields>
+                </magetsync_group_notes_1>
+                <magetsync_group_notes_2 translate="label">
+                    <label>Global Notes 2</label>
+                    <expanded>0</expanded>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_prepend_two translate="label comment">
+                            <label>Prepend Global Note 2</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>This text will be added at the beginning of the Etsy listing description field</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_prepend_two>
+                        <magetsync_field_append_two translate="label comment">
+                            <label>Append Global Note 2</label>
+                            <frontend_type>textarea</frontend_type>
+                            <comment>This text will be added at the end of the Etsy listing description field</comment>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_append_two>
+                    </fields>
+                </magetsync_group_notes_2>
+            </groups>
         </magetsync_section_templates>
-		
-	<magetsync_section_draftmode translate="label" module="magetsync">
-		<label>Listings Manager Options</label>
-		<sort_order>21</sort_order>
-		<frontend_type>text</frontend_type>
-		<show_in_default>1</show_in_default>
-		<show_in_website>1</show_in_website>
-		<show_in_store>1</show_in_store>
-		<tab>magetsync_tab</tab>
-		<groups>
-			
-			<magetsync_group_draft translate="label comment">
-				<label>General Configuration</label>
-				<expanded>1</expanded>
-				<comment></comment>
-				<sort_order>1</sort_order>
-				<frontend_type>text</frontend_type>
-				<show_in_default>1</show_in_default>
-				<show_in_website>1</show_in_website>
-				<show_in_store>1</show_in_store>
-				<fields>
-					<magetsync_field_listing_draft_mode translate="label comment">
-						<label>Create Listings in Draft Mode</label>
-						<frontend_type>select</frontend_type>
-						<source_model>magetsync/sources_excludeOption_source</source_model>
-						<comment>Set listing status for products to draft.</comment>
-						<sort_order>1</sort_order>
-						<show_in_default>1</show_in_default>
-						<show_in_website>1</show_in_website>
-						<show_in_store>1</show_in_store>
-					</magetsync_field_listing_draft_mode>
-				</fields>
-	        </magetsync_group_draft>
-            <magetsync_group_mapping translate="label comment">
-                <label>Mapping Items Etsy SKU Format</label>
-                <expanded>1</expanded>
-                <comment></comment>
-                <sort_order>2</sort_order>
-                <frontend_type>text</frontend_type>
-                <show_in_default>1</show_in_default>
-                <show_in_website>1</show_in_website>
-                <show_in_store>1</show_in_store>
-                <fields>
-                    <magetsync_field_sku_pattern translate="label comment">
+
+        <magetsync_section_draftmode translate="label" module="magetsync">
+            <label>Listings Manager Options</label>
+            <sort_order>21</sort_order>
+            <frontend_type>text</frontend_type>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <tab>magetsync_tab</tab>
+            <groups>
+
+                <magetsync_group_draft translate="label comment">
+                    <label>General Configuration</label>
+                    <expanded>1</expanded>
+                    <comment></comment>
+                    <sort_order>1</sort_order>
+                    <frontend_type>text</frontend_type>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_listing_draft_mode translate="label comment">
+                            <label>Create Listings in Draft Mode</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>Set listing status for products to draft.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_listing_draft_mode>
+                    </fields>
+                </magetsync_group_draft>
+                <magetsync_group_mapping translate="label comment">
+                    <label>Mapping Items Etsy SKU Format</label>
+                    <expanded>1</expanded>
+                    <comment></comment>
+                    <sort_order>2</sort_order>
+                    <frontend_type>text</frontend_type>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_sku_pattern translate="label comment">
                             <label>SKU Pattern</label>
-                            <comment>AAANNN(A - Alphabet, N - Numeric), Add place holder A for Alphabet and N for Numeric to create a pattern for SKUs. The eg. SKU for AAANNN is  ABL004.</comment>
+                            <comment>AAANNN(A - Alphabet, N - Numeric), Add place holder A for Alphabet and N for Numeric to create a pattern for SKUs. The eg. SKU for AAANNN is ABL004.</comment>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -496,83 +534,83 @@
                             <frontend_class>validate-alphanum</frontend_class>
                             <frontend_input>text</frontend_input>
                         </magetsync_field_sku_pattern>
-                </fields>
-            </magetsync_group_mapping>
-            
-			<magetsync_group_delete translate="label comment">
-				<label>Reset Option</label>
-				<comment>This setting is only available for users who wish to remove all items from the Listings Manager</comment>
-				<expanded>0</expanded>
-				<sort_order>2</sort_order>
-				<show_in_default>1</show_in_default>
-				<show_in_website>0</show_in_website>
-				<show_in_store>0</show_in_store>
-				<fields>
-                    <magetsync_field_enable_failed_items_deletion translate="label comment">
-                        <label>Enable Failed Items Deletion</label>
-                        <frontend_type>select</frontend_type>
-                        <source_model>magetsync/sources_excludeOption_source</source_model>
-                        <comment>When it's set to yes, failed items could be deletable from both the actions dropdown menu and/or 'Delete' button within the listing.</comment>
-                        <sort_order>1</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_enable_failed_items_deletion>
-					<magetsync_field_deletelistings translate="label comment">
-						<label>Remove all listings</label>
-						<frontend_type>button</frontend_type>
-						<comment>Caution: This button will purge all items from the Listings Manager.</comment>
-						<frontend_model>magetsync/buttonDeleteListings</frontend_model>
-						<sort_order>2</sort_order>
-						<show_in_default>1</show_in_default>
-						<show_in_website>1</show_in_website>
-						<show_in_store>1</show_in_store>
-					</magetsync_field_deletelistings>
-				</fields>
-			</magetsync_group_delete>
-             <magetsync_group_resize_images translate="label comment">
-                <label>Resize Images</label>
-                <comment>This setting is used to resize the oversized listing manager product images to Etsy's recommendation(1000px).</comment>
-                <expanded>1</expanded>
-                <sort_order>3</sort_order>
-                <show_in_default>1</show_in_default>
-                <show_in_website>0</show_in_website>
-                <show_in_store>0</show_in_store>
-                <fields>
-                    <magetsync_field_resize_images translate="label comment">
-                        <label>Resize</label>
-                        <frontend_type>button</frontend_type>
-                        <comment>Caution: This button will resize the images for listing manager products.</comment>
-                        <frontend_model>magetsync/buttonResizeListings</frontend_model>
-                        <sort_order>2</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_resize_images>
+                    </fields>
+                </magetsync_group_mapping>
 
-                    <magetsync_field_delete_resize_images translate="label comment">
-                        <label>Delete Resized Images</label>
-                        <frontend_type>button</frontend_type>
-                        <comment>Caution: This button will delete the resized images for all the listing manager products. Note: It will keep the original images intact.</comment>
-                        <frontend_model>magetsync/buttonDeleteResizeListings</frontend_model>
-                        <sort_order>3</sort_order>
-                        <show_in_default>1</show_in_default>
-                        <show_in_website>1</show_in_website>
-                        <show_in_store>1</show_in_store>
-                    </magetsync_field_delete_resize_images>
+                <magetsync_group_delete translate="label comment">
+                    <label>Reset Option</label>
+                    <comment>This setting is only available for users who wish to remove all items from the Listings Manager</comment>
+                    <expanded>0</expanded>
+                    <sort_order>2</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <magetsync_field_enable_failed_items_deletion translate="label comment">
+                            <label>Enable Failed Items Deletion</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>magetsync/sources_excludeOption_source</source_model>
+                            <comment>When it's set to yes, failed items could be deletable from both the actions dropdown menu and/or 'Delete' button within the listing.</comment>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_enable_failed_items_deletion>
+                        <magetsync_field_deletelistings translate="label comment">
+                            <label>Remove all listings</label>
+                            <frontend_type>button</frontend_type>
+                            <comment>Caution: This button will purge all items from the Listings Manager.</comment>
+                            <frontend_model>magetsync/buttonDeleteListings</frontend_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_deletelistings>
+                    </fields>
+                </magetsync_group_delete>
+                <magetsync_group_resize_images translate="label comment">
+                    <label>Resize Images</label>
+                    <comment>This setting is used to resize the oversized listing manager product images to Etsy's recommendation(1000px).</comment>
+                    <expanded>1</expanded>
+                    <sort_order>3</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <magetsync_field_resize_images translate="label comment">
+                            <label>Resize</label>
+                            <frontend_type>button</frontend_type>
+                            <comment>Caution: This button will resize the images for listing manager products.</comment>
+                            <frontend_model>magetsync/buttonResizeListings</frontend_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_resize_images>
 
-                </fields>
-            </magetsync_group_resize_images>
-				
-		</groups>
+                        <magetsync_field_delete_resize_images translate="label comment">
+                            <label>Delete Resized Images</label>
+                            <frontend_type>button</frontend_type>
+                            <comment>Caution: This button will delete the resized images for all the listing manager products. Note: It will keep the original images intact.</comment>
+                            <frontend_model>magetsync/buttonDeleteResizeListings</frontend_model>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_delete_resize_images>
+
+                    </fields>
+                </magetsync_group_resize_images>
+
+            </groups>
         </magetsync_section_draftmode>
-		 
+
         <payment>
             <groups>
                 <magetsync_payment translate="label comment">
                     <label>MagetSync Payment</label>
                     <expanded>0</expanded>
-					<comment>Etsy orders are associated with this payment method</comment>
+                    <comment>Etsy orders are associated with this payment method</comment>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
@@ -622,7 +660,9 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><allowspecific>1</allowspecific></depends>
+                            <depends>
+                                <allowspecific>1</allowspecific>
+                            </depends>
                         </specificcountry>
                     </fields>
                 </magetsync_payment>

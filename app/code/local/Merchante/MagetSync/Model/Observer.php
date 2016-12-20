@@ -719,7 +719,9 @@ class Merchante_MagetSync_Model_Observer
             return;
         }
 
-        Mage::getModel('magetsync/service_listingService')->processListingCollectionApi();
+        /** @var Merchante_MagetSync_Model_Service_ListingService $listingService */
+        $listingService = Mage::getModel('magetsync/service_listingService');
+        $listingService->processListingCollectionApi();
     }
 
 
