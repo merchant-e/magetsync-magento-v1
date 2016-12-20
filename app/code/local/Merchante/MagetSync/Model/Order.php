@@ -614,7 +614,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
 
         } else {
-            Mage::log("Error: " . print_r($value['receipt_id'], true), null, 'magetsync_orderId.log');
+            $this->log("Error: " . print_r($value['receipt_id'], true));
         }
     }
 

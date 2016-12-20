@@ -136,13 +136,13 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
     {
         $data = $listing->getData();
 
-        # checking if the product is already there in the list synchronizing only images
-        if ($data['listing_id']) {
-            throw new Merchante_MagetSync_ListingServiceException(
-                'Listing already exists',
-                Merchante_MagetSync_ListingServiceException::ALREADY_EXISTS
-            );
-        }
+//        # checking if the product is already there in the list synchronizing only images
+//        if ($data['listing_id']) {
+//            throw new Merchante_MagetSync_ListingServiceException(
+//                'Listing already exists',
+//                Merchante_MagetSync_ListingServiceException::ALREADY_EXISTS
+//            );
+//        }
 
         $params = $this->prepareData($listing);
 
@@ -205,7 +205,12 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
             }
         }
         $listing->addData($postData);
-        $listing->save();
+
+        try {
+            $listing->save();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
 
         if ($hasError == true) {
             Merchante_MagetSync_Model_LogData::magetsync(
@@ -224,7 +229,7 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
     }
 
     /**
-     *
+     * Process collection API
      */
     public function processListingCollectionApi()
     {
@@ -234,6 +239,9 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
 
         /** @var Merchante_MagetSync_Model_Listing $listing */
         foreach ($listings as $listing) {
+            if ($listing->getListingId()) {
+                continue;
+            }
             if ($iterationCntr > Merchante_MagetSync_Model_Observer::AUTOQUEUE_ITERATIONS_LIMIT) {
                 break;
             }

@@ -62,7 +62,7 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
 
             return;
         } catch (Exception $e) {
-            Mage::logException($e);
+            $this->logException($e);
 
             return;
         }
