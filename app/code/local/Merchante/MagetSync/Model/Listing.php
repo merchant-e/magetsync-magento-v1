@@ -466,16 +466,14 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     $dataSave['title'] = ucfirst($dataProduct['name']);
                 }
 
-                $attrDescription = array_key_exists('description', $attributes);
-                if ($attrDescription) {
+
+                if (array_key_exists('description', $attributes)) {
                     $textNoHtml = strip_tags($attributes['description'], '<br></br><br/><br />');
-                    $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
-                    $dataSave['description'] = $newDescription;
                 } else {
                     $textNoHtml = strip_tags($dataProduct['description'], '<br></br><br/><br />');
-                    $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
-                    $dataSave['description'] = $newDescription;
                 }
+                $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                $dataSave['description'] = $newDescription;
 
                 /// getting custom title field flag from the configuration
                 $isCustomTitle = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute');
@@ -1079,58 +1077,72 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
         return -1;
     }
 
-    public function composeDescription($oldDescription,$prependedTemplate,$appendedTemplate)
+    public function composeDescription($oldDescription, $prependedTemplate, $appendedTemplate, $productId)
     {
+        $productData = Mage::getModel('catalog/product')->load($productId)->getData();
         $newDescription = $oldDescription;
         if($prependedTemplate)
         {
+            $descriptionTemplateRaw = false;
             switch($prependedTemplate)
             {
                 case 1:
-                    $descriptionTemplate = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_1/magetsync_field_prepend_one');
-                    if($descriptionTemplate) {
-                        $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br/><br />');
-                        $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
-                        $newDescription = $newDescription . PHP_EOL . $oldDescription;
-                    }
+                    $descriptionTemplateRaw = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_1/magetsync_field_prepend_one');
                     break;
                 case 2:
-                    $descriptionTemplate = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_2/magetsync_field_prepend_two');
-                    if($descriptionTemplate) {
-                        $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br/><br />');
-                        $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
-                        $newDescription = $newDescription . PHP_EOL . $oldDescription;
-                    }
+                    $descriptionTemplateRaw = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_2/magetsync_field_prepend_two');
                     break;
-                default:
-                    $newDescription = $oldDescription;
-                    break;
+            }
+            if($descriptionTemplateRaw) {
+                $descriptionTemplate = $this->replaceAttributePatterns($descriptionTemplateRaw, $productData);
+                $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br/><br />');
+                $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                $newDescription .= PHP_EOL . $oldDescription;
             }
         }
 
         if($appendedTemplate)
         {
+            $descriptionTemplateRaw = false;
             switch($appendedTemplate)
             {
                 case 1:
-                    $descriptionTemplate = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_1/magetsync_field_append_one');
-                    if($descriptionTemplate) {
-                        $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br/><br />');
-                        $newDescriptionAppend = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
-                        $newDescription = $newDescription . PHP_EOL . $newDescriptionAppend;
-                    }
+                    $descriptionTemplateRaw = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_1/magetsync_field_append_one');
                     break;
                 case 2:
-                    $descriptionTemplate = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_2/magetsync_field_append_two');
-                    if($descriptionTemplate) {
-                        $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br><br />');
-                        $newDescriptionAppend = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
-                        $newDescription = $newDescription . PHP_EOL . $newDescriptionAppend;
-                    }
+                    $descriptionTemplateRaw = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_2/magetsync_field_append_two');
                     break;
+            }
+            if($descriptionTemplateRaw) {
+                $descriptionTemplate = $this->replaceAttributePatterns($descriptionTemplateRaw, $productData);
+                $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br><br />');
+                $newDescriptionAppend = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
+                $newDescription .= PHP_EOL . $newDescriptionAppend;
             }
         }
         return $newDescription;
+    }
+
+    /**
+     * Replaces entries surrounded with curly brackets with product attribute values
+     * @param $text
+     * @param $productData
+     * @return string
+     */
+    public function replaceAttributePatterns($text, $productData) {
+        $returnText = $text;
+        $regexp = '/\{\{.*?\}\}/';
+        preg_match_all($regexp, $text, $matches);
+        $attributeValArr = array();
+        foreach($matches[0] as $matchedPattern) {
+            $attributeCode = str_replace(array('{{', '}}'), '', $matchedPattern);
+            $attributeValArr[$attributeCode] = $productData[$attributeCode];
+        }
+        foreach($attributeValArr as $attrCode => $attrVal) {
+            $returnText = str_replace('{{'.$attrCode.'}}', $attrVal, $returnText);
+        }
+
+        return $returnText;
     }
 
     /**

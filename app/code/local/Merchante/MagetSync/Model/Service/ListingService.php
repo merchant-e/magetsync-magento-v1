@@ -89,24 +89,31 @@ class Merchante_MagetSync_Model_Service_ListingService
 
         $taxonomyID = $listing->getTaxonomyID($data);
 
+        $newDescription = $listing->composeDescription(
+            !empty($data['description']) ? $data['description'] : '',
+            $data['prepended_template'],
+            $data['appended_template'],
+            $data['idproduct']
+        );
+
         $params = array(
-            'description'          => !empty($data['description']) ?: '',
-            'materials'            => !empty($data['materials'])   ?: '',
+            'description'          => $newDescription,
+            'materials'            => !empty($data['materials']) ? $data['materials'] : '',
             'state'                => $stateListing,
             'quantity'             => $qty,
             'price'                => $data['price'],
-            'shipping_template_id' => !empty($data['shipping_template_id']) ?: '',
-            'shop_section_id'      => !empty($data['shop_section_id']) ?: '',
-            'title'                => !empty($data['title']) ?: '',
-            'tags'                 => !empty($data['tags']) ?: '',
+            'shipping_template_id' => !empty($data['shipping_template_id']) ? $data['shipping_template_id'] : '',
+            'shop_section_id'      => !empty($data['shop_section_id']) ? $data['shop_section_id'] : '',
+            'title'                => !empty($data['title']) ? $data['title'] : '',
+            'tags'                 => !empty($data['tags']) ? $data['tags'] : '',
             'taxonomy_id'          => $taxonomyID,
-            'who_made'             => !empty($data['who_made']) ?: '',
+            'who_made'             => !empty($data['who_made']) ? $data['who_made'] : '',
             'is_supply'            => $supply,
-            'when_made'            => !empty($data['when_made']) ?: '',
-            'recipient'            => !empty($data['recipient']) ?: '',
-            'occasion'             => !empty($data['occasion']) ?: '',
-            'style'                => !empty($data['style']) ?: '',
-            'should_auto_renew'    => !empty($data['should_auto_renew']) ?: 0,
+            'when_made'            => !empty($data['when_made']) ? $data['when_made'] : '',
+            'recipient'            => !empty($data['recipient']) ? $data['recipient'] : '',
+            'occasion'             => !empty($data['occasion']) ? $data['occasion'] : '',
+            'style'                => !empty($data['style']) ? $data['style'] : '',
+            'should_auto_renew'    => !empty($data['should_auto_renew']) ? $data['should_auto_renew'] : 0,
             'language'             => $language
         );
 
