@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
 
 /**
  * @copyright  Copyright (c) 2015 Merchant-e
@@ -11,17 +10,19 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
      * @var null
      */
     public $OAuth = null;
+
     /**
      * @var null
      */
     public $apiInfo = null;
+
     /**
      * @var string
      */
     public static $merchApi = "https://api.magetsync.net/public/v1/";
 
     /**
-     *
+     * Constructor
      */
     public function _construct()
     {
@@ -61,7 +62,7 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
 
             return;
         } catch (Exception $e) {
-            Mage::logException($e);
+            $this->logException($e);
 
             return;
         }
@@ -124,9 +125,9 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
             'accessToken'       => $accessToken,
             'accessTokenSecret' => $accessTokenSecret
         );
-        $isDraftMode = Mage::getStoreConfig(
-            'magetsync_section_draftmode/magetsync_group_draft/magetsync_field_listing_draft_mode'
-        );
+
+        $isDraftMode = Mage::helper('magetsync/config')->isListingDraftMode();
+
         if ($isDraftMode &&
             ($service != "uploadListingImage" && $service != "deleteListingImage" && $service != "findAllListingImages")
         ) {
@@ -146,9 +147,8 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
             "url"      => $url,
             "response" => $response
         );
-        //$log = json_encode($log, true);
-        error_log(print_r($log, 1), null, '../etsy_log.log');
-        Mage::log(print_r($log, 1), null, 'etsy_log.log');
+
+        $this->log(print_r($log, 1));
         $result = json_decode($response, true);
 
         return $result;
@@ -204,15 +204,41 @@ class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract
             $response = curl_exec($ch);
 
             if (curl_errno($ch)) {
-                Mage::log("Error: " . print_r(curl_error($ch), true), null, 'magetsync_curl.log');
+                $this->log("[CURL Error] " . print_r(curl_error($ch), true));
             }
 
             curl_close($ch);
 
             return $response;
         } catch (Exception $e) {
-            Mage::log("Error: " . print_r($e, true), null, 'magetsync_curl.log');
+            $this->log("[CURL Exception] " . print_r($e, true));
         }
+    }
+
+    /**
+     * Log into file
+     *
+     * @param $message
+     * @throws Merchante_MagetSync_ApiClientException
+     */
+    protected function log($message)
+    {
+        $loggerBaseName = strtolower(get_called_class());
+
+        Mage::helper('magetsync/log')->log($message, $loggerBaseName);
+    }
+
+    /**
+     * Log exception
+     *
+     * @param $message
+     * @throws Merchante_MagetSync_ApiClientException
+     */
+    protected function logException($message)
+    {
+        $loggerBaseName = strtolower(get_called_class());
+
+        Mage::helper('magetsync/log')->logException($message, $loggerBaseName);
     }
 
 }
