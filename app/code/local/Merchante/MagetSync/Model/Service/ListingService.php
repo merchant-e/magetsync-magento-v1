@@ -98,23 +98,23 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
         $taxonomyID = $listing->getTaxonomyID($data);
 
         $params = array(
-            'description'          => !empty($data['description']) ?: '',
-            'materials'            => !empty($data['materials'])   ?: '',
+            'description'          => $data['description'] ?: '',
+            'materials'            => $data['materials']   ?: '',
             'state'                => $stateListing,
             'quantity'             => $qty,
             'price'                => $data['price'],
-            'shipping_template_id' => !empty($data['shipping_template_id']) ?: '',
-            'shop_section_id'      => !empty($data['shop_section_id']) ?: '',
-            'title'                => !empty($data['title']) ?: '',
-            'tags'                 => !empty($data['tags']) ?: '',
+            'shipping_template_id' => $data['shipping_template_id'] ?: '',
+            'shop_section_id'      => $data['shop_section_id'] ?: '',
+            'title'                => $data['title'] ?: '',
+            'tags'                 => $data['tags'] ?: '',
             'taxonomy_id'          => $taxonomyID,
-            'who_made'             => !empty($data['who_made']) ?: '',
+            'who_made'             => $data['who_made'] ?: '',
             'is_supply'            => $supply,
-            'when_made'            => !empty($data['when_made']) ?: '',
-            'recipient'            => !empty($data['recipient']) ?: '',
-            'occasion'             => !empty($data['occasion']) ?: '',
-            'style'                => !empty($data['style']) ?: '',
-            'should_auto_renew'    => !empty($data['should_auto_renew']) ?: 0,
+            'when_made'            => $data['when_made'] ?: '',
+            'recipient'            => $data['recipient'] ?: '',
+            'occasion'             => $data['occasion'] ?: '',
+            'style'                => $data['style'] ?: '',
+            'should_auto_renew'    => $data['should_auto_renew'] ?: 0,
             'language'             => $language
         );
 
