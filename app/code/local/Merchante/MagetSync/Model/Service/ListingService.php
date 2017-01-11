@@ -97,6 +97,13 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
 
         $taxonomyID = $listing->getTaxonomyID($data);
 
+        $newDescription = $listing->composeDescription(
+            !empty($data['description']) ? $data['description'] : '',
+            $data['prepended_template'],
+            $data['appended_template'],
+            $data['idproduct']
+        );
+
         $params = array(
             'description'          => $data['description'] ?: '',
             'materials'            => $data['materials']   ?: '',

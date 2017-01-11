@@ -228,7 +228,10 @@ class Merchante_MagetSync_Model_Observer
                     $taxonomyID = $listingModel->getTaxonomyID($listing, null);
 
                     $newDescription = $listingModel->composeDescription(
-                        $listing['description'], $listing['prepended_template'], $listing['appended_template']
+                        $listing['description'],
+                        $listing['prepended_template'],
+                        $listing['appended_template'],
+                        $listing['idproduct']
                     );
                     $style = array();
                     $style[] = $listing['style_one'];

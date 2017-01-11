@@ -270,6 +270,13 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
         $product->setData('synchronizedEtsy', false)->getResource()->saveAttribute($product, 'synchronizedEtsy');
     }
 
+    function listingReindexCallback($args)
+    {
+        $listing = Mage::getModel('magetsync/listing');
+        $listing->setData($args['row']);
+        $listing->setData('sync', Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE)->save();
+    }
+
     /**
      * Method for deleting all listings
      */
@@ -311,6 +318,48 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
             $result = array('success' => true);
             echo json_encode($result, true);
+
+        } catch (Exception $e) {
+            $result = array(
+                'success' => false,
+                'msg'     => $e->getMessage()
+            );
+            echo json_encode($result, true);
+        }
+    }
+    /**
+     * Method for reindexing listings(Global Notes)
+     */
+    public function reindexListingsAction()
+    {
+        try {
+
+            $collection = Mage::getModel('magetsync/listing')->getCollection()
+                              ->addFieldToSelect('id')
+                              ->addFieldToFilter('sync', array(Merchante_MagetSync_Model_Listing::STATE_SYNCED, Merchante_MagetSync_Model_Listing::STATE_DRAFT))
+                              ->addFieldToFilter(
+                                  array('appended_template', 'prepended_template'),
+                                  array(array('neq' => 'NULL'), array('neq' => 'NULL'))
+                              );
+            if ($collection->count() > 0) {
+                Mage::getSingleton('core/resource_iterator')->walk(
+                    $collection->getSelect(), array(
+                        array(
+                            $this,
+                            'listingReindexCallback'
+                        )
+                    )
+                );
+
+                $result = array('success' => true);
+                echo json_encode($result, true);
+            } else {
+                $result = array(
+                    'success' => false,
+                    'msg'     => 'No listings were changed.'
+                );
+                echo json_encode($result, true);
+            }
 
         } catch (Exception $e) {
             $result = array(
@@ -496,7 +545,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $listingModel->emptyField($postData['appended_template'], $data['appended_template']);
 
                     $newDescription =
-                        $listingModel->composeDescription($data['description'], $prependedTemplate, $appendedTemplate);
+                        $listingModel->composeDescription($data['description'], $prependedTemplate, $appendedTemplate, $data['idproduct']);
                     $renewalOption =
                         $listingModel->emptyField($postData['should_auto_renew'], $data['should_auto_renew'], 0);
 

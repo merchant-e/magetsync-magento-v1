@@ -429,21 +429,32 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <magetsync_field_converter_one translate="label">
+                            <label>Insert attributes:</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <frontend_model>magetsync/multiselect_render</frontend_model>
+                            <sort_order>1</sort_order>
+                            <source_model>magetsync/sources_globalNote_source</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </magetsync_field_converter_one>
                         <magetsync_field_prepend_one translate="label">
                             <label>Prepend Global Note 1</label>
                             <frontend_type>textarea</frontend_type>
                             <comment>This text will be added at the beginning of the Etsy listing description field</comment>
-                            <sort_order>1</sort_order>
+                            <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </magetsync_field_prepend_one>
-
                         <magetsync_field_append_one translate="label comment">
                             <label>Append Global Note 1</label>
                             <frontend_type>textarea</frontend_type>
+                            <frontend_class>append-area</frontend_class>
                             <comment>This text will be added at the end of the Etsy listing description field</comment>
-                            <sort_order>2</sort_order>
+                            <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -459,11 +470,22 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <magetsync_field_converter_two translate="label">
+                            <label>Insert attributes:</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <frontend_model>magetsync/multiselect_render</frontend_model>
+                            <sort_order>1</sort_order>
+                            <source_model>magetsync/sources_globalNote_source</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <can_be_empty>1</can_be_empty>
+                        </magetsync_field_converter_two>
                         <magetsync_field_prepend_two translate="label comment">
                             <label>Prepend Global Note 2</label>
                             <frontend_type>textarea</frontend_type>
                             <comment>This text will be added at the beginning of the Etsy listing description field</comment>
-                            <sort_order>1</sort_order>
+                            <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -471,15 +493,43 @@
                         <magetsync_field_append_two translate="label comment">
                             <label>Append Global Note 2</label>
                             <frontend_type>textarea</frontend_type>
+                            <frontend_class>append-area</frontend_class>
                             <comment>This text will be added at the end of the Etsy listing description field</comment>
-                            <sort_order>2</sort_order>
+                            <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </magetsync_field_append_two>
                     </fields>
                 </magetsync_group_notes_2>
+                <magetsync_group_reindex translate="label">
+                    <label>Global Notes Re-Indexing</label>
+                    <comment>
+                        For performance reasons attribute attachment templates are translated when you first add a product to the Listing Manager.
+                        If you make changes to these templates after the fact, this option will recreate the translations.
+                        Please note that this will mark all your listings as 'out of sync' for auto-resyncing.
+                    </comment>
+                    <expanded>0</expanded>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>4</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <magetsync_field_reindexlistings translate="label comment">
+                            <label>Apply template changes to all listings</label>
+                            <frontend_type>button</frontend_type>
+                            <comment>Listings with global attribute templates will be updated.</comment>
+                            <frontend_model>magetsync/buttonReindexListings</frontend_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </magetsync_field_reindexlistings>
+                    </fields>
+                </magetsync_group_reindex>
             </groups>
+>>>>>>> 189e48c918e9e92259108da7ffd1c023c1e472e0
         </magetsync_section_templates>
 
         <magetsync_section_draftmode translate="label" module="magetsync">
