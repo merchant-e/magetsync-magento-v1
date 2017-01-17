@@ -384,38 +384,17 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                                     'region_id'  => $region_id
                                 );
 
-                                $paymentMethod = '';
-                                switch ($value['payment_method']) {
-                                    case 'pp':
-                                        if (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_STANDARD])) {
-                                            $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_STANDARD;
-                                        } elseif (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_EXPRESS])) {
-                                            $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_EXPRESS;
-                                        } else {
-                                            $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_MAGETSYNC;
-                                        }
-                                        break;
-                                    case 'cc':
-                                        /*if (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_AUTHORIZENET])) {
-                                            $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_AUTHORIZENET;
-                                        } elseif (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_CCSAVE])) {
-                                            $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_CCSAVE;
-                                        } else {*/
-                                        $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_MAGETSYNC;
-                                        //}
-                                        break;
-                                    case 'ck':
-                                    case 'mo':
-                                        /*if (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_CHECKMO])) {
-                                            $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_CHECKMO;
-                                        } else {*/
-                                        $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_MAGETSYNC;
-                                        //}
-                                        break;
-                                    default:
-                                        $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_MAGETSYNC;
-                                        break;
+                                $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_MAGETSYNC;
+                                $useMagetsyncPMOnly = Mage::getStoreConfig('magetsync_section/magetsync_group_sales_order/magetsync_field_default_payment_method');
+                                if ($value['payment_method'] == 'pp' && !$useMagetsyncPMOnly) {
+                                    if (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_STANDARD])) {
+                                        $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_STANDARD;
+                                    } elseif (isset($allActivePaymentMethods[Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_EXPRESS])) {
+                                        $paymentMethod = Merchante_MagetSync_Model_Order::PAYMENT_PAYPAL_EXPRESS;
+                                    }
                                 }
+
+
 
                                 $this->setOrder(
                                     $quote, $addressData, $value, $qtyProducts, $paymentMethod, $transactionNumber,
