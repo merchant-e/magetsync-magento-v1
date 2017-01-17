@@ -291,6 +291,9 @@
                 <enable_log>0</enable_log>
                 <enable_exception_log>0</enable_exception_log>
             </magetsync_group_debug>
+            <magetsync_group_sales_order>
+                <magetsync_field_default_payment_method>1</magetsync_field_default_payment_method>
+            </magetsync_group_sales_order>
         </magetsync_section>
     </default>
     <crontab>
