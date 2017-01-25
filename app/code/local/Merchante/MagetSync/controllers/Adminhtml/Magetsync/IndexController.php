@@ -546,7 +546,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $listingModel->emptyField($postData['appended_template'], $data['appended_template']);
 
                     $newDescription =
-                        $listingModel->composeDescription($data['description'], $prependedTemplate, $appendedTemplate);
+                        $listingModel->composeDescription($data['description'], $prependedTemplate, $appendedTemplate, $data['idproduct']);
                     $renewalOption =
                         $listingModel->emptyField($postData['should_auto_renew'], $data['should_auto_renew'], 0);
 
