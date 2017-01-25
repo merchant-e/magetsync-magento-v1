@@ -1,16 +1,36 @@
+##[2017.01 beta] - 2017-01-26
+### From this point forward MagetSync versions will be year and release number
+### Added
+- New configurable option to allow embeding of product attributes into product descriptions (enhanced Global Templates)
+- Added Centralised logger for troubleshooting purposes (with config option)
+
+### Changed
+- MagetSync controllers refactoring and general code base improvements and optimisations
+- Config option to assign all Etsy orders to MagetSync payment method by default
+
+### Fixed
+- Possible security issues
+- Bug: Listings has variations with prices set...
+- Bug preventing PayPal paid orders being imported in Magento - by assigning all orders by default to MagetSync payment method
+
+------- end of 2016 --------
+
 ##[0.9.7.5] - 2016-11-28
 ### Added
 - Support for Attribute Templates
 - New Pricing Rules (Increase/Decrease prices globally using Attribute Templates)
 - Option to re-upload product images for previouly synced products (New Image Reset Option - with its own cron task)
 - New Observer for when Magento products are restocked (credit memo/order cancelled)
+- Mappings: SKU search for auto suggestion
+- Option to auto resize larger images
+- Modman support
 
 ### Changed 
 - Added new measures to prevent excessive API calls when using auto-queue
 - New 'Draft' label for products in Draft state
 - Long custom options labels/values are auto trimmed to Etsy limit (20 chars)
 
-### Bug
+### Fixed
 - Fixed PHP array incompatibility with older PHP versions
 - Fixed Permissions for non-admin users (Access Denied error)
 

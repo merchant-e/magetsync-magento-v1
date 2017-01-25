@@ -91,7 +91,7 @@
                         <magetsync_field_version translate="label comment">
                             <label>Version</label>
                             <frontend_type>Label</frontend_type>
-                            <comment>0.9.7.5</comment>
+                            <comment>2017.01 [beta]</comment>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
