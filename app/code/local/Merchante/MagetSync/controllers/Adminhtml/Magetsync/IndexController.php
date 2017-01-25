@@ -500,9 +500,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     'id', array('in' => $newListing)
                 )->load();
 
+                foreach ($listings as $value) {
+                    $data = $value->getData();
 
-                foreach ($listings as $listing) {
-                    $data = $listing->getData();
                     if (isset($postData['category_id'])) {
                         $postData['category_id'] = $listingModel->emptyField($postData['category_id'], null);
                         $postData['subcategory_id'] = $listingModel->emptyField($postData['subcategory_id'], null);
@@ -523,8 +523,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     if ($data['listing_id'] && $syncStatus) {
                         if (!$isSendtoEtsy) {
-                            $listing->addData($postData);
-                            $updateProduct = $listing->save();
+                            $value
+                                ->addData($postData);
+                            $updateProduct = $value->save();
                             $data = $updateProduct->getData();
                         }
                     }
@@ -578,7 +579,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     $params = array(
                         'description'          => $newDescription,
-                        //$data['description'],
                         'materials'            => $listingModel->emptyField($postData['materials'], $data['materials']),
                         'state'                => $stateListing,
                         'quantity'             => $data['quantity'],
@@ -600,35 +600,28 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $languageData
                     );
-                    $dataGlobal = $data['id'];//$listing;
+                    $dataGlobal = $data['id'];
                     $hasError = false;
                     if ($syncStatus) {
-                        //Update price
+
                         if ($postData && array_key_exists('price', $postData)) {
-                            $origPrice = $postData['price'];
+                            $priceEtsy = $postData['price'];
                         } else {
-                            $origPrice = $data['price'];
+                            $priceEtsy = $data['price'];
                         }
-                        if ($postData['pricing_rule'] == 'original') {
-                            $finalPrice = $origPrice;
-                        } else {
-                            if ($postData['affect_strategy'] == 'percentage') {
-                                $delta = round($origPrice * (floatval($postData['affect_value']) / 100), 2);
-                            } else {
-                                $delta = $postData['affect_value'];
-                            }
-                            if ($postData['pricing_rule'] == 'increase') {
-                                $finalPrice = $origPrice + $delta;
-                            } else {
-                                $finalPrice = $origPrice - $delta;
-                            }
-                        }
-                        $params['price'] = $finalPrice;
 
                         if ($data['listing_id']) {
                             $obliUpd = array('listing_id' => $data['listing_id']);
                             $resultApi = $listingModel->updateListing($obliUpd, $params);
                         } else {
+                            $new_pricing = Mage::getStoreConfig(
+                                'magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing'
+                            );
+                            if ($new_pricing) {
+                                $params['price'] = $priceEtsy;
+                            } else {
+                                $params['price'] = $data['price'];
+                            }
                             $resultApi = $listingModel->createListing(null, $params);
                         }
                         if ($resultApi['status'] == true) {
@@ -636,7 +629,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $result = json_decode(json_decode($resultApi['result']), true);
                             $result = $result['results'][0];
                             $statusOperation =
-                                $listingModel->saveDetails($result, $data['idproduct'], $params['price'], $dataGlobal);
+                                $listingModel->saveDetails($result, $data['idproduct'], $priceEtsy, $dataGlobal);
                             /*********************************/
 
                             $postData['creation_tsz'] = $result['creation_tsz'];
@@ -659,7 +652,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $postData['listing_id'] = $result['listing_id'];
                             $postData['state'] = $result['state'];
                             $postData['user_id'] = $result['user_id'];
-                            //$postData['should_auto_renew'] = $result['should_auto_renew'];
 
                             if ($statusOperation['status']) {
                                 if ($result['state'] == 'edit') {
@@ -701,14 +693,10 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     }
 
                     $postData['sync_ready'] = 1;
-                    if ($attrTemplateId = $listing->getAttributeTemplateId()) {
-                        $attributeTemplateModel = Mage::getModel('magetsync/attributeTemplate');
-                        $attributeTemplateModel->removeAssociatedProduct($attrTemplateId, $listing->getIdproduct());
-                    }
-                    $postData['attribute_template_id'] = 0;
 
-                    $listing->addData($postData);
-                    $listing->save();
+                    $value
+                        ->addData($postData);
+                    $value->save();
 
                     if ($hasError == true) {
                         Merchante_MagetSync_Model_LogData::magetsync(
@@ -731,7 +719,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         /**********CLEAN LOGS*********/
                         $logData = Mage::getModel('magetsync/logData');
                         $logData->remove($dataGlobal, Merchante_MagetSync_Model_LogData::TYPE_LISTING);
-                        /****************************/
                     }
                 }
 
