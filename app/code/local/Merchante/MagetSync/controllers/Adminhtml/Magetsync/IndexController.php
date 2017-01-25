@@ -525,10 +525,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         if (!$isSendtoEtsy) {
                             $value
                                 ->addData($postData);
-                            //->setId($value);
-                            //->setId($data['id']);
                             $updateProduct = $value->save();
-                            $data = $updateProduct->getData();//$listingModel->load($value)->getData();
+                            $data = $updateProduct->getData();
                         }
                     }
 
@@ -581,10 +579,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     $params = array(
                         'description'          => $newDescription,
-                        //$data['description'],
                         'materials'            => $listingModel->emptyField($postData['materials'], $data['materials']),
                         'state'                => $stateListing,
-                        //'price'=>              $data['price'],
                         'quantity'             => $data['quantity'],
                         'shipping_template_id' => $listingModel->emptyField(
                             $postData['shipping_template_id'], $data['shipping_template_id']
@@ -604,7 +600,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $languageData
                     );
-                    $dataGlobal = $data['id'];//$value;
+                    $dataGlobal = $data['id'];
                     $hasError = false;
                     if ($syncStatus) {
 
@@ -656,7 +652,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $postData['listing_id'] = $result['listing_id'];
                             $postData['state'] = $result['state'];
                             $postData['user_id'] = $result['user_id'];
-                            //$postData['should_auto_renew'] = $result['should_auto_renew'];
 
                             if ($statusOperation['status']) {
                                 if ($result['state'] == 'edit') {
@@ -701,8 +696,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     $value
                         ->addData($postData);
-                    //->setId($value);
-                    //->setId($dataGlobal);
                     $value->save();
 
                     if ($hasError == true) {
@@ -726,7 +719,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         /**********CLEAN LOGS*********/
                         $logData = Mage::getModel('magetsync/logData');
                         $logData->remove($dataGlobal, Merchante_MagetSync_Model_LogData::TYPE_LISTING);
-                        /****************************/
                     }
                 }
 
