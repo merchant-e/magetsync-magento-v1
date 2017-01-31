@@ -334,9 +334,9 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </magetsync_field_enable_prefix>
-                        <magetsync_field_default_payment_method translate="label">
+                        <magetsync_field_default_payment_method translate="label comment">
                             <label>Use MagetSync Payment Method for all Etsy Orders</label>
-                            <comment>When this is disabled, orders paid via PayPal will be assigned to your default PayPal payment method.</comment>
+                            <comment><![CDATA[When disabled, MagetSync will attempt to assign Etsy orders paid by PayPal to your local PayPal payment method. <strong>Caution:</strong> Changing this might prevent Etsy orders from being imported]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>3</sort_order>
