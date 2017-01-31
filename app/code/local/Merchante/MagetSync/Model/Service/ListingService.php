@@ -48,9 +48,11 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
         /** @var Merchante_MagetSync_Model_Mysql4_Listing_Collection $listings */
         $listings = $this->getModel()->getCollection()
                          ->addFieldToSelect('*')
-                         ->addFieldToFilter(
-                             'sync', array('eq' => Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE)
-                         )
+                         ->addFieldToFilter('sync', ['in' => [
+                                Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC,
+                                Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE
+                            ]
+                        ])
                          ->load();
 
         return $listings;
@@ -135,22 +137,28 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
      * @throws Exception
      * @throws ListingServiceException
      */
-    public function processListingApi(Merchante_MagetSync_Model_Listing $listing)
+    public function processListingApi(Merchante_MagetSync_Model_Listing $listing, $update = false)
     {
         $data = $listing->getData();
 
         $params = $this->prepareData($listing);
 
+        $price = $params['price'];
         $hasError = false;
-
-        $resultApi = $listing->createListing(null, $params);
+        if (! $update) {
+            $resultApi = $listing->createListing(null, $params);
+        } else {
+            $obliUpd = ['listing_id' => $listing->getListingId()];
+            unset($params['price']);
+            $resultApi = $listing->updateListing($obliUpd, $params);
+        }
 
         if ($resultApi['status'] == true) {
 
             $result = json_decode(json_decode($resultApi['result']), true);
             $result = $result['results'][0];
             $statusOperation =
-                $listing->saveDetails($result, $data['idproduct'], $params['price'], $listing->getId());
+                $listing->saveDetails($result, $data['idproduct'], $price, $listing->getId());
 
             $postData['creation_tsz']           = $result['creation_tsz'];
             $postData['ending_tsz']             = $result['ending_tsz'];
@@ -235,15 +243,18 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
         /** @var Merchante_MagetSync_Model_Listing $listing */
         foreach ($listings as $listing) {
 
-            if ($listing->getListingId()) {
-                continue;
-            }
-
             if ($iterationCntr > Merchante_MagetSync_Model_Observer::AUTOQUEUE_ITERATIONS_LIMIT) {
                 break;
             }
             try {
-                $this->processListingApi($listing);
+                if ($listing->getListingId()) {
+                    $this->processListingApi($listing, true);
+                    $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_SYNCED);
+                    $listing->setSyncready(1);
+                    $listing->save();
+                } else {
+                    $this->processListingApi($listing);
+                }
                 $iterationCntr++;
             } catch (Exception $e) {
 
