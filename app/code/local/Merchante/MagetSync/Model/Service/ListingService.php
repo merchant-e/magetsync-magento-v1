@@ -50,9 +50,7 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
                          ->addFieldToSelect('*')
                          ->addFieldToFilter('sync', ['in' => [
                                 Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC,
-                                Merchante_MagetSync_Model_Listing::STATE_FAILED,
-                                Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE,
-                                Merchante_MagetSync_Model_Listing::STATE_INQUEUE
+                                Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE
                             ]
                         ])
                          ->load();
