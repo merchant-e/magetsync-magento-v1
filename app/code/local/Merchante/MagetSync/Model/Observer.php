@@ -607,30 +607,11 @@ class Merchante_MagetSync_Model_Observer
                 $resultUpload = json_decode($resultUpload, true);
                 if ($resultUpload['success'] == 1 || $resultUpload['success'] == true) {
                     $file = $resultUpload['upload'];
-                    if ($query == null) {
-                        $params = array(
-                            '@image' => '@' . $file . ';type=' . $mime,
-                            'name'   => $file
-                        );
-                    } else {
-                        $params = array(
-                            '@image'           => '@' . $file . ';type=' . $mime,
-                            'listing_image_id' => intval($query[0]['listing_image_id']),
-                            'name'             => $file
-                        );
-                        $obligatoryDelete = array(
-                            'listing_id'       => $result['listing_id'],
-                            'listing_image_id' => intval($query[0]['listing_image_id'])
-                        );
-                        $resultImageApiDelete =
-                            Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
-                        if (!$resultImageApiDelete['status']) {
-                            Merchante_MagetSync_Model_LogData::magetsync(
-                                $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                                $resultImageApiDelete['message'], Merchante_MagetSync_Model_LogData::LEVEL_WARNING
-                            );
-                        }
-                    }
+                    $params = array(
+                        '@image' => '@' . $file . ';type=' . $mime,
+                        'name'   => $file
+                    );
+
                     $resultImageApi = Mage::getModel('magetsync/listing')->uploadListingImage($obligatory, $params);
                     if ($resultImageApi['status']) {
                         $resultImage = json_decode(json_decode($resultImageApi['result']), true);
