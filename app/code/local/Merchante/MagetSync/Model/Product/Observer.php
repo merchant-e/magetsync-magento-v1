@@ -29,32 +29,31 @@ class Merchante_MagetSync_Model_Product_Observer
             /** @var Mage_Catalog_Model_Product $parent */
             $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($data['entity_id']);
 
+
             if (!$parent) {
-                if ($status == 1) {
-                    $result =
-                        Mage::getModel('magetsync/listing')->saveListingSynchronized($product, $attributes, false);
-                } elseif ($status == 0) {
-                    //If the product was in queue delete this.
-                    $listingModel = Mage::getModel('magetsync/listing');
-                    $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $data['entity_id']);
-                    $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
-                    if ($query != null) {
-                        if ($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
-                            $listingModel->setId($query[0]['id'])
-                                         ->delete();
-                        } elseif ($query[0]['sync'] != Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
-                            $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_DISABLED;
-                            $listingModel
-                                ->addData($dataSave)
-                                ->setId($query[0]['id']);
-                            $listingModel->save();
-                        }
+                $productModel = $product;
+            } else {
+                $productModel = Mage::getModel('catalog/product')->load($parent[0]);
+            }
+            if ($status == 1) {
+                Mage::getModel('magetsync/listing')->saveListingSynchronized($productModel, $attributes, false);
+            } elseif ($status == 0) {
+                //If the product was in queue delete this.
+                $listingModel = Mage::getModel('magetsync/listing');
+                $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $data['entity_id']);
+                $query = Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($query);
+                if ($query != null) {
+                    if ($query[0]['sync'] == Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
+                        $listingModel->setId($query[0]['id'])
+                            ->delete();
+                    } elseif ($query[0]['sync'] != Merchante_MagetSync_Model_Listing::STATE_INQUEUE) {
+                        $dataSave['enabled'] = Merchante_MagetSync_Model_Listing::LISTING_DISABLED;
+                        $listingModel
+                            ->addData($dataSave)
+                            ->setId($query[0]['id']);
+                        $listingModel->save();
                     }
                 }
-            } else {
-                $parentModel = Mage::getModel('catalog/product')->load($parent[0]);
-                $result =
-                    Mage::getModel('magetsync/listing')->saveListingSynchronized($parentModel, $attributes, false);
             }
         } catch (Exception $e) {
             Mage::logException($e);
