@@ -500,6 +500,12 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     'id', array('in' => $newListing)
                 )->load();
 
+                if($postData["is_custom_price"] == "on") {
+                    $postData["is_custom_price"] = 1;
+                } else {
+                    $postData["is_custom_price"] = 0;
+                }
+
                 foreach ($listings as $value) {
                     $data = $value->getData();
 
@@ -604,24 +610,19 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     $hasError = false;
                     if ($syncStatus) {
 
-                        if ($postData && array_key_exists('price', $postData)) {
+                        if ($postData && array_key_exists('price', $postData) && $postData['price'] > 0) {
                             $priceEtsy = $postData['price'];
                         } else {
                             $priceEtsy = $data['price'];
                         }
+                        $params['price'] = $priceEtsy;
 
                         if ($data['listing_id']) {
+
                             $obliUpd = array('listing_id' => $data['listing_id']);
                             $resultApi = $listingModel->updateListing($obliUpd, $params);
                         } else {
-                            $new_pricing = Mage::getStoreConfig(
-                                'magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing'
-                            );
-                            if ($new_pricing) {
-                                $params['price'] = $priceEtsy;
-                            } else {
-                                $params['price'] = $data['price'];
-                            }
+
                             $resultApi = $listingModel->createListing(null, $params);
                         }
                         if ($resultApi['status'] == true) {
@@ -694,8 +695,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     $postData['sync_ready'] = 1;
 
-                    $value
-                        ->addData($postData);
+                    $value->addData($postData);
                     $value->save();
 
                     if ($hasError == true) {
