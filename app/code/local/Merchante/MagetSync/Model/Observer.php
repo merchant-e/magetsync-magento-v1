@@ -487,10 +487,15 @@ class Merchante_MagetSync_Model_Observer
                           ->getCollection()
                           ->addFieldToFilter('listing_id', array('eq' => $idListing));
 
+        Mage::log('/**********************************************************************/', null, 'images-issue.txt');
         /** @var Merchante_MagetSync_Model_ImageEtsy $img */
+        $cntr1 = 0;
         foreach ($imageModel as $img) {
             $img->delete();
+            $cntr1++;
         }
+
+        Mage::log('Deleted:' .$cntr1. 'image models.', null, 'images-issue.txt');
 
         // deleting images
         if (count($dataPro['media_gallery']['images']) > 0) {
@@ -506,6 +511,7 @@ class Merchante_MagetSync_Model_Observer
 
             //We sort and cut the array of images when no image is there to sync
             if (empty($newImages)) {
+                Mage::log('$newImages EMPTY!', null, 'images-issue.txt');
                 $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_SYNCED);
                 $listing->save();
 
@@ -526,6 +532,7 @@ class Merchante_MagetSync_Model_Observer
             }
         }
 
+        Mage::log('Media gallery images > 0.', null, 'images-issue.txt');
         $newImages = array_reverse($newImages);
         $paramImg = array('listing_id' => $result['listing_id']);
         // deleting all the images on etsy
@@ -533,6 +540,9 @@ class Merchante_MagetSync_Model_Observer
 
         if ($resultTotalImgs['status']) {
             $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
+
+            Mage::log('Count is:'.count($resultTotalImgs['results']).' for findAllListingImages call', null, 'images-issue.txt');
+
             if ($result['listing_id'] && isset($resultTotalImgs['results']) && count($resultTotalImgs['results']) > 0) {
                 foreach ($resultTotalImgs['results'] as $etsyImg) {
                     $obligatoryDelete = array(
@@ -541,6 +551,8 @@ class Merchante_MagetSync_Model_Observer
                     );
                     $resultImageApiDelete =
                         Mage::getModel('magetsync/listing')->deleteListingImage($obligatoryDelete, null);
+
+                    Mage::log('Deleted listing_image_id: '.intval($etsyImg['listing_image_id']).' through deleteListingImage', null, 'images-issue.txt');
                     if (!$resultImageApiDelete['status']) {
                         Merchante_MagetSync_Model_LogData::magetsync(
                             $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
@@ -556,6 +568,9 @@ class Merchante_MagetSync_Model_Observer
         if ($resultTotalImgs['status']) {
             $resultTotalImgs = json_decode(json_decode($resultTotalImgs['result']), true);
             $totalImagesAux = $resultTotalImgs['count'];
+
+            Mage::log('Second findAllListingImages call returned: '.$resultTotalImgs['count'].' count', null, 'images-issue.txt');
+
             $totalImages = isset($totalImagesAux) ? $totalImagesAux : 0;
         } else {
             Merchante_MagetSync_Model_LogData::magetsync(
@@ -567,6 +582,9 @@ class Merchante_MagetSync_Model_Observer
         $uploadCount = 0;
 
         $imageModel = Mage::getModel('magetsync/imageEtsy')->getCollection();
+
+
+        Mage::log('Starting $newImages foreach. $totalImages is:'.$totalImages, null, 'images-issue.txt');
 
         foreach ($newImages as $image) {
             //We control that the number of images always
@@ -614,6 +632,8 @@ class Merchante_MagetSync_Model_Observer
 
                     $resultImageApi = Mage::getModel('magetsync/listing')->uploadListingImage($obligatory, $params);
                     if ($resultImageApi['status']) {
+
+                        Mage::log('uploadListingImage returned OK. Counter is:'.$h, null, 'images-issue.txt');
                         $resultImage = json_decode(json_decode($resultImageApi['result']), true);
                         $resultImage = $resultImage['results'][0];
                         $imageData = array(
@@ -633,12 +653,16 @@ class Merchante_MagetSync_Model_Observer
                         }
                         $uploadCount++;
                     } else {
+
+                        Mage::log('uploadListingImage returned NOTOK. Counter is:'.$h, null, 'images-issue.txt');
                         Merchante_MagetSync_Model_LogData::magetsync(
                             $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultImageApi['message'],
                             Merchante_MagetSync_Model_LogData::LEVEL_ERROR
                         );
                     }
                 } else {
+
+                    Mage::log('Unsuccessful curl upload. Counter is:'.$h, null, 'images-issue.txt');
                     Merchante_MagetSync_Model_LogData::magetsync(
                         $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING, $resultUpload['message'],
                         Merchante_MagetSync_Model_LogData::LEVEL_ERROR
@@ -652,6 +676,9 @@ class Merchante_MagetSync_Model_Observer
         } else {
             $listing->setSync(Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC);
         }
+
+        Mage::log('Upload count: '.$uploadCount, null, 'images-issue.txt');
+        Mage::log('/########################################################################/', null, 'images-issue.txt');
         $listing->save();
     }
 
