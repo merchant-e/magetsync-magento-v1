@@ -615,14 +615,14 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         } else {
                             $priceEtsy = $data['price'];
                         }
-                        $params['price'] = $priceEtsy;
 
                         if ($data['listing_id']) {
 
                             $obliUpd = array('listing_id' => $data['listing_id']);
                             $resultApi = $listingModel->updateListing($obliUpd, $params);
                         } else {
-
+                            
+                            $params['price'] = $priceEtsy;
                             $resultApi = $listingModel->createListing(null, $params);
                         }
                         if ($resultApi['status'] == true) {
