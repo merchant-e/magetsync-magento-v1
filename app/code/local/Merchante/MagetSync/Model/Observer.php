@@ -498,11 +498,18 @@ class Merchante_MagetSync_Model_Observer
         Mage::log('Deleted:' .$cntr1. 'image models.', null, 'images-issue.txt');
 
         // deleting images
-        if (count($dataPro['media_gallery']['images']) > 0) {
-            $excluded =
-                Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
+        $galleryImages = $productModel->getMediaGalleryImages();
+
+        Mage::log('$galleryImages count: '.count($galleryImages), null, 'images-issue.txt');
+
+        if (count($galleryImages) > 0) {
+            $excluded = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
+            Mage::log('excluded is: '.$excluded, null, 'images-issue.txt');
             if ($excluded <> '1') {
-                foreach ($dataPro['media_gallery']['images'] as $imageAux) {
+                foreach ($galleryImages as $imageAux) {
+                    $disCond = $imageAux['disabled'] != '1';
+                    $disDefCond = $imageAux['disabled_default'] != '1';
+                    Mage::log('Looping through images. disabled cond: '.$disCond.', disabled_default cond: '.$disDefCond, null, 'images-issue.txt');
                     if ($imageAux['disabled'] != '1' && $imageAux['disabled_default'] != '1') {
                         $newImages[] = $imageAux;
                     }
