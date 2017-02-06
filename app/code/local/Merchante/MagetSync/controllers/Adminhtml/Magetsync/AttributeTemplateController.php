@@ -89,6 +89,11 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                 $postData['product_ids'] = implode(',', $productIdsToAddArr);
                 $postData['products_count'] = count($productIdsToAddArr);
 
+                if ($postData['pricing_rule'] == 'original' || $postData['affect_value'] == 0) {
+                    $postData['pricing_rule'] = 'original';
+                    $postData['affect_value'] = 0;
+                    $postData['affect_strategy'] = NULL;
+                }
                 $origData = $attributeTemplateModel->getOrigData();
                 $attributeTemplateModel->addData($postData);
                 $attributeTemplateModel->save();
@@ -175,6 +180,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         }
                         if ($postData['pricing_rule'] == 'original') {
                             $finalPrice = $origPrice;
+                            $postData['is_custom_price'] = 0;
                         } else {
                             if ($postData['affect_strategy'] == 'percentage') {
                                 $delta = round($origPrice * (floatval($postData['affect_value']) / 100), 2);
@@ -186,6 +192,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                             } else {
                                 $finalPrice = $origPrice - $delta;
                             }
+                            $postData['is_custom_price'] = 1;
                         }
                         $postData['price'] = $finalPrice;
 

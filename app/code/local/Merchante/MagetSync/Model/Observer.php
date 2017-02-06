@@ -263,15 +263,28 @@ class Merchante_MagetSync_Model_Observer
                     }
 
                     $postData['price'] = $dataProduct['price'];
-                    if ($dataProduct['special_price'] != '') {
-                        $useSpecialPrice = Mage::getStoreConfig(
-                            'magetsync_section/magetsync_group_options/magetsync_field_special_price'
-                        );
-                        if ($useSpecialPrice) {
-                            $today = new DateTime("now");
-                            if ($dataProduct['special_from_date']) {
-                                $fromDate = new DateTime($dataProduct['special_from_date']);
-                                if ($fromDate <= $today) {
+                    if ($listing['is_custom_price'] == 1) {
+                        $postData['price'] = $listing['price'];
+                    } else {
+                        if ($dataProduct['special_price'] != '') {
+                            $useSpecialPrice = Mage::getStoreConfig(
+                                'magetsync_section/magetsync_group_options/magetsync_field_special_price'
+                            );
+                            if ($useSpecialPrice) {
+                                $today = new DateTime("now");
+                                if ($dataProduct['special_from_date']) {
+                                    $fromDate = new DateTime($dataProduct['special_from_date']);
+                                    if ($fromDate <= $today) {
+                                        if ($dataProduct['special_to_date']) {
+                                            $toDate = new DateTime($dataProduct['special_to_date']);
+                                            if ($toDate >= $today) {
+                                                $postData['price'] = $dataProduct['special_price'];
+                                            }
+                                        } else {
+                                            $postData['price'] = $dataProduct['special_price'];
+                                        }
+                                    }
+                                } else {
                                     if ($dataProduct['special_to_date']) {
                                         $toDate = new DateTime($dataProduct['special_to_date']);
                                         if ($toDate >= $today) {
@@ -281,40 +294,14 @@ class Merchante_MagetSync_Model_Observer
                                         $postData['price'] = $dataProduct['special_price'];
                                     }
                                 }
-                            } else {
-                                if ($dataProduct['special_to_date']) {
-                                    $toDate = new DateTime($dataProduct['special_to_date']);
-                                    if ($toDate >= $today) {
-                                        $postData['price'] = $dataProduct['special_price'];
-                                    }
-                                } else {
-                                    $postData['price'] = $dataProduct['special_price'];
-                                }
                             }
                         }
                     }
-                    $origPrice = $postData['price'];
-                    if ($listing['pricing_rule'] == 'original') {
-                        $finalPrice = $origPrice;
-                    } else {
-                        if ($listing['affect_strategy'] == 'percentage') {
-                            $delta = round($origPrice * (floatval($listing['affect_value']) / 100), 2);
-                        } else {
-                            $delta = $listing['affect_value'];
-                        }
-                        if ($listing['pricing_rule'] == 'increase') {
-                            $finalPrice = $origPrice + $delta;
-                        } else {
-                            $finalPrice = $origPrice - $delta;
-                        }
-                    }
-                    $postData['price'] = $finalPrice;
-
+                    $finalPrice = $postData['price'];
 
                     $params = array(
                         'description'          => $newDescription,
                         'materials'            => $listing['materials'],
-                        'price'                => $postData['price'],
                         'shipping_template_id' => $listing['shipping_template_id'],
                         'shop_section_id'      => $listing['shop_section_id'],
                         'title'                => $listing['title'],
@@ -392,7 +379,7 @@ class Merchante_MagetSync_Model_Observer
                         $result = json_decode(json_decode($resultApiUpd['result']), true);
                         $result = $result['results'][0];
                         $statusProcess = $listingModel->saveDetails(
-                            $result, $listing['idproduct'], $listing['price'], $listing['id'], 1
+                            $result, $listing['idproduct'], $finalPrice, $listing['id'], 1
                         );
 
                         if ($statusProcess['status']) {
