@@ -484,7 +484,11 @@ class Merchante_MagetSync_Model_Observer
             $uploadExcluded = Mage::getStoreConfig('magetsync_section/magetsync_group_options/magetsync_field_exclude_pictures');
             foreach ($dataPro['media_gallery']['images'] as $imageAux) {
                 if (($imageAux['disabled'] != '1' && $imageAux['disabled_default'] != '1') || $uploadExcluded == 1) {
-                    $newImages[] = $imageAux;
+                    if ($productModel->getImage() == $imageAux['file']) {
+                        $baseImage = $imageAux;
+                    } else {
+                        $newImages[] = $imageAux;
+                    }
                 }
             }
 
@@ -495,19 +499,19 @@ class Merchante_MagetSync_Model_Observer
 
                 return false;
             }
-            $imageUrl = $productModel->getImage();
-            $resultIndex = $listing->searchForFile($imageUrl, $newImages);
-
-            if (isset($resultIndex)) {
-                usort(
-                    $newImages, function ($a, $b) {
-                    return ($a['position'] > $b['position']) ? 1 : -1;
-                }
-                );
-                if (count($newImages) >= 5) {
-                    $newImages = array_slice($newImages, 0, 5);
-                }
+            usort(
+                $newImages, function ($a, $b) {
+                return ($a['position'] > $b['position']) ? 1 : -1;
             }
+            );
+            // Insert base image as first
+            if (!empty($baseImage)) {
+                array_unshift($newImages, $baseImage);
+            }
+            if (count($newImages) > 5) {
+                $newImages = array_slice($newImages, 0, 5);
+            }
+
         }
 
         $newImages = array_reverse($newImages);
