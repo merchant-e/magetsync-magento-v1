@@ -1,5 +1,4 @@
-##[2017.01 beta] - 2017-01-26
-### From this point forward MagetSync versions will be year and release number
+##[2017.01 beta] - 2017-02-06
 ### Added
 - New configurable option to allow embeding of product attributes into product descriptions (enhanced Global Templates)
 - Added Centralised logger for troubleshooting purposes (with config option)
@@ -9,12 +8,15 @@
 - Config option to assign all Etsy orders to MagetSync payment method by default
 
 ### Fixed
+- Bug: Etsy orders created using Magento price instead of Etsy price
+- Bug: Listings has variations with prices set... in all instances
+- Bug: Updates made to a child product not detected
+- Bug  preventing PayPal paid orders being imported in Magento - by assigning all orders by default to MagetSync payment method
+- Bug: Custom prices being rewritten on product updates
 - Possible security issues
-- Bug: Listings has variations with prices set...
-- Bug preventing PayPal paid orders being imported in Magento - by assigning all orders by default to MagetSync payment method
 
 ------- end of 2016 --------
-
+### From this point forward MagetSync versions will be assigned a year and release number
 ##[0.9.7.5] - 2016-11-28
 ### Added
 - Support for Attribute Templates
