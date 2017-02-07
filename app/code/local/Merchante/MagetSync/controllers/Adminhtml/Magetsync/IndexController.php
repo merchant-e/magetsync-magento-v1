@@ -487,7 +487,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 } else {
                     $newListing = array($listingId);
                 }
-                $languageData = '';
+
                 $language = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language');
                 if ($language <> null) {
                     $languageData = $language;
@@ -608,14 +608,18 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     );
                     $dataGlobal = $data['id'];
                     $hasError = false;
-                    if ($syncStatus) {
 
-                        if ($postData && array_key_exists('price', $postData) && $postData['price'] > 0) {
+                    $priceEtsy = $data['price'];
+                    if ($postData["is_custom_price"]) {
+                        if (array_key_exists('price', $postData) && $postData['price'] > 0) {
                             $priceEtsy = $postData['price'];
-                        } else {
-                            $priceEtsy = $data['price'];
                         }
+                    } else {
+                        $priceEtsy = round(Mage::getModel('catalog/product')->load($data['idproduct'])->getPrice(), 2);
+                    }
+                    $postData['price'] = $priceEtsy;
 
+                    if ($syncStatus) {
                         if ($data['listing_id']) {
 
                             $obliUpd = array('listing_id' => $data['listing_id']);

@@ -172,25 +172,21 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                             );
                         }
                         $postData['attribute_template_id'] = $attributeTemplateId;
+                        $productPrice = $createdListingsData[$listing->getIdproduct()];
 
-                        if ($listing->getPrice()) {
-                            $origPrice = $listing->getPrice();
-                        } else {
-                            $origPrice = $createdListingsData[$listing->getIdproduct()];
-                        }
                         if ($postData['pricing_rule'] == 'original') {
-                            $finalPrice = $origPrice;
+                            $finalPrice = $productPrice;
                             $postData['is_custom_price'] = 0;
                         } else {
                             if ($postData['affect_strategy'] == 'percentage') {
-                                $delta = round($origPrice * (floatval($postData['affect_value']) / 100), 2);
+                                $delta = round($productPrice * (floatval($postData['affect_value']) / 100), 2);
                             } else {
                                 $delta = $postData['affect_value'];
                             }
                             if ($postData['pricing_rule'] == 'increase') {
-                                $finalPrice = $origPrice + $delta;
+                                $finalPrice = $productPrice + $delta;
                             } else {
-                                $finalPrice = $origPrice - $delta;
+                                $finalPrice = $productPrice - $delta;
                             }
                             $postData['is_custom_price'] = 1;
                         }
