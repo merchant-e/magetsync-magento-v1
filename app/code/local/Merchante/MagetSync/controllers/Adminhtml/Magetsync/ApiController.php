@@ -230,6 +230,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ApiController extends Mage_Adminht
             $url = Merchante_MagetSync_Model_Etsy::$merchApi;
             $url = $url . "resetAuthorizationData/" . $tokenCustomer;
             $result = $etsyModel->curlConnect($url);
+
+            $result = json_decode($result, true);
+
             /*************************************/
             if ($result['success']) {
                 $etsyData = $etsyModel->load(1);
