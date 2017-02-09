@@ -494,9 +494,7 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
         /** @var Mage_Sales_Model_Order $order */
         $order = $service->getOrder();
-
-        if ($order) {
-
+        if ($order instanceof Mage_Sales_Model_Order && $order->getId()) {
             $usePrefix =
                 Mage::getStoreConfig('magetsync_section/magetsync_group_sales_order/magetsync_field_enable_prefix');
             if ($usePrefix) {
@@ -535,7 +533,12 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                 $order->setUpdatedAt($current_time);
             }
 
-            $order->save();
+            try {
+                $order->save();
+            } catch(Exception $e) {
+                Mage::logException($e);
+                $this->_getSession()->addError($e->getMessage());
+            }
 
             /****UPDATE QUANTITIES IN LISTINGS****/
 
