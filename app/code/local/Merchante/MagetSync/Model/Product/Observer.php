@@ -68,11 +68,17 @@ class Merchante_MagetSync_Model_Product_Observer
     public function massiveUpdate($observer)
     {
         try {
+
+            $parentProductIDs = array();
             $data = $observer->getEvent()->getData();
             $listingModel = Mage::getModel('magetsync/listing');
-            $productIDs = $data['product_ids'] ?: $data['products'];
+            $requestProductIDs = $data['product_ids'] ?: $data['products'];
+            foreach ($requestProductIDs as $productID) {
+                $parentProductIDs = array_merge($parentProductIDs, Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($productID));
+            }
+            $allProductIDs = array_merge($requestProductIDs, $parentProductIDs);
             $existingListings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter(
-                'idproduct', array('in' => $productIDs)
+                'idproduct', array('in' => $allProductIDs)
             )->load();
             foreach ($existingListings as $listing) {
                 $this->logUpdate(null, $listing->getIdproduct(), $data['attributes_data']);
