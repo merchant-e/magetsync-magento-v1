@@ -535,9 +535,10 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
 
             try {
                 $order->save();
-            } catch(Exception $e) {
-                Mage::logException($e);
-                $this->_getSession()->addError($e->getMessage());
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')
+                    ->addError(Mage::helper('magetsync')->__('Error saving order #'. $order->getId()));
+                $this->logException($e->getMessage());
             }
 
             /****UPDATE QUANTITIES IN LISTINGS****/
