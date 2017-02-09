@@ -25,6 +25,9 @@ class Merchante_MagetSync_Model_Product_Observer
                 $product = Mage::getModel('catalog/product')->load($idProduct);
                 $data = $product->getData();
                 $status = $attributes['synchronizedEtsy'];
+                if (is_null($status)) {
+                    $status = $data['synchronizedEtsy'];
+                }
             }
             /** @var Mage_Catalog_Model_Product $parent */
             $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($data['entity_id']);
@@ -66,13 +69,13 @@ class Merchante_MagetSync_Model_Product_Observer
     {
         try {
             $data = $observer->getEvent()->getData();
-            $product_ids = $data['product_ids'];
-            $attributes = $data['attributes_data'];
-            $value = array_key_exists('synchronizedEtsy', $attributes);
-            if ($value) {
-                foreach ($product_ids as $item) {
-                    $this->logUpdate(null, $item, $attributes);
-                }
+            $listingModel = Mage::getModel('magetsync/listing');
+            $productIDs = $data['product_ids'] ?: $data['products'];
+            $existingListings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter(
+                'idproduct', array('in' => $productIDs)
+            )->load();
+            foreach ($existingListings as $listing) {
+                $this->logUpdate(null, $listing->getIdproduct(), $data['attributes_data']);
             }
         } catch (Exception $e) {
             Mage::logException($e);
