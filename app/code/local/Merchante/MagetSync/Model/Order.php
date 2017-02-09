@@ -492,11 +492,9 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
             $coreConfig->saveConfig('general/region/state_required', $regionRequiredCountries);
         }
 
-
+        /** @var Mage_Sales_Model_Order $order */
         $order = $service->getOrder();
-
-        if ($order) {
-
+        if ($order instanceof Mage_Sales_Model_Order && $order->getId()) {
             $usePrefix =
                 Mage::getStoreConfig('magetsync_section/magetsync_group_sales_order/magetsync_field_enable_prefix');
             if ($usePrefix) {
@@ -527,25 +525,21 @@ class Merchante_MagetSync_Model_Order extends Merchante_MagetSync_Model_Etsy
                 $msgFromBuyer = Mage::helper('magetsync')->__('There\'s no note from buyer.');
             }
 
+            $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+            $order->addStatusHistoryComment($msgFromBuyer, Mage_Sales_Model_Order::STATE_PROCESSING);
             if ($was_shipped == 1) {
                 $current_time = Varien_Date::formatDate($value['creation_tsz'], false);
                 $order->setCreatedAt($current_time);
                 $order->setUpdatedAt($current_time);
-
-                $order->addStatusToHistory(Mage_Sales_Model_Order::STATE_COMPLETE, $msgFromBuyer, false);
-
-            } else {
-                /***************************/
-                if ($value['was_paid'] == true) {
-                    $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
-                    $order->addStatusToHistory(Mage_Sales_Model_Order::STATE_PROCESSING, $msgFromBuyer, false);
-                } else {
-                    $order->setState(Mage_Sales_Model_Order::STATE_NEW, true);
-                    $order->addStatusHistoryComment($msgFromBuyer);
-                }
             }
 
-            $order->save();
+            try {
+                $order->save();
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')
+                    ->addError(Mage::helper('magetsync')->__('Error saving order #'. $order->getId()));
+                $this->logException($e->getMessage());
+            }
 
             /****UPDATE QUANTITIES IN LISTINGS****/
 

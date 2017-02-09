@@ -276,16 +276,6 @@
                 <sallowspecific>0</sallowspecific>
             </magetsync_shipping>
         </carriers>
-        <payment>
-            <magetsync_payment>
-                <model>magetsync/custom_payment</model>
-                <active>1</active>
-                <order_status>processing</order_status>
-                <title>MagetSync</title>
-                <allowspecific>0</allowspecific>
-                <sort_order>1</sort_order>
-            </magetsync_payment>
-        </payment>
         <magetsync_section>
             <magetsync_group_debug>
                 <enable_log>0</enable_log>
