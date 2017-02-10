@@ -285,6 +285,12 @@
                 <magetsync_field_default_payment_method>1</magetsync_field_default_payment_method>
             </magetsync_group_sales_order>
         </magetsync_section>
+        <payment>
+            <magetsync_payment>
+                <model>magetsync/custom_payment</model>
+                <order_status>processing</order_status>
+            </magetsync_payment>
+        </payment>
     </default>
     <crontab>
         <jobs>
