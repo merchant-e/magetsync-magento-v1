@@ -734,6 +734,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 $dataSave['quantity'] = $itemStock;
             }
         }
+        $dataSave['quantity_has_changed'] = $this::QUANTITY_HAS_NOT_CHANGED;
     }
 
     /**
