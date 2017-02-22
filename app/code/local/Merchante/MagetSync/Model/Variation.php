@@ -78,7 +78,7 @@ class Merchante_MagetSync_Model_Variation extends Merchante_MagetSync_Model_Etsy
      */
     public function updateInventory($obligatory, $params = null)
     {
-        /*
+        /**
          * TODO move to new model after API will be set up
          */
         return $this->selectExecute('ListingInventory',__FUNCTION__,$obligatory,$params);

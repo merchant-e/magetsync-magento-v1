@@ -819,9 +819,10 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param $idProduct
      * @param $priceBase
      * @param $idListing
-     * @return bool
+     * @param string $callType
+     * @return array
      */
-    public function saveDetails($result, $idProduct, $priceBase, $idListing, $inventoryCall = 0)
+    public function saveDetails($result, $idProduct, $priceBase, $idListing, $callType = 'all')
     {
         try {
             $statusOperation = array(
@@ -830,287 +831,180 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
             );
             $productModel = Mage::getModel('catalog/product')->load($idProduct);
             $dataPro = $productModel->getData();
-            $availabilityStock = array();
 
-            if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                $options = $productModel->getOptions();
-            } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                $options = $productModel->getTypeInstance()->getConfigurableAttributesAsArray();
-                foreach ($productModel->getTypeInstance(true)->getUsedProducts(null, $productModel) as $simpleAux) {
+            if ($callType == 'all' || $callType == 'inventory') {
+                $availabilityStock = array();
 
-                    $dataSimple = $simpleAux->getData();
-                    if ($dataSimple['is_in_stock']) {
-                        $existStockItem = array_key_exists('stock_item', $dataSimple);
-                        if ($existStockItem) {
-                            if ($dataSimple['stock_item']['qty'] > 0) {
-                                $availabilityStock[] = true;
+                if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+                    $options = $productModel->getOptions();
+                } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                    $options = $productModel->getTypeInstance()->getConfigurableAttributesAsArray();
+                    foreach ($productModel->getTypeInstance(true)->getUsedProducts(null, $productModel) as $simpleAux) {
+
+                        $dataSimple = $simpleAux->getData();
+                        if ($dataSimple['is_in_stock']) {
+                            $existStockItem = array_key_exists('stock_item', $dataSimple);
+                            if ($existStockItem) {
+                                if ($dataSimple['stock_item']['qty'] > 0) {
+                                    $availabilityStock[] = true;
+                                } else {
+                                    $availabilityStock[] = false;
+                                }
                             } else {
                                 $availabilityStock[] = false;
                             }
                         } else {
                             $availabilityStock[] = false;
                         }
-                    } else {
-                        $availabilityStock[] = false;
-                    }
-                }
-
-            }
-
-            /******************************
-             * Variations create section
-             ******************************/
-
-            $variationModel = Mage::getModel('magetsync/variation')->getCollection()->getData();
-            $nCustom = 0;
-            $obliVariation['listing_id'] = $result['listing_id'];
-            $scalesArray = array();
-            $variationMapping = array();
-            $requestParams = array();
-            
-/*
- * TODO remove after new API switch
-            $customNames = array();
-            $hasPrice = false;
-            $singleVariationGlobal = array();
- */
-            foreach ($options as $valueVar) {
-
-                if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                    $dataValue = $valueVar->getData();
-                    $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
-                    $valuesOpt = $valueVar->getValues();
-                    $propertyName = ucfirst($dataValue['title']);
-                } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                    $dataValue = $valueVar;
-                    $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel, 'label');
-                    $valuesOpt = $valueVar['values'];
-                    $propertyName = ucfirst($dataValue['label']);
-                }
-                $scaleValue = 0;
-                if ($exist <> -1) {
-                    $propertyID = $variationModel[$exist]['propertyid'];
-
-                    if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
-                        || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
-                    ) {
-                        if ($propertyName == 'Size') {
-                            $propertyScaleName = 'sizing';
-                        } else {
-                            $propertyScaleName = strtolower($propertyName);
-                        }
-                        $scaleName = $propertyScaleName . '_scale';
-
-                        $scaleValue = Mage::getStoreConfig(
-                            'magetsync_section/magetsync_group_variations/magetsync_field_' . $propertyScaleName .
-                            '_scale'
-                        );
-
-                        $scalesArray[$scaleName] = $scaleValue;
                     }
 
-                } else {
-                    /* 513 and 514 are custom properties on Etsy */
-                    if ($nCustom == 0) {
-                        $propertyID = 513;
-/*
- * TODO remove after new API switch
-                        if (strlen($propertyName) > 20) {
-                            $customNames['513'] = substr($propertyName, 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $customNames['513'] = $propertyName;
-                        }
-*/
-                    } elseif ($nCustom == 1) {
-                        $propertyID = 514;
-/*
- * TODO remove after new API switch
-                        if (strlen($propertyName) > 20) {
-                            $customNames['514'] = substr($propertyName, 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $customNames['514'] = $propertyName;
-                        }
-*/
-                    } else {
-                        break;
-                    }
                 }
 
-                $y = 0;
-                foreach ($valuesOpt as $item) {
-                    $variationMapping[$valueVar['attribute_code']][$item['value_index']]['price'] = $item['pricing_value'];
-                    $variationMapping[$valueVar['attribute_code']][$item['value_index']]['is_percent'] = $item['is_percent'];
-                    $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_name'] = $valueVar['frontend_label'];
-                    $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $item['label'];
-                    $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_id'] = $propertyID;
+                /******************************
+                 * Variations create section
+                 ******************************/
 
-/*
- * TODO remove after new API switch
-                    $singleVariation = array();
-                    $singleVariation['property_id'] = $propertyID;
+                $variationModel = Mage::getModel('magetsync/variation')->getCollection()->getData();
+                $nCustom = 0;
+                $obliVariation['listing_id'] = $result['listing_id'];
+                $scalesArray = array();
+                $variationMapping = array();
+                $requestParams = array();
+
+                foreach ($options as $valueVar) {
+
                     if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                        $singleVariation['is_available'] = true;
-                        $dataItem = $item->getData();
-                        if (strlen($dataItem['title']) > 20) {
-                            $singleVariation['value'] = substr($dataItem['title'], 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $singleVariation['value'] = $dataItem['title'];
-                        }
-
-
-                        //$pricing = $dataItem['price'];
-                        //$price_type = $dataItem['price_type'];
+                        $dataValue = $valueVar->getData();
+                        $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
+                        $valuesOpt = $valueVar->getValues();
+                        $propertyName = ucfirst($dataValue['title']);
                     } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                        $singleVariation['is_available'] =
-                            isset($availabilityStock[$y]) ? $availabilityStock[$y] : true;
-                        $dataItem = $item;
-                        if (strlen($dataItem['label']) > 20) {
-                            $singleVariation['value'] = substr($dataItem['label'], 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $singleVariation['value'] = $dataItem['label'];
-                        }
-
-                        //$singleVariation['value'] = $dataItem['label'];
-                        //$pricing = $dataItem['pricing_value'];
-                        //$price_type = $dataItem['is_percent'];
+                        $dataValue = $valueVar;
+                        $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel, 'label');
+                        $valuesOpt = $valueVar['values'];
+                        $propertyName = ucfirst($dataValue['label']);
                     }
-*/
-                    if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
-                        $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
-                    ) {
-                        $matches = null;
+                    $scaleValue = 0;
+                    if ($exist <> -1) {
+                        $propertyID = $variationModel[$exist]['propertyid'];
+
                         if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
                             || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
                         ) {
-                            if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
-                                $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
+                            if ($propertyName == 'Size') {
+                                $propertyScaleName = 'sizing';
+                            } else {
+                                $propertyScaleName = strtolower($propertyName);
+                            }
+                            $scaleName = $propertyScaleName . '_scale';
+
+                            $scaleValue = Mage::getStoreConfig(
+                                'magetsync_section/magetsync_group_variations/magetsync_field_' . $propertyScaleName .
+                                '_scale'
+                            );
+
+                            $scalesArray[$scaleName] = $scaleValue;
+                        }
+
+                    } else {
+                        /* 513 and 514 are custom properties on Etsy */
+                        if ($nCustom == 0) {
+                            $propertyID = 513;
+
+                        } elseif ($nCustom == 1) {
+                            $propertyID = 514;
+
+                        } else {
+                            break;
+                        }
+                    }
+
+                    $y = 0;
+                    foreach ($valuesOpt as $item) {
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['price'] = $item['pricing_value'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['is_percent'] = $item['is_percent'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_name'] = $valueVar['frontend_label'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $item['label'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_id'] = $propertyID;
+
+                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
+                            $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
+                        ) {
+                            $matches = null;
+                            if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
+                                || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
                             ) {
-                                preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'], $matches);
+                                if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
+                                    $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
+                                ) {
+                                    preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'], $matches);
+                                }
+                            }
+                            if ($matches && count($matches) > 0) {
+                                //$singleVariation['value'] = $matches[1];
+                                $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $matches[1];
                             }
                         }
-                        if ($matches && count($matches) > 0) {
-                            //$singleVariation['value'] = $matches[1];
-                            $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $matches[1];
-                        }
+
+                        $y = $y + 1;
                     }
-/*
- * TODO remove after new API switch
-                    if ($pricing != 0) {
-                        $hasPrice = true;
-                        if ($price_type == 'fixed' || !$price_type) {
-                            $singleVariation['price'] = $priceBase + $pricing;
-                        } elseif ($price_type == 'percent' || $price_type) {
-                            $singleVariation['price'] = ($priceBase * ($pricing / 100)) + $priceBase;
+
+                    if ($exist == -1) {
+                        $nCustom = $nCustom + 1;
+                    }
+                }
+
+                $productsData = array();
+                if ($productModel->getTypeId() == "configurable") {
+                    $confProduct = Mage::getModel('catalog/product_type_configurable')->setProduct($productModel);
+                    $simpleCollection = $confProduct->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
+                    foreach ($simpleCollection as $simpleProduct) {
+                        $product = array();
+                        $product['property_values'] = array();
+                        $product['sku'] = $simpleProduct->getSku();
+                        $priceVal = 0;
+                        foreach ($variationMapping as $attrCode => $attrValsArr) {
+                            if ($attrValsArr[$simpleProduct[$attrCode]]['is_percent'] == '1') {
+                                $priceVal += $singleVariation['price'] = ($priceBase * ($attrValsArr[$simpleProduct[$attrCode]]['price'] / 100)) + $priceBase;
+                            } else {
+                                $priceVal += $attrValsArr[$simpleProduct[$attrCode]]['price'];
+                            }
+                            $product['property_values'][] = array(
+                                'property_id' => $attrValsArr[$simpleProduct[$attrCode]]['property_id'],
+                                'property_name' => $attrValsArr[$simpleProduct[$attrCode]]['property_name'],
+                                'value' => $attrValsArr[$simpleProduct[$attrCode]]['value']
+                            );
                         }
+                        $product['offerings'] = array(array(
+                            'price' => $priceBase + $priceVal,
+                            'quantity' => $simpleProduct->getStockItem() ? intval($simpleProduct->getStockItem()->getQty()) : 0,
+                            'is_enabled' => intval($simpleProduct->getIsInStock())
+                        ));
+                        $requestParams[] = $product;
+                    }
+                    $productsData['price_on_property'] = array($propertyID);
+                    $productsData['quantity_on_property'] = array($propertyID);
+                    $productsData['sku_on_property'] = array($propertyID);
+                    $productsData['products'] = json_encode($requestParams, 128);
+
+                    $resultVariationApi = Mage::getModel('magetsync/variation')->updateInventory($obliVariation, $productsData);
+
+                    if ($resultVariationApi['status'] == true) {
+                        $resultVariation = json_decode(json_decode($resultVariationApi['result']), true);
                     } else {
-                        $singleVariation['price'] = $priceBase;
-                    }
-                    $singleVariationGlobal[] = $singleVariation;
-*/
-                    $y = $y + 1;
-                }
-
-                if ($exist == -1) {
-                    $nCustom = $nCustom + 1;
-                }
-            }
-/*
- * TODO remove after new API switch
-            if ($singleVariationGlobal) {
-                $singleData = array();
-                $singleData['variations'] = json_encode($singleVariationGlobal, 128);//JSON_PRETTY_PRINT
-                if ($customNames) {
-                    $singleData['custom_property_names'] = json_encode($customNames, true);
-                }
-                $singleData = array_merge($singleData, $scalesArray);
-            } else {
-                $singleData['variations'] = json_encode(array(), 128);
-            }
-*/
-
-            if($productModel->getTypeId() == "configurable") {
-                $conf = Mage::getModel('catalog/product_type_configurable')->setProduct($productModel);
-                $simple_collection = $conf->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
-                foreach ($simple_collection as $simple_product) {
-                    $product = array();
-                    $product['property_values'] = array();
-                    $product['sku'] = $simple_product->getSku();
-                    $priceVal = 0;
-                    foreach ($variationMapping as $attrCode => $attrValsArr) {
-                        if ($attrValsArr[$simple_product[$attrCode]]['is_percent'] == '1') {
-                            $priceVal += $singleVariation['price'] = ($priceBase * ($attrValsArr[$simple_product[$attrCode]]['price'] / 100)) + $priceBase;
-                        } else {
-                            $priceVal += $attrValsArr[$simple_product[$attrCode]]['price'];
-                        }
-                        $product['property_values'][] = array(
-                            'property_id' => $attrValsArr[$simple_product[$attrCode]]['property_id'],
-                            'property_name' => $attrValsArr[$simple_product[$attrCode]]['property_name'],
-                            'value' => $attrValsArr[$simple_product[$attrCode]]['value']
+                        Merchante_MagetSync_Model_LogData::magetsync(
+                            $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                            $resultVariationApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_WARNING
+                        );
+                        return array(
+                            'status' => false,
+                            'message' => 'Unable to update inventory.'
                         );
                     }
-                    $product['offerings'] = array(
-                        'price' => $priceBase + $priceVal,
-                        'quantity' => $simple_product->getStockItem() ? $simple_product->getStockItem()->getQty() : 0,
-                        'is_enabled' => intval($simple_product->getIsInStock())
-                    );
-                    $requestParams[] = $product;
                 }
             }
-            $obliVariation['products'] = json_encode($requestParams, 128);
-
-            $productsData = array();
-            $productsData['price_on_property'] = array();
-            $productsData['quantity_on_property'] = array();
-            $productsData['sku_on_property'] = array();
-
-            $resultVariationApi = Mage::getModel('magetsync/variation')->updateInventory($obliVariation, $productsData);
-
-            if ($resultVariationApi['status']) {
-                $resultVariation = json_decode(json_decode($resultVariationApi['result']), true);
-                $resultVariation = $resultVariation['results'][0];
-
-                if ($result['state'] == 'edit') {
-                    $stateListing = Merchante_MagetSync_Model_Listing::STATE_INACTIVE;
-                } else {
-                    $stateListing = Merchante_MagetSync_Model_Listing::STATE_ACTIVE;
-                }
-/*
- * TODO remove after new API switch
-                $listingModel = Mage::getModel('magetsync/listing');
-                if ($singleVariationGlobal) {
-                    if (!$hasPrice) {
-                        $obliUpd = array('listing_id' => $result['listing_id']);
-                        $listingModel->updateListing(
-                            $obliUpd, array(
-                                'price' => $priceBase,
-                                'state' => $stateListing
-                            )
-                        );
-                    }
-                } else {
-                    $obliUpd = array('listing_id' => $result['listing_id']);
-                    $listingModel->updateListing(
-                        $obliUpd, array(
-                            'price' => $priceBase,
-                            'state' => $stateListing
-                        )
-                    );
-                }
-*/
-            } else {
-
-                Merchante_MagetSync_Model_LogData::magetsync(
-                    $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                    $resultVariationApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_WARNING
-                );
-
-            }
-
-            if ($inventoryCall == 0) {
+            
+            if ($callType == 'all' || $callType == 'image') {
                 /**********************************/
                 $h = 0;
                 /******************************

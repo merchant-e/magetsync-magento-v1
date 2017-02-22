@@ -391,8 +391,9 @@ class Merchante_MagetSync_Model_Observer
                     if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
                         $result = json_decode(json_decode($resultApiUpd['result']), true);
                         $result = $result['results'][0];
+                        $callType = 'inventory';
                         $statusProcess = $listingModel->saveDetails(
-                            $result, $listing['idproduct'], $listing['price'], $listing['id'], 1
+                            $result, $listing['idproduct'], $listing['price'], $listing['id'], $callType
                         );
 
                         if ($statusProcess['status']) {
