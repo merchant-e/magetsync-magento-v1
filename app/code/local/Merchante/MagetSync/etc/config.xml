@@ -5,7 +5,7 @@
 <config>
     <modules>
         <Merchante_MagetSync>
-            <version>0.2.4</version>
+            <version>0.2.6</version>
         </Merchante_MagetSync>
     </modules>
     <frontend>
@@ -276,16 +276,6 @@
                 <sallowspecific>0</sallowspecific>
             </magetsync_shipping>
         </carriers>
-        <payment>
-            <magetsync_payment>
-                <model>magetsync/custom_payment</model>
-                <active>1</active>
-                <order_status>processing</order_status>
-                <title>MagetSync</title>
-                <allowspecific>0</allowspecific>
-                <sort_order>1</sort_order>
-            </magetsync_payment>
-        </payment>
         <magetsync_section>
             <magetsync_group_debug>
                 <enable_log>0</enable_log>
@@ -295,6 +285,12 @@
                 <magetsync_field_default_payment_method>1</magetsync_field_default_payment_method>
             </magetsync_group_sales_order>
         </magetsync_section>
+        <payment>
+            <magetsync_payment>
+                <model>magetsync/custom_payment</model>
+                <order_status>processing</order_status>
+            </magetsync_payment>
+        </payment>
     </default>
     <crontab>
         <jobs>

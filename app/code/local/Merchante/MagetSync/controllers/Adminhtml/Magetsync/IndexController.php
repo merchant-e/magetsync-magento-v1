@@ -487,7 +487,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 } else {
                     $newListing = array($listingId);
                 }
-                $languageData = '';
+
                 $language = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language');
                 if ($language <> null) {
                     $languageData = $language;
@@ -499,6 +499,12 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 $listings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter(
                     'id', array('in' => $newListing)
                 )->load();
+
+                if($postData["is_custom_price"] == "on") {
+                    $postData["is_custom_price"] = 1;
+                } else {
+                    $postData["is_custom_price"] = 0;
+                }
 
                 foreach ($listings as $value) {
                     $data = $value->getData();
@@ -605,22 +611,17 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $callType = 'all';
                         $resource = Mage::getSingleton('catalog/product')->getResource();
                         $productType = $resource->getAttributeRawValue($data['idproduct'], 'type_id', Mage::app()->getStore());
-                        if ($postData && array_key_exists('price', $postData)) {
-                            $priceEtsy = $postData['price'];
-                        } else {
-                            $priceEtsy = $data['price'];
-                        }
                         $new_pricing = Mage::getStoreConfig(
                             'magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing'
                         );
-                        if ($new_pricing) {
-                            $priceToBeSent = $priceEtsy;
-                        } else {
-                            $priceToBeSent = $data['price'];
-                        }
+                        $priceToBeSent = (!empty($postData['price']) && $new_pricing) ? $postData['price'] : $data['price'];
 
                         if ($data['listing_id']) {
                             $obliUpd = array('listing_id' => $data['listing_id']);
+
+                            /**
+                             * Update inventory call not used for simple products
+                             */
                             if ($productType == 'simple') {
                                 $params['quantity'] = $data['quantity'];
                                 $params['price'] = $priceToBeSent;
@@ -632,10 +633,11 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $params['quantity'] = $data['quantity'];
                             $resultApi = $listingModel->createListing(null, $params);
 
+                            /**
+                             * Update inventory call not used for simple products
+                             */
                             if ($productType == 'simple') {
-                                /**
-                                 * Skip inventory update call as it is automatically created during simple product listing creation
-                                 */
+
                                 $callType = 'image';
                             }
 
@@ -646,7 +648,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $result = $result['results'][0];
 
                             $statusOperation =
-                                $listingModel->saveDetails($result, $data['idproduct'], $priceEtsy, $dataGlobal, $callType);
+                                $listingModel->saveDetails($result, $data['idproduct'], $priceToBeSent, $dataGlobal, $callType);
                             /*********************************/
 
                             $postData['creation_tsz'] = $result['creation_tsz'];
@@ -711,8 +713,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     $postData['sync_ready'] = 1;
 
-                    $value
-                        ->addData($postData);
+                    $value->addData($postData);
                     $value->save();
 
                     if ($hasError == true) {

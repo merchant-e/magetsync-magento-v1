@@ -495,6 +495,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
                 if (array_key_exists('price', $attributes)) {
                     $dataSave['price'] = $attributes['price'];
+                } elseif ($query && $query[0]['is_custom_price'] == 1) {
+                    $dataSave['price'] = $query[0]['price'];
                 } else {
                     if (array_key_exists('special_price', $attributes)) {
                         $dataSave['price'] = $attributes['special_price'];

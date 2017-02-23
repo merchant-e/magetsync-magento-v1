@@ -16,7 +16,7 @@
             <frontend_type>text</frontend_type>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
-            <show_in_store>1</show_in_store>
+            <show_in_store>0</show_in_store>
             <tab>magetsync_tab</tab>
             <groups>
                 <magetsync_group translate="label comment">
@@ -35,8 +35,8 @@
                             <frontend_model>magetsync/buttonUpgrade</frontend_model>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_upgrade>
                         <magetsync_field_language translate="label comment">
                             <label>Language</label>
@@ -46,8 +46,8 @@
                             <sort_order>2</sort_order>
                             <source_model>magetsync/sources_languageEtsy_source</source_model>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_language>
                         <magetsync_field_shop translate="label comment">
                             <label>Shop ID</label>
@@ -55,8 +55,8 @@
                             <sort_order>3</sort_order>
                             <validate>required-entry</validate>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                             <frontend_class>validate-alphanum</frontend_class>
                             <frontend_input>text</frontend_input>
                         </magetsync_field_shop>
@@ -64,10 +64,10 @@
                             <label>Secret Token</label>
                             <comment>Token which you received after registration on Magetsync\'s website.</comment>
                             <sort_order>4</sort_order>
-                            <show_in_default>1</show_in_default>
                             <validate>required-entry</validate>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+							<show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                             <frontend_input>text</frontend_input>
                         </magetsync_field_tokencustomer>
                         <magetsync_field_authorize translate="label comment">
@@ -76,8 +76,8 @@
                             <frontend_model>magetsync/buttonAuthorize</frontend_model>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_authorize>
                         <magetsync_field_deauthorize translate="label comment">
                             <label></label>
@@ -85,31 +85,18 @@
                             <frontend_model>magetsync/buttonDeauthorize</frontend_model>
                             <sort_order>6</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_deauthorize>
                         <magetsync_field_version translate="label comment">
                             <label>Version</label>
                             <frontend_type>Label</frontend_type>
-                            <comment>2017.01 [beta]</comment>
+                            <comment>2017.01</comment>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_version>
-                        <magetsync_field_inc translate="label comment">
-                            <label></label>
-                            <frontend_type>label</frontend_type>
-                            <comment>
-                                <![CDATA[
-                                The term <span class="notice">'Etsy'</span> is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.
-                            ]]>
-                            </comment>
-                            <sort_order>8</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </magetsync_field_inc>
                     </fields>
                 </magetsync_group>
                 <magetsync_group_settings translate="label comment">
@@ -129,43 +116,12 @@
                             <comment>Enable this option if you're experiencing issues authorizing your store.</comment>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_open_ssl>
                     </fields>
                 </magetsync_group_settings>
 
-                <magetsync_group_debug translate="label comment">
-                    <label>Debug</label>
-                    <expanded>1</expanded>
-                    <sort_order>2</sort_order>
-                    <frontend_type>text</frontend_type>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <enable_log translate="label comment">
-                            <label>Enable log</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <comment>Enable this option if you want to log process.</comment>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enable_log>
-                        <enable_exception_log translate="label comment">
-                            <label>Enable exception log</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <comment>Enable this option if you want to log exceptions.</comment>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enable_exception_log>
-                    </fields>
-                </magetsync_group_debug>
 
                 <magetsync_group_options translate="label comment">
                     <label>Catalog Specific Options</label>
@@ -357,8 +313,8 @@
                     <sort_order>5</sort_order>
                     <frontend_type>text</frontend_type>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_column_order translate="label">
                             <label>Enable \'Source\' Column in Order Grid</label>
@@ -378,9 +334,9 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </magetsync_field_enable_prefix>
-                        <magetsync_field_default_payment_method translate="label">
+                        <magetsync_field_default_payment_method translate="label comment">
                             <label>Use MagetSync Payment Method for all Etsy Orders</label>
-                            <comment>When this is disabled. Orders paid via PayPal will be assigned to your default PayPal payment method.'</comment>
+                            <comment><![CDATA[When disabled, MagetSync will attempt to assign Etsy orders paid by PayPal to your local PayPal payment method. <strong>Caution:</strong> Changing this might prevent Etsy orders from being imported]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>3</sort_order>
@@ -412,7 +368,51 @@
                         </magetsync_field_was_shipped_orders>
                     </fields>
                 </magetsync_group_sales_order>
-            </groups>
+				<magetsync_group_debug translate="label comment">
+						<label>Debug</label>
+						<expanded>1</expanded>
+						<sort_order>6</sort_order>
+						<frontend_type>text</frontend_type>
+						<show_in_default>1</show_in_default>
+						<show_in_website>1</show_in_website>
+						<show_in_store>1</show_in_store>
+						<fields>
+							<enable_log translate="label comment">
+								<label>Enable log</label>
+								<frontend_type>select</frontend_type>
+								<source_model>adminhtml/system_config_source_yesno</source_model>
+								<comment>Enable this option if you want to log process.</comment>
+								<sort_order>1</sort_order>
+								<show_in_default>1</show_in_default>
+								<show_in_website>1</show_in_website>
+								<show_in_store>1</show_in_store>
+							</enable_log>
+							<enable_exception_log translate="label comment">
+								<label>Enable exception log</label>
+								<frontend_type>select</frontend_type>
+								<source_model>adminhtml/system_config_source_yesno</source_model>
+								<comment>Enable this option if you want to log exceptions.</comment>
+								<sort_order>1</sort_order>
+								<show_in_default>1</show_in_default>
+								<show_in_website>1</show_in_website>
+								<show_in_store>1</show_in_store>
+							</enable_exception_log>
+							<magetsync_field_inc translate="label comment">
+								<label></label>
+								<frontend_type>label</frontend_type>
+								<comment>
+									<![CDATA[
+									The term <span class="notice">'Etsy'</span> is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.
+								]]>
+								</comment>
+								<sort_order>8</sort_order>
+								<show_in_default>1</show_in_default>
+								<show_in_website>1</show_in_website>
+								<show_in_store>1</show_in_store>
+							</magetsync_field_inc>
+						</fields>
+					</magetsync_group_debug>
+			</groups>
         </magetsync_section>
         <magetsync_section_templates translate="label" module="magetsync">
             <label>Templates</label>
@@ -420,7 +420,7 @@
             <frontend_type>text</frontend_type>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
-            <show_in_store>1</show_in_store>
+            <show_in_store>0</show_in_store>
             <tab>magetsync_tab</tab>
             <groups>
                 <magetsync_group_description_area1 translate="label comment">
@@ -431,18 +431,19 @@
                     <frontend_model>magetsync/adminhtml_configuration_template_form</frontend_model>
                 </magetsync_group_description_area1>
                 <magetsync_group_notes_1 translate="label comment">
-                    <label>Global Notes 1</label>
+                    <label>Global Note 1 Template</label>
                     <expanded>1</expanded>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_converter_one translate="label">
                             <label>Insert attributes:</label>
                             <frontend_type>multiselect</frontend_type>
                             <frontend_model>magetsync/multiselect_render</frontend_model>
+							<comment>Select attributes to auto-generate variables</comment>
                             <sort_order>1</sort_order>
                             <source_model>magetsync/sources_globalNote_source</source_model>
                             <show_in_default>1</show_in_default>
@@ -451,34 +452,34 @@
                             <can_be_empty>1</can_be_empty>
                         </magetsync_field_converter_one>
                         <magetsync_field_prepend_one translate="label">
-                            <label>Prepend Global Note 1</label>
+                            <label>Prepend Following Note</label>
                             <frontend_type>textarea</frontend_type>
                             <comment>This text will be added at the beginning of the Etsy listing description field</comment>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_prepend_one>
                         <magetsync_field_append_one translate="label comment">
-                            <label>Append Global Note 1</label>
+                            <label>Append Following Note</label>
                             <frontend_type>textarea</frontend_type>
                             <frontend_class>append-area</frontend_class>
                             <comment>This text will be added at the end of the Etsy listing description field</comment>
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_append_one>
                     </fields>
                 </magetsync_group_notes_1>
                 <magetsync_group_notes_2 translate="label">
-                    <label>Global Notes 2</label>
+                    <label>Global Note 2 Template</label>
                     <expanded>0</expanded>
                     <frontend_type>text</frontend_type>
                     <sort_order>3</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_converter_two translate="label">
                             <label>Insert attributes:</label>
@@ -487,8 +488,8 @@
                             <sort_order>1</sort_order>
                             <source_model>magetsync/sources_globalNote_source</source_model>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                             <can_be_empty>1</can_be_empty>
                         </magetsync_field_converter_two>
                         <magetsync_field_prepend_two translate="label comment">
@@ -497,18 +498,18 @@
                             <comment>This text will be added at the beginning of the Etsy listing description field</comment>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_prepend_two>
                         <magetsync_field_append_two translate="label comment">
                             <label>Append Global Note 2</label>
                             <frontend_type>textarea</frontend_type>
                             <frontend_class>append-area</frontend_class>
-                            <comment>This text will be added at the end of the Etsy listing description field</comment>
+							<comment>This text will be added at the end of the Etsy listing description field</comment>
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_append_two>
                     </fields>
                 </magetsync_group_notes_2>
@@ -523,8 +524,8 @@
                     <frontend_type>text</frontend_type>
                     <sort_order>4</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_reindexlistings translate="label comment">
                             <label>Apply template changes to all listings</label>
@@ -533,13 +534,13 @@
                             <frontend_model>magetsync/buttonReindexListings</frontend_model>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_reindexlistings>
                     </fields>
                 </magetsync_group_reindex>
             </groups>
->>>>>>> 189e48c918e9e92259108da7ffd1c023c1e472e0
+
         </magetsync_section_templates>
 
         <magetsync_section_draftmode translate="label" module="magetsync">
@@ -548,7 +549,7 @@
             <frontend_type>text</frontend_type>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
-            <show_in_store>1</show_in_store>
+            <show_in_store>0</show_in_store>
             <tab>magetsync_tab</tab>
             <groups>
 
@@ -570,7 +571,7 @@
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_listing_draft_mode>
                     </fields>
                 </magetsync_group_draft>
@@ -582,15 +583,15 @@
                     <frontend_type>text</frontend_type>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
+                    <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_sku_pattern translate="label comment">
                             <label>SKU Pattern</label>
-                            <comment>AAANNN(A - Alphabet, N - Numeric), Add place holder A for Alphabet and N for Numeric to create a pattern for SKUs. The eg. SKU for AAANNN is ABL004.</comment>
+                            <comment>Insert Sample SKU pattern. Example: 'ABL004' would be written 'AAANNN'. Only use A for Alphabet and N for Numeric characters as pattern.</comment>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                             <frontend_class>validate-alphanum</frontend_class>
                             <frontend_input>text</frontend_input>
                         </magetsync_field_sku_pattern>
@@ -603,7 +604,7 @@
                     <expanded>0</expanded>
                     <sort_order>2</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
+                    <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_enable_failed_items_deletion translate="label comment">
@@ -613,8 +614,8 @@
                             <comment>When it's set to yes, failed items could be deletable from both the actions dropdown menu and/or 'Delete' button within the listing.</comment>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_enable_failed_items_deletion>
                         <magetsync_field_deletelistings translate="label comment">
                             <label>Remove all listings</label>
@@ -623,8 +624,8 @@
                             <frontend_model>magetsync/buttonDeleteListings</frontend_model>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_deletelistings>
                     </fields>
                 </magetsync_group_delete>
@@ -634,7 +635,7 @@
                     <expanded>1</expanded>
                     <sort_order>3</sort_order>
                     <show_in_default>1</show_in_default>
-                    <show_in_website>0</show_in_website>
+                    <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
                         <magetsync_field_resize_images translate="label comment">
@@ -645,7 +646,7 @@
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_resize_images>
 
                         <magetsync_field_delete_resize_images translate="label comment">
@@ -656,7 +657,7 @@
                             <sort_order>3</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
+                            <show_in_store>0</show_in_store>
                         </magetsync_field_delete_resize_images>
 
                     </fields>
@@ -694,15 +695,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </title>
-                        <order_status translate="label">
-                            <label>New Order Status</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_order_status</source_model>
-                            <sort_order>30</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </order_status>
                         <allowspecific translate="label">
                             <label>Payment Applicable From</label>
                             <frontend_type>select</frontend_type>
