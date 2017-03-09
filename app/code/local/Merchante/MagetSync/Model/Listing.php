@@ -872,6 +872,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 $scalesArray = array();
                 $variationMapping = array();
                 $requestParams = array();
+                $propertyIDs = array();
 
                 foreach ($options as $valueVar) {
 
@@ -882,7 +883,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         $propertyName = ucfirst($dataValue['title']);
                     } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
                         $dataValue = $valueVar;
-                        $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel, 'label');
+                        $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel);
                         $valuesOpt = $valueVar['values'];
                         $propertyName = ucfirst($dataValue['label']);
                     }
@@ -920,6 +921,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                             break;
                         }
                     }
+                    $propertyIDs[] = $propertyID;
 
                     $y = 0;
                     foreach ($valuesOpt as $item) {
@@ -984,9 +986,9 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         ));
                         $requestParams[] = $product;
                     }
-                    $productsData['price_on_property'] = array($propertyID);
-                    $productsData['quantity_on_property'] = array($propertyID);
-                    $productsData['sku_on_property'] = array($propertyID);
+                    $productsData['price_on_property'] = implode(',', $propertyIDs);
+                    $productsData['quantity_on_property'] = implode(',', $propertyIDs);
+                    $productsData['sku_on_property'] = implode(',', $propertyIDs);
                     $productsData['products'] = json_encode($requestParams, 128);
 
                     $resultVariationApi = Mage::getModel('magetsync/variation')->updateInventory($obliVariation, $productsData);
