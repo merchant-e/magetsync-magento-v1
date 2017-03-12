@@ -873,6 +873,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 $variationMapping = array();
                 $requestParams = array();
                 $propertyIDs = array();
+                $allSecondOptionValues = array();
+                $isOptionFirst = true;
 
                 foreach ($options as $valueVar) {
 
@@ -922,9 +924,11 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         }
                     }
                     $propertyIDs[] = $propertyID;
-
                     $y = 0;
                     foreach ($valuesOpt as $item) {
+                        if (!$isOptionFirst) {
+                            $allSecondOptionValues[] = $item['label'];
+                        }
                         $variationMapping[$valueVar['attribute_code']][$item['value_index']]['price'] = $item['pricing_value'];
                         $variationMapping[$valueVar['attribute_code']][$item['value_index']]['is_percent'] = $item['is_percent'];
                         $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_name'] = $valueVar['frontend_label'];
@@ -945,7 +949,6 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                                 }
                             }
                             if ($matches && count($matches) > 0) {
-                                //$singleVariation['value'] = $matches[1];
                                 $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $matches[1];
                             }
                         }
@@ -956,10 +959,11 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     if ($exist == -1) {
                         $nCustom = $nCustom + 1;
                     }
+                    $isOptionFirst = false;
                 }
 
                 $productsData = array();
-                if ($productModel->getTypeId() == "configurable") {
+                if ($productModel->getTypeId() == 'configurable') {
                     $confProduct = Mage::getModel('catalog/product_type_configurable')->setProduct($productModel);
                     $simpleCollection = $confProduct->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
                     foreach ($simpleCollection as $simpleProduct) {
@@ -986,6 +990,14 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         ));
                         $requestParams[] = $product;
                     }
+
+                    /**
+                     * Check if each master variation attribute has all listed variation attributes
+                     */
+                    if (count($propertyIDs) > 1) {
+                        $this->fillMissingVariants($requestParams, $allSecondOptionValues);
+                    }
+
                     $productsData['price_on_property'] = implode(',', $propertyIDs);
                     $productsData['quantity_on_property'] = implode(',', $propertyIDs);
                     $productsData['sku_on_property'] = implode(',', $propertyIDs);
@@ -1201,6 +1213,53 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
     {
         return (isset($postData) && !empty($postData)) ? $postData : ((isset($data) &&
             !empty($data)) ? $data : $isBool);
+    }
+
+    /**
+     * Adds disabled dummy products to fix requirements
+     * @param $requestParams
+     * @return mixed
+     */
+    public function fillMissingVariants(&$requestParams, $allSecondOptionValues)
+    {
+        $attributeNameToIdMapping = array();
+        $processedVariantValues = array();
+        foreach ($requestParams as $product) {
+            $propertyValues = $product['property_values'];
+            $processedVariantValues[$propertyValues[0]['value']][] = $propertyValues[1]['value'];
+            $attributeNameToIdMapping[$propertyValues[0]['value']] = $propertyValues[0]['property_id'];
+            $attributeNameToIdMapping[$propertyValues[1]['value']] = $propertyValues[1]['property_id'];
+        }
+
+        foreach ($processedVariantValues as $masterValue => $values) {
+            foreach($allSecondOptionValues as $requiredOptionValue) {
+                if (!in_array($requiredOptionValue, $processedVariantValues[$masterValue])) {
+
+                    $product = array();
+                    $product['property_values'] = array();
+                    $product['sku'] = 'dummy_sku' . $requiredOptionValue;
+                    $product['property_values'][] = array(
+                        'property_id' => $attributeNameToIdMapping[$masterValue],
+                        'property_name' => '',
+                        'value' => $masterValue
+                    );
+                    $product['property_values'][] = array(
+                        'property_id' => $attributeNameToIdMapping[$requiredOptionValue],
+                        'property_name' => '',
+                        'value' => $requiredOptionValue
+                    );
+
+                    $product['offerings'] = array(array(
+                        'price' => 0,
+                        'quantity' => 0,
+                        'is_enabled' => 0
+                    ));
+                    $requestParams[] = $product;
+                }
+            }
+        }
+
+        return $requestParams;
     }
 
     /**
