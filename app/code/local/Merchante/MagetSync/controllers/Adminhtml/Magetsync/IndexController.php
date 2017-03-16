@@ -452,6 +452,37 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
     }
 
     /**
+     * Method renew for expired listing
+     */
+    public function renewAction()
+    {
+        if (!$this->verifyEtsyApi()) {
+            return;
+        }
+
+        $requestParams = $this->getRequest()->getParams();
+        $etsyListingId = $requestParams['etsyListingId'];
+        $magentoListingId = $requestParams['magentoListingId'];
+        if (!empty($etsyListingId)) {
+            $listingModel = Mage::getModel('magetsync/listing');
+            $obliUpd = array('listing_id' => $etsyListingId, 'renew' => true);
+            $resultApi = $listingModel->updateListing($obliUpd);
+            if ($resultApi['status'] == true) {
+                $listingModel->load($magentoListingId);
+                $listingModel->setSync(Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC)->save();
+                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__('Lisiting renewed'));
+            } else {
+                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to renew listing #' . $magentoListingId));
+            }
+        } else {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to renew listing #' . $magentoListingId));
+        }
+
+        $this->_redirect('*/*/index');
+        return;
+    }
+
+    /**
      * Method save for listing
      * @param int $actionStatus
      * @param int $listingId
@@ -637,10 +668,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                              * Update inventory call not used for simple products
                              */
                             if ($productType == 'simple') {
-
                                 $callType = 'image';
                             }
-
                         }
                         if ($resultApi['status'] == true) {
 
