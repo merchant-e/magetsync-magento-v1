@@ -198,6 +198,15 @@
                     </magetsync>
                 </observers>
             </catalog_product_attribute_update_before>
+            <catalog_product_stock_item_mass_change>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/product_observer</class>
+                        <method>massiveUpdate</method>
+                    </magetsync>
+                </observers>
+            </catalog_product_stock_item_mass_change>
             <catalog_product_save_after>
                 <observers>
                     <magetsync>
