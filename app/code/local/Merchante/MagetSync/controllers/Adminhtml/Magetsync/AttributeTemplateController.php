@@ -160,7 +160,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         'idproduct', array('in' => array_keys($createdListingsData))
                     )->load();
                     foreach ($newListings as $listing) {
-                        $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                        if ($listing->getData('sync') != Merchante_MagetSync_Model_Listing::STATE_EXPIRED) {
+                            $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                        }
                         $postData['sync_ready'] = 1;
                         $postData['title'] = $listing->getTitle();
 

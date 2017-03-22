@@ -687,13 +687,17 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                                 $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_FORCE_DELETE;
                             }
                         }
-                    } elseif ($this->getRequest()->getParam('autoQueue')) {
-                        $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
-                    } else {
-                        if ($data['listing_id']) {
-                            $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
+                    }
+
+                    if (!$syncStatus && $data['sync'] != Merchante_MagetSync_Model_Listing::STATE_EXPIRED) {
+                        if ($this->getRequest()->getParam('autoQueue')) {
+                            $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
                         } else {
-                            $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_INQUEUE;
+                            if ($data['listing_id']) {
+                                $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC;
+                            } else {
+                                $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_INQUEUE;
+                            }
                         }
                     }
 
