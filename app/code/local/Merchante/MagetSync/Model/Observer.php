@@ -126,7 +126,7 @@ class Merchante_MagetSync_Model_Observer
 
 
         $query = $listingModel->getCollection()->getSelect()->where(
-            '(sync =' . Merchante_MagetSync_Model_Listing::SYNCED .
+            '(sync =' . Merchante_MagetSync_Model_Listing::STATE_SYNCED .
             ' OR sync =' . Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC
             . ') AND enabled =' . Merchante_MagetSync_Model_Listing::LISTING_ENABLED
         );
