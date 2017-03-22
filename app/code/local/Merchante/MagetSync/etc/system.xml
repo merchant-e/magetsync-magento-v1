@@ -91,7 +91,7 @@
                         <magetsync_field_version translate="label comment">
                             <label>Version</label>
                             <frontend_type>Label</frontend_type>
-                            <comment>2017.01</comment>
+                            <comment>2017.02 [beta-build-0466749]</comment>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -227,7 +227,7 @@
                 <magetsync_group_variations translate="label comment">
                     <label>Variations Specific Options</label>
                     <expanded>1</expanded>
-                    <comment><![CDATA[<div class=\'box\'>Please specify sizing scales used in your Magento products - only applicable if you offer products with custom options. <a href="https://www.etsy.com/au/help/article/3385" class="link-store-scope" title="What is this?" target="_blank">Help</a></div>]]></comment>
+                    <comment><![CDATA[<div class='box'>Please specify sizing scales used in your Magento products - only applicable if you offer products with custom options. <a href="https://www.etsy.com/au/help/article/3385" class="link-store-scope" title="What is this?" target="_blank">Help</a></div>]]></comment>
                     <sort_order>4</sort_order>
                     <frontend_type>text</frontend_type>
                     <show_in_default>1</show_in_default>
@@ -371,6 +371,7 @@
 				<magetsync_group_debug translate="label comment">
 						<label>Debug</label>
 						<expanded>1</expanded>
+						<comment><![CDATA[<div class='box'><strong>Caution: </strong>Enabling these logs will result in large amounts of data being generated. To avoid filling up your disk space, only enable for a short period of time when necessary.</div>]]></comment>
 						<sort_order>6</sort_order>
 						<frontend_type>text</frontend_type>
 						<show_in_default>1</show_in_default>
@@ -381,7 +382,7 @@
 								<label>Enable log</label>
 								<frontend_type>select</frontend_type>
 								<source_model>adminhtml/system_config_source_yesno</source_model>
-								<comment>Enable this option if you want to log process.</comment>
+								<comment>Enable this option if you want to log process. (Remember to disable)</comment>
 								<sort_order>1</sort_order>
 								<show_in_default>1</show_in_default>
 								<show_in_website>1</show_in_website>
@@ -402,8 +403,8 @@
 								<frontend_type>label</frontend_type>
 								<comment>
 									<![CDATA[
-									The term <span class="notice">'Etsy'</span> is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.
-								]]>
+										The term <span class="notice">'Etsy'</span> is a trademark of Etsy, Inc. This application uses the Etsy API but is not endorsed or certified by Etsy, Inc.
+									]]>
 								</comment>
 								<sort_order>8</sort_order>
 								<show_in_default>1</show_in_default>
