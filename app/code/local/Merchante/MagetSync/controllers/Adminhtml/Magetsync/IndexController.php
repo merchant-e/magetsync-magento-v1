@@ -452,6 +452,37 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
     }
 
     /**
+     * Method renew for expired listing
+     */
+    public function renewAction()
+    {
+        if (!$this->verifyEtsyApi()) {
+            return;
+        }
+
+        $requestParams = $this->getRequest()->getParams();
+        $etsyListingId = $requestParams['etsyListingId'];
+        $magentoListingId = $requestParams['magentoListingId'];
+        if (!empty($etsyListingId)) {
+            $listingModel = Mage::getModel('magetsync/listing');
+            $obliUpd = array('listing_id' => $etsyListingId, 'renew' => true);
+            $resultApi = $listingModel->updateListing($obliUpd);
+            if ($resultApi['status'] == true) {
+                $listingModel->load($magentoListingId);
+                $listingModel->setSync(Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC)->save();
+                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('magetsync')->__('Lisiting renewed'));
+            } else {
+                Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to renew listing #' . $magentoListingId));
+            }
+        } else {
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to renew listing #' . $magentoListingId));
+        }
+
+        $this->_redirect('*/*/index');
+        return;
+    }
+
+    /**
      * Method save for listing
      * @param int $actionStatus
      * @param int $listingId
@@ -587,7 +618,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         'description'          => $newDescription,
                         'materials'            => $listingModel->emptyField($postData['materials'], $data['materials']),
                         'state'                => $stateListing,
-                        'quantity'             => $data['quantity'],
                         'shipping_template_id' => $listingModel->emptyField(
                             $postData['shipping_template_id'], $data['shipping_template_id']
                         ),
@@ -608,33 +638,46 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     );
                     $dataGlobal = $data['id'];
                     $hasError = false;
-
-                    $priceEtsy = $data['price'];
-                    if ($postData["is_custom_price"]) {
-                        if (array_key_exists('price', $postData) && $postData['price'] > 0) {
-                            $priceEtsy = $postData['price'];
-                        }
-                    } else {
-                        $priceEtsy = round(Mage::getModel('catalog/product')->load($data['idproduct'])->getPrice(), 2);
-                    }
-                    $postData['price'] = $priceEtsy;
-
                     if ($syncStatus) {
-                        if ($data['listing_id']) {
+                        $callType = 'all';
+                        $resource = Mage::getSingleton('catalog/product')->getResource();
+                        $productType = $resource->getAttributeRawValue($data['idproduct'], 'type_id', Mage::app()->getStore());
+                        $new_pricing = Mage::getStoreConfig(
+                            'magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing'
+                        );
+                        $priceToBeSent = (!empty($postData['price']) && $new_pricing) ? $postData['price'] : $data['price'];
 
+                        if ($data['listing_id']) {
                             $obliUpd = array('listing_id' => $data['listing_id']);
+
+                            /**
+                             * Update inventory call not used for simple products
+                             */
+                            if ($productType == 'simple') {
+                                $params['quantity'] = $data['quantity'];
+                                $params['price'] = $priceToBeSent;
+                                $callType = 'image';
+                            }
                             $resultApi = $listingModel->updateListing($obliUpd, $params);
                         } else {
-                            
-                            $params['price'] = $priceEtsy;
+                            $params['price'] = $priceToBeSent;
+                            $params['quantity'] = $data['quantity'];
                             $resultApi = $listingModel->createListing(null, $params);
+
+                            /**
+                             * Update inventory call not used for simple products
+                             */
+                            if ($productType == 'simple') {
+                                $callType = 'image';
+                            }
                         }
                         if ($resultApi['status'] == true) {
 
                             $result = json_decode(json_decode($resultApi['result']), true);
                             $result = $result['results'][0];
+
                             $statusOperation =
-                                $listingModel->saveDetails($result, $data['idproduct'], $priceEtsy, $dataGlobal);
+                                $listingModel->saveDetails($result, $data['idproduct'], $priceToBeSent, $dataGlobal, $callType);
                             /*********************************/
 
                             $postData['creation_tsz'] = $result['creation_tsz'];

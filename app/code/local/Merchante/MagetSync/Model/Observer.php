@@ -126,7 +126,7 @@ class Merchante_MagetSync_Model_Observer
 
 
         $query = $listingModel->getCollection()->getSelect()->where(
-            '(sync =' . Merchante_MagetSync_Model_Listing::SYNCED .
+            '(sync =' . Merchante_MagetSync_Model_Listing::STATE_SYNCED .
             ' OR sync =' . Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC
             . ') AND enabled =' . Merchante_MagetSync_Model_Listing::LISTING_ENABLED
         );
@@ -201,6 +201,7 @@ class Merchante_MagetSync_Model_Observer
             $qty = 0;
             $params = array();
             $postData = array();
+            $skipVariationInventoryUpdate = false;
 
             if ($product['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
                 $stock = $product->getStockItem();
@@ -220,6 +221,7 @@ class Merchante_MagetSync_Model_Observer
                         $qty += 0;
                     }
                 }
+                $skipVariationInventoryUpdate = true;
             }
 
             if ($autoSync == '1') {
@@ -297,7 +299,6 @@ class Merchante_MagetSync_Model_Observer
                             }
                         }
                     }
-                    $finalPrice = $postData['price'];
 
                     $params = array(
                         'description'          => $newDescription,
@@ -319,17 +320,18 @@ class Merchante_MagetSync_Model_Observer
                 }
             }
 
-            if ($qty == 0) {
-                $params['state'] = Merchante_MagetSync_Model_Listing::STATE_INACTIVE;
-                $params['quantity'] = 1;
-            } else {
-                if ($qty > 999) {
-                    $params['quantity'] = 999;
-                    $qty = 999;
+            if (!$skipVariationInventoryUpdate) {
+                if ($qty == 0) {
+                    $params['state'] = Merchante_MagetSync_Model_Listing::STATE_INACTIVE;
+                    $params['quantity'] = 1;
                 } else {
-                    $params['quantity'] = $qty;
-                }
-            }
+                    if ($qty > 999) {
+                        $params['quantity'] = 999;
+                        $qty = 999;
+                    } else {
+                        $params['quantity'] = $qty;
+                    }
+                }}
             /// getting custom title field flag from the configuration
             $isCustomTitle = Mage::getStoreConfig(
                 'magetsync_section/magetsync_group_options/magetsync_field_change_product_title_attribute'
@@ -378,8 +380,9 @@ class Merchante_MagetSync_Model_Observer
                     if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
                         $result = json_decode(json_decode($resultApiUpd['result']), true);
                         $result = $result['results'][0];
+                        $callType = 'inventory';
                         $statusProcess = $listingModel->saveDetails(
-                            $result, $listing['idproduct'], $finalPrice, $listing['id'], 1
+                            $result, $listing['idproduct'], $listing['price'], $listing['id'], $callType
                         );
 
                         if ($statusProcess['status']) {

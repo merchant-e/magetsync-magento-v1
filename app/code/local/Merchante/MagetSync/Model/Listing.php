@@ -33,9 +33,9 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @var array
      */
     public $mimetypes = array(
-        "png"  => "image/png",
-        "gif"  => "image/gif",
-        "jpg"  => "image/jpeg",
+        "png" => "image/png",
+        "gif" => "image/gif",
+        "jpg" => "image/jpeg",
         "jpeg" => "image/jpeg"
     );
     /**
@@ -190,8 +190,8 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 array('shop_id' => Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop'));
             $params = array(
                 'includes' => 'MainImage',
-                'offset'   => intval($offset),
-                'limit'    => 25
+                'offset' => intval($offset),
+                'limit' => 25
             );
             $listingsResult = $this->findAllShopListingsActive($obligatory, $params);
             if ($listingsResult['status']) {
@@ -255,32 +255,32 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                                 preg_match($regularExpression, $item['title'], $sku_array);
                                 if (!empty($sku_array)) { // if any match found
                                     $productsCollection = $productModel->getCollection()
-                                                                       ->addAttributeToSelect('name')
-                                                                       ->addAttributeToSelect('sku')
-                                                                       ->addAttributeToSelect('entity_id')
-                                                                       ->addAttributeToFilter(
-                                                                           array(
-                                                                               array(
-                                                                                   'attribute' => 'name',
-                                                                                   'like'      => $item['title']
-                                                                               ),
-                                                                               array(
-                                                                                   'attribute' => 'sku',
-                                                                                   'like'      => $sku_array[0]
-                                                                               ),
-                                                                           )
-                                                                       );
+                                        ->addAttributeToSelect('name')
+                                        ->addAttributeToSelect('sku')
+                                        ->addAttributeToSelect('entity_id')
+                                        ->addAttributeToFilter(
+                                            array(
+                                                array(
+                                                    'attribute' => 'name',
+                                                    'like' => $item['title']
+                                                ),
+                                                array(
+                                                    'attribute' => 'sku',
+                                                    'like' => $sku_array[0]
+                                                ),
+                                            )
+                                        );
                                     $skuSearch = true;
                                 }
                             }
                             if (!$skuSearch) {
                                 $productsCollection = $productModel->getCollection()
-                                                                   ->addAttributeToSelect('name')
-                                                                   ->addAttributeToSelect('sku')
-                                                                   ->addAttributeToSelect('entity_id')
-                                                                   ->addAttributeToFilter(
-                                                                       'name', array('eq' => $item['title'])
-                                                                   );//->addAttributeToFilter('synchronizedEtsy',0);
+                                    ->addAttributeToSelect('name')
+                                    ->addAttributeToSelect('sku')
+                                    ->addAttributeToSelect('entity_id')
+                                    ->addAttributeToFilter(
+                                        'name', array('eq' => $item['title'])
+                                    );//->addAttributeToFilter('synchronizedEtsy',0);
                             }
                             $queryProduct = $productsCollection->getData();
 
@@ -292,31 +292,31 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                                 $queryAux = $resource->getConnection('core_read')->fetchAll($queryAux);
                                 if (!$queryAux) {
                                     $matchings = array(
-                                        'etsy_id'      => $item['listing_id'],
-                                        'etsy_name'    => $item['title'],
-                                        'thumbnail'    => $item['MainImage']['url_75x75'],
-                                        'product_id'   => $queryProduct[0]['entity_id'],
+                                        'etsy_id' => $item['listing_id'],
+                                        'etsy_name' => $item['title'],
+                                        'thumbnail' => $item['MainImage']['url_75x75'],
+                                        'product_id' => $queryProduct[0]['entity_id'],
                                         'product_name' => $queryProduct[0]['name'],
-                                        'product_sku'  => $queryProduct[0]['sku']
+                                        'product_sku' => $queryProduct[0]['sku']
                                     );
                                 } else {
                                     $matchings = array(
-                                        'etsy_id'      => $item['listing_id'],
-                                        'etsy_name'    => $item['title'],
-                                        'thumbnail'    => $item['MainImage']['url_75x75'],
-                                        'product_id'   => null,
+                                        'etsy_id' => $item['listing_id'],
+                                        'etsy_name' => $item['title'],
+                                        'thumbnail' => $item['MainImage']['url_75x75'],
+                                        'product_id' => null,
                                         'product_name' => null,
-                                        'product_sku'  => null
+                                        'product_sku' => null
                                     );
                                 }
                             } else {
                                 $matchings = array(
-                                    'etsy_id'      => $item['listing_id'],
-                                    'etsy_name'    => $item['title'],
-                                    'thumbnail'    => $item['MainImage']['url_75x75'],
-                                    'product_id'   => null,
+                                    'etsy_id' => $item['listing_id'],
+                                    'etsy_name' => $item['title'],
+                                    'thumbnail' => $item['MainImage']['url_75x75'],
+                                    'product_id' => null,
                                     'product_name' => null,
-                                    'product_sku'  => null
+                                    'product_sku' => null
                                 );
                             }
                             $changes = true;
@@ -330,18 +330,18 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                 if ($changes) {
                     return array(
                         'success' => true,
-                        'count'   => $changesCount
+                        'count' => $changesCount
                     );
                 } else {
                     if ($count == 0) {
                         return array(
                             'success' => true,
-                            'count'   => 0
+                            'count' => 0
                         );
                     } else {
                         return array(
                             'success' => false,
-                            'count'   => 0
+                            'count' => 0
                         );
                     }
                 }
@@ -399,31 +399,31 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                                 Mage::getSingleton('core/resource')->getConnection('core_read')->fetchAll($queryAux);
                             if (!$queryAux) {
                                 $matchings = array(
-                                    'etsy_id'      => $item['listing_id'],
-                                    'etsy_name'    => $item['title'],
-                                    'thumbnail'    => $item['MainImage']['url_75x75'],
-                                    'product_id'   => $queryProduct[0]['entity_id'],
+                                    'etsy_id' => $item['listing_id'],
+                                    'etsy_name' => $item['title'],
+                                    'thumbnail' => $item['MainImage']['url_75x75'],
+                                    'product_id' => $queryProduct[0]['entity_id'],
                                     'product_name' => $queryProduct[0]['name'],
-                                    'product_sku'  => $queryProduct[0]['sku']
+                                    'product_sku' => $queryProduct[0]['sku']
                                 );
                             } else {
                                 $matchings = array(
-                                    'etsy_id'      => $item['listing_id'],
-                                    'etsy_name'    => $item['title'],
-                                    'thumbnail'    => $item['MainImage']['url_75x75'],
-                                    'product_id'   => null,
+                                    'etsy_id' => $item['listing_id'],
+                                    'etsy_name' => $item['title'],
+                                    'thumbnail' => $item['MainImage']['url_75x75'],
+                                    'product_id' => null,
                                     'product_name' => null,
-                                    'product_sku'  => null
+                                    'product_sku' => null
                                 );
                             }
                         } else {
                             $matchings = array(
-                                'etsy_id'      => $item['listing_id'],
-                                'etsy_name'    => $item['title'],
-                                'thumbnail'    => $item['MainImage']['url_75x75'],
-                                'product_id'   => null,
+                                'etsy_id' => $item['listing_id'],
+                                'etsy_name' => $item['title'],
+                                'thumbnail' => $item['MainImage']['url_75x75'],
+                                'product_id' => null,
                                 'product_name' => null,
-                                'product_sku'  => null
+                                'product_sku' => null
                             );
                         }
 
@@ -479,7 +479,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
                 $dataSave = array(
                     'idproduct' => $dataProduct['entity_id'],
-                    'sync'      => Merchante_MagetSync_Model_Listing::STATE_INQUEUE
+                    'sync' => Merchante_MagetSync_Model_Listing::STATE_INQUEUE
                 );
 
                 $this->handleQtyUpdate($dataProduct, $dataSave, $productModel);
@@ -488,7 +488,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     if (array_key_exists('quantity', $dataSave) && $dataSave['quantity'] == 0) {
                         return array(
                             'success' => false,
-                            'error'   => 'This product can not be synchronized because has quantity 0.'
+                            'error' => 'This product can not be synchronized because has quantity 0.'
                         );
                     }
                 }
@@ -651,7 +651,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
             } else {
                 return array(
                     'success' => false,
-                    'error'   => 'Invalid product type.'
+                    'error' => 'Invalid product type.'
                 );
             }
         } catch (Exception $e) {
@@ -659,7 +659,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
             return array(
                 'success' => false,
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage()
             );
         }
     }
@@ -782,6 +782,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
         $category7 =
             isset($postData['subcategory7_id']) ? $postData['subcategory7_id'] : (isset($data['subcategory7_id']) ? $data['subcategory7_id'] : null);
 
+
         if ($category7 != null && $category7 != "0") {
             $taxonomyID = $category7;
         } else {
@@ -821,238 +822,206 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param $idProduct
      * @param $priceBase
      * @param $idListing
-     * @return bool
+     * @param string $callType
+     * @return array
      */
-    public function saveDetails($result, $idProduct, $priceBase, $idListing, $inventoryCall = 0)
+    public function saveDetails($result, $idProduct, $priceBase, $idListing, $callType = 'all')
     {
         try {
             $statusOperation = array(
                 'status' => true,
-                'msg'    => ''
+                'msg' => ''
             );
             $productModel = Mage::getModel('catalog/product')->load($idProduct);
             $dataPro = $productModel->getData();
-            $availabilityStock = array();
 
-            if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                $options = $productModel->getOptions();
-            } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                $options = $productModel->getTypeInstance()->getConfigurableAttributesAsArray();
-                foreach ($productModel->getTypeInstance(true)->getUsedProducts(null, $productModel) as $simpleAux) {
+            if ($callType == 'all' || $callType == 'inventory') {
+                $availabilityStock = array();
 
-                    $dataSimple = $simpleAux->getData();
-                    if ($dataSimple['is_in_stock']) {
-                        $existStockItem = array_key_exists('stock_item', $dataSimple);
-                        if ($existStockItem) {
-                            if ($dataSimple['stock_item']['qty'] > 0) {
-                                $availabilityStock[] = true;
+                if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+                    $options = $productModel->getOptions();
+                } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                    $options = $productModel->getTypeInstance()->getConfigurableAttributesAsArray();
+                    foreach ($productModel->getTypeInstance(true)->getUsedProducts(null, $productModel) as $simpleAux) {
+
+                        $dataSimple = $simpleAux->getData();
+                        if ($dataSimple['is_in_stock']) {
+                            $existStockItem = array_key_exists('stock_item', $dataSimple);
+                            if ($existStockItem) {
+                                if ($dataSimple['stock_item']['qty'] > 0) {
+                                    $availabilityStock[] = true;
+                                } else {
+                                    $availabilityStock[] = false;
+                                }
                             } else {
                                 $availabilityStock[] = false;
                             }
                         } else {
                             $availabilityStock[] = false;
                         }
-                    } else {
-                        $availabilityStock[] = false;
-                    }
-                }
-
-            }
-
-            /******************************
-             * Variations create section
-             ******************************/
-
-            $variationModel = Mage::getModel('magetsync/variation')->getCollection()->getData();
-            $nCustom = 0;
-            $singleVariationGlobal = array();
-            $obliVariation['listing_id'] = $result['listing_id'];
-            $customNames = array();
-            $scalesArray = array();
-            $hasPrice = false;
-            foreach ($options as $valueVar) {
-
-                if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                    $dataValue = $valueVar->getData();
-                    $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
-                    $valuesOpt = $valueVar->getValues();
-                    $propertyName = ucfirst($dataValue['title']);
-                } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                    $dataValue = $valueVar;
-                    $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel, 'label');
-                    $valuesOpt = $valueVar['values'];
-                    $propertyName = ucfirst($dataValue['label']);
-                }
-                $scaleValue = 0;
-                if ($exist <> -1) {
-                    $propertyID = $variationModel[$exist]['propertyid'];
-
-                    if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
-                        || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
-                    ) {
-                        if ($propertyName == 'Size') {
-                            $propertyScaleName = 'sizing';
-                        } else {
-                            $propertyScaleName = strtolower($propertyName);
-                        }
-                        $scaleName = $propertyScaleName . '_scale';
-
-                        $scaleValue = Mage::getStoreConfig(
-                            'magetsync_section/magetsync_group_variations/magetsync_field_' . $propertyScaleName .
-                            '_scale'
-                        );
-
-                        $scalesArray[$scaleName] = $scaleValue;
                     }
 
-                } else {
-                    /* 513 and 514 are custom properties on Etsy */
-                    if ($nCustom == 0) {
-                        $propertyID = 513;
-                        if (strlen($propertyName) > 20) {
-                            $customNames['513'] = substr($propertyName, 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $customNames['513'] = $propertyName;
-                        }
-                    } elseif ($nCustom == 1) {
-                        $propertyID = 514;
-                        if (strlen($propertyName) > 20) {
-                            $customNames['514'] = substr($propertyName, 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $customNames['514'] = $propertyName;
-                        }
-                    } else {
-                        break;
-                    }
                 }
 
-                $y = 0;
-                foreach ($valuesOpt as $item) {
+                /******************************
+                 * Variations create section
+                 ******************************/
 
-                    $singleVariation = array();
-                    $singleVariation['property_id'] = $propertyID;
+                $variationModel = Mage::getModel('magetsync/variation')->getCollection()->getData();
+                $nCustom = 0;
+                $obliVariation['listing_id'] = $result['listing_id'];
+                $scalesArray = array();
+                $variationMapping = array();
+                $requestParams = array();
+                $propertyIDs = array();
+                $allSecondOptionValues = array();
+                $isOptionFirst = true;
+
+                foreach ($options as $valueVar) {
+
                     if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                        $singleVariation['is_available'] = true;
-                        $dataItem = $item->getData();
-                        if (strlen($dataItem['title']) > 20) {
-                            $singleVariation['value'] = substr($dataItem['title'], 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $singleVariation['value'] = $dataItem['title'];
-                        }
-
-
-                        $pricing = $dataItem['price'];
-                        $price_type = $dataItem['price_type'];
+                        $dataValue = $valueVar->getData();
+                        $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
+                        $valuesOpt = $valueVar->getValues();
+                        $propertyName = ucfirst($dataValue['title']);
                     } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                        $singleVariation['is_available'] =
-                            isset($availabilityStock[$y]) ? $availabilityStock[$y] : true;
-                        $dataItem = $item;
-                        if (strlen($dataItem['label']) > 20) {
-                            $singleVariation['value'] = substr($dataItem['label'], 0, 20);
-                            // throw new Exception(Mage::helper('magetsync')->__('There is a custom property with length higher than allowed (20)'));
-                        } else {
-                            $singleVariation['value'] = $dataItem['label'];
-                        }
-
-                        //$singleVariation['value'] = $dataItem['label'];
-                        $pricing = $dataItem['pricing_value'];
-                        $price_type = $dataItem['is_percent'];
+                        $dataValue = $valueVar;
+                        $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel);
+                        $valuesOpt = $valueVar['values'];
+                        $propertyName = ucfirst($dataValue['label']);
                     }
+                    $scaleValue = 0;
+                    if ($exist <> -1) {
+                        $propertyID = $variationModel[$exist]['propertyid'];
 
-                    if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
-                        $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
-                    ) {
-                        $matches = null;
                         if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
                             || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
                         ) {
-                            if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
-                                $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
+                            if ($propertyName == 'Size') {
+                                $propertyScaleName = 'sizing';
+                            } else {
+                                $propertyScaleName = strtolower($propertyName);
+                            }
+                            $scaleName = $propertyScaleName . '_scale';
+
+                            $scaleValue = Mage::getStoreConfig(
+                                'magetsync_section/magetsync_group_variations/magetsync_field_' . $propertyScaleName .
+                                '_scale'
+                            );
+
+                            $scalesArray[$scaleName] = $scaleValue;
+                        }
+
+                    } else {
+                        /* 513 and 514 are custom properties on Etsy */
+                        if ($nCustom == 0) {
+                            $propertyID = 513;
+
+                        } elseif ($nCustom == 1) {
+                            $propertyID = 514;
+
+                        } else {
+                            break;
+                        }
+                    }
+                    $propertyIDs[] = $propertyID;
+                    $y = 0;
+                    foreach ($valuesOpt as $item) {
+                        if (!$isOptionFirst) {
+                            $allSecondOptionValues[] = $item['label'];
+                        }
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['price'] = $item['pricing_value'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['is_percent'] = $item['is_percent'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_name'] = $valueVar['frontend_label'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $item['label'];
+                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_id'] = $propertyID;
+
+                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
+                            $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
+                        ) {
+                            $matches = null;
+                            if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
+                                || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
                             ) {
-                                preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $singleVariation['value'], $matches);
+                                if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
+                                    $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
+                                ) {
+                                    preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'], $matches);
+                                }
+                            }
+                            if ($matches && count($matches) > 0) {
+                                $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $matches[1];
                             }
                         }
-                        if ($matches && count($matches) > 0) {
-                            $singleVariation['value'] = $matches[1];
-                        }
+
+                        $y = $y + 1;
                     }
 
-                    if ($pricing != 0) {
-                        $hasPrice = true;
-                        if ($price_type == 'fixed' || !$price_type) {
-                            $singleVariation['price'] = $priceBase + $pricing;
-                        } elseif ($price_type == 'percent' || $price_type) {
-                            $singleVariation['price'] = ($priceBase * ($pricing / 100)) + $priceBase;
+                    if ($exist == -1) {
+                        $nCustom = $nCustom + 1;
+                    }
+                    $isOptionFirst = false;
+                }
+
+                $productsData = array();
+                if ($productModel->getTypeId() == 'configurable') {
+                    $confProduct = Mage::getModel('catalog/product_type_configurable')->setProduct($productModel);
+                    $simpleCollection = $confProduct->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
+                    foreach ($simpleCollection as $simpleProduct) {
+                        $product = array();
+                        $product['property_values'] = array();
+                        $product['sku'] = $simpleProduct->getSku();
+                        $priceVal = 0;
+                        foreach ($variationMapping as $attrCode => $attrValsArr) {
+                            if ($attrValsArr[$simpleProduct[$attrCode]]['is_percent'] == '1') {
+                                $priceVal += $singleVariation['price'] = ($priceBase * ($attrValsArr[$simpleProduct[$attrCode]]['price'] / 100)) + $priceBase;
+                            } else {
+                                $priceVal += $attrValsArr[$simpleProduct[$attrCode]]['price'];
+                            }
+                            $product['property_values'][] = array(
+                                'property_id' => $attrValsArr[$simpleProduct[$attrCode]]['property_id'],
+                                'property_name' => $attrValsArr[$simpleProduct[$attrCode]]['property_name'],
+                                'value' => $attrValsArr[$simpleProduct[$attrCode]]['value']
+                            );
                         }
+                        $product['offerings'] = array(array(
+                            'price' => $priceBase + $priceVal,
+                            'quantity' => $simpleProduct->getStockItem() ? intval($simpleProduct->getStockItem()->getQty()) : 0,
+                            'is_enabled' => intval($simpleProduct->getIsInStock())
+                        ));
+                        $requestParams[] = $product;
+                    }
+
+                    /**
+                     * Check if each master variation attribute has all listed variation attributes
+                     */
+                    if (count($propertyIDs) > 1) {
+                        $this->fillMissingVariants($requestParams, $allSecondOptionValues);
+                    }
+
+                    $productsData['price_on_property'] = implode(',', $propertyIDs);
+                    $productsData['quantity_on_property'] = implode(',', $propertyIDs);
+                    $productsData['sku_on_property'] = implode(',', $propertyIDs);
+                    $productsData['products'] = json_encode($requestParams, 128);
+
+                    $resultVariationApi = Mage::getModel('magetsync/variation')->updateInventory($obliVariation, $productsData);
+
+                    if ($resultVariationApi['status'] == true) {
+                        $resultVariation = json_decode(json_decode($resultVariationApi['result']), true);
                     } else {
-                        $singleVariation['price'] = $priceBase;
-                    }
-
-                    $singleVariationGlobal[] = $singleVariation;
-                    $y = $y + 1;
-
-                }
-
-                if ($exist == -1) {
-                    $nCustom = $nCustom + 1;
-                }
-            }
-            if ($singleVariationGlobal) {
-                $singleData = array();
-                $singleData['variations'] = json_encode($singleVariationGlobal, 128);//JSON_PRETTY_PRINT
-                if ($customNames) {
-                    $singleData['custom_property_names'] = json_encode($customNames, true);
-                }
-                $singleData = array_merge($singleData, $scalesArray);
-            } else {
-                $singleData['variations'] = json_encode(array(), 128);
-            }
-
-            $resultVariationApi =
-                Mage::getModel('magetsync/variation')->createListingVariations($obliVariation, $singleData);
-            if ($resultVariationApi['status']) {
-                $resultVariation = json_decode(json_decode($resultVariationApi['result']), true);
-                $resultVariation = $resultVariation['results'][0];
-
-                if ($result['state'] == 'edit') {
-                    $stateListing = Merchante_MagetSync_Model_Listing::STATE_INACTIVE;
-                } else {
-                    $stateListing = Merchante_MagetSync_Model_Listing::STATE_ACTIVE;
-                }
-
-                $listingModel = Mage::getModel('magetsync/listing');
-                if ($singleVariationGlobal) {
-                    if (!$hasPrice) {
-                        $obliUpd = array('listing_id' => $result['listing_id']);
-                        $listingModel->updateListing(
-                            $obliUpd, array(
-                            'price' => $priceBase,
-                            'state' => $stateListing
-                        )
+                        Merchante_MagetSync_Model_LogData::magetsync(
+                            $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                            $resultVariationApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_WARNING
+                        );
+                        return array(
+                            'status' => false,
+                            'message' => 'Unable to update inventory.'
                         );
                     }
-                } else {
-                    $obliUpd = array('listing_id' => $result['listing_id']);
-                    $listingModel->updateListing(
-                        $obliUpd, array(
-                        'price' => $priceBase,
-                        'state' => $stateListing
-                    )
-                    );
                 }
-            } else {
-
-                Merchante_MagetSync_Model_LogData::magetsync(
-                    $idListing, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                    $resultVariationApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_WARNING
-                );
-
             }
-
-            if ($inventoryCall == 0) {
+            
+            if ($callType == 'all' || $callType == 'image') {
                 /**********************************/
                 $h = 0;
                 /******************************
@@ -1076,7 +1045,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                                         );
                                     if ($queryVerify) {
                                         $obligatoryDelete = array(
-                                            'listing_id'       => $result['listing_id'],
+                                            'listing_id' => $result['listing_id'],
                                             'listing_image_id' => intval($queryVerify[0]['listing_image_id'])
                                         );
                                         $resultImageApiDelete = Mage::getModel('magetsync/listing')->deleteListingImage(
@@ -1165,16 +1134,16 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                             if ($query == null) {
                                 $params = array(
                                     '@image' => '@' . $file . ';type=' . $mime,
-                                    'name'   => $file
+                                    'name' => $file
                                 );
                             } else {
                                 $params = array(
-                                    '@image'           => '@' . $file . ';type=' . $mime,
+                                    '@image' => '@' . $file . ';type=' . $mime,
                                     'listing_image_id' => intval($query[0]['listing_image_id']),
-                                    'name'             => $file
+                                    'name' => $file
                                 );
                                 $obligatoryDelete = array(
-                                    'listing_id'       => $result['listing_id'],
+                                    'listing_id' => $result['listing_id'],
                                     'listing_image_id' => intval($query[0]['listing_image_id'])
                                 );
                                 $resultImageApiDelete =
@@ -1195,14 +1164,14 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                                 $resultImage = json_decode(json_decode($resultImageApi['result']), true);
                                 $resultImage = $resultImage['results'][0];
                                 $imageData = array(
-                                    'listing_id'       => $resultImage['listing_id'],
+                                    'listing_id' => $resultImage['listing_id'],
                                     'listing_image_id' => $resultImage['listing_image_id'],
-                                    'file'             => $image['file']
+                                    'file' => $image['file']
                                 );
                                 if ($query[0]['id']) {
                                     $resultSaveImage = Mage::getModel('magetsync/imageEtsy')->load($query[0]['id'])
-                                                           ->addData($imageData)
-                                                           ->setId($query[0]['id']);
+                                        ->addData($imageData)
+                                        ->setId($query[0]['id']);
                                     $resultSaveImage->save();
                                 } else {
                                     $imageEtsyModel = Mage::getModel('magetsync/imageEtsy');
@@ -1230,7 +1199,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
             Mage::logException($e);
 
             return array(
-                'status'  => false,
+                'status' => false,
                 'message' => $e->getMessage()
             );
         }
@@ -1245,6 +1214,53 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
     {
         return (isset($postData) && !empty($postData)) ? $postData : ((isset($data) &&
             !empty($data)) ? $data : $isBool);
+    }
+
+    /**
+     * Adds disabled dummy products to fix requirements
+     * @param $requestParams
+     * @return mixed
+     */
+    public function fillMissingVariants(&$requestParams, $allSecondOptionValues)
+    {
+        $attributeNameToIdMapping = array();
+        $processedVariantValues = array();
+        foreach ($requestParams as $product) {
+            $propertyValues = $product['property_values'];
+            $processedVariantValues[$propertyValues[0]['value']][] = $propertyValues[1]['value'];
+            $attributeNameToIdMapping[$propertyValues[0]['value']] = $propertyValues[0]['property_id'];
+            $attributeNameToIdMapping[$propertyValues[1]['value']] = $propertyValues[1]['property_id'];
+        }
+
+        foreach ($processedVariantValues as $masterValue => $values) {
+            foreach($allSecondOptionValues as $requiredOptionValue) {
+                if (!in_array($requiredOptionValue, $processedVariantValues[$masterValue])) {
+
+                    $product = array();
+                    $product['property_values'] = array();
+                    $product['sku'] = 'dummy_sku' . $requiredOptionValue;
+                    $product['property_values'][] = array(
+                        'property_id' => $attributeNameToIdMapping[$masterValue],
+                        'property_name' => '',
+                        'value' => $masterValue
+                    );
+                    $product['property_values'][] = array(
+                        'property_id' => $attributeNameToIdMapping[$requiredOptionValue],
+                        'property_name' => '',
+                        'value' => $requiredOptionValue
+                    );
+
+                    $product['offerings'] = array(array(
+                        'price' => 0,
+                        'quantity' => 0,
+                        'is_enabled' => 0
+                    ));
+                    $requestParams[] = $product;
+                }
+            }
+        }
+
+        return $requestParams;
     }
 
     /**
@@ -1277,11 +1293,9 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
         $productData = Mage::getModel('catalog/product')->load($productId)->getData();
         $newDescription = $oldDescription;
 
-        if($prependedTemplate)
-        {
+        if ($prependedTemplate) {
             $descriptionTemplateRaw = false;
-            switch($prependedTemplate)
-            {
+            switch ($prependedTemplate) {
                 case 1:
                     $descriptionTemplateRaw = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_1/magetsync_field_prepend_one');
                     break;
@@ -1290,7 +1304,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
                     break;
             }
-            if($descriptionTemplateRaw) {
+            if ($descriptionTemplateRaw) {
                 $descriptionTemplate = $this->replaceAttributePatterns($descriptionTemplateRaw, $productData);
                 $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br/><br />');
                 $newDescription = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
@@ -1298,11 +1312,9 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
             }
         }
 
-        if($appendedTemplate)
-        {
+        if ($appendedTemplate) {
             $descriptionTemplateRaw = false;
-            switch($appendedTemplate)
-            {
+            switch ($appendedTemplate) {
                 case 1:
                     $descriptionTemplateRaw = Mage::getStoreConfig('magetsync_section_templates/magetsync_group_notes_1/magetsync_field_append_one');
                     break;
@@ -1311,7 +1323,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
                     break;
             }
-            if($descriptionTemplateRaw) {
+            if ($descriptionTemplateRaw) {
                 $descriptionTemplate = $this->replaceAttributePatterns($descriptionTemplateRaw, $productData);
                 $textNoHtml = strip_tags($descriptionTemplate, '<br></br><br><br />');
                 $newDescriptionAppend = preg_replace('/(<br>)|(<\/br>)|(<br\/>)|(<br \/>)/', PHP_EOL, $textNoHtml);
@@ -1328,17 +1340,18 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param $productData
      * @return string
      */
-    public function replaceAttributePatterns($text, $productData) {
+    public function replaceAttributePatterns($text, $productData)
+    {
         $returnText = $text;
         $regexp = '/\{\{.*?\}\}/';
         preg_match_all($regexp, $text, $matches);
         $attributeValArr = array();
-        foreach($matches[0] as $matchedPattern) {
+        foreach ($matches[0] as $matchedPattern) {
             $attributeCode = str_replace(array('{{', '}}'), '', $matchedPattern);
             $attributeValArr[$attributeCode] = $productData[$attributeCode];
         }
-        foreach($attributeValArr as $attrCode => $attrVal) {
-            $returnText = str_replace('{{'.$attrCode.'}}', $attrVal, $returnText);
+        foreach ($attributeValArr as $attrCode => $attrVal) {
+            $returnText = str_replace('{{' . $attrCode . '}}', $attrVal, $returnText);
         }
 
         return $returnText;

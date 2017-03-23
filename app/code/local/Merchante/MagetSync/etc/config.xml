@@ -5,7 +5,7 @@
 <config>
     <modules>
         <Merchante_MagetSync>
-            <version>0.2.6</version>
+            <version>0.2.7</version>
         </Merchante_MagetSync>
     </modules>
     <frontend>
