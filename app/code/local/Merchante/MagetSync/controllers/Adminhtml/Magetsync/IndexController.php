@@ -327,6 +327,80 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
             echo json_encode($result, true);
         }
     }
+
+    /**
+     * Fetches taxonomies through API and replaces DB values
+     * Loops through all Listings and resets categories that are no longer supported
+     */
+    public function fetchTaxonomyAction()
+    {
+        $result = array('success' => true);
+
+        try {
+            $categoryModel = Mage::getModel('magetsync/category');
+            $dataApi = $categoryModel->getSellerTaxonomy(null, null);
+            if ($dataApi['status'] == true) {
+                $coreResource = Mage::getSingleton('core/resource');
+                $connection = $coreResource->getConnection('core_write');
+                $tableName = $connection->getTableName('magetsync_category');
+                $connection->truncateTable($tableName);
+                $values = json_decode(json_decode($dataApi['result']), true);
+                $values = (isset($values['results']) ? $values['results'] : null);
+                $categoryModel->recursiveCategoriesForTaxonomy($values, $connection, $tableName);
+
+                $collection = Mage::getModel('magetsync/category')->getCollection()
+                    ->addFieldToSelect('level_id');
+                $categoriesArr = $collection->getColumnValues('level_id');
+                $listingCollection = Mage::getModel('magetsync/listing')->getCollection()
+                    ->addFieldToSelect('*');
+                foreach ($listingCollection as $listing) {
+                    $removeDescendants = false;
+                    if (!in_array($listing->getData('category_id'), $categoriesArr)) {
+                        $removeDescendants = true;
+                        $listing->setData('category_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subsubcategory_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subsubcategory_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory4_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory4_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory5_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory5_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory6_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory6_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory7_id'), $categoriesArr) || $removeDescendants) {
+                        $listing->setData('subcategory7_id', NULL);
+                    }
+                    $listing->save();
+                }
+
+            } else {
+                $result['success'] = false;
+                $result['msg'] = 'API returned unsuccessful response. Please try again later.';
+            }
+
+            echo json_encode($result, true);
+
+        } catch (Exception $e) {
+            $result = array(
+                'success' => false,
+                'msg'     => $e->getMessage()
+            );
+            echo json_encode($result, true);
+        }
+    }
+
     /**
      * Method for reindexing listings(Global Notes)
      */
