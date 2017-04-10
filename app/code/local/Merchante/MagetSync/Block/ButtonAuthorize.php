@@ -16,6 +16,19 @@ class Merchante_MagetSync_Block_ButtonAuthorize extends Mage_Adminhtml_Block_Sys
      */
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
     {
+        $label = Mage::helper('magetsync')->__('Authorize');
+        if (version_compare(phpversion(), '5.4.0', '<')===true) {
+            $html = "<p style='color:red'>" . Mage::helper('magetsync')->__("You're using PHP version: " . phpversion()
+                    . ". MagetSync requires 5.4 or newer. Update your PHP version before proceeding.") . "</p>";
+            $html .= $this->getLayout()->createBlock('adminhtml/widget_button')
+                ->setType('button')
+                ->setClass('disabled')
+                ->setDisabled(true)
+                ->setLabel($label)
+                ->toHtml();
+
+            return $html;
+        }
         $this->setElement($element);
         $url = $this->getUrl('adminhtml/magetsync_api/authorize');
         $etsyModel = Mage::getModel('magetsync/etsy');
@@ -24,7 +37,6 @@ class Merchante_MagetSync_Block_ButtonAuthorize extends Mage_Adminhtml_Block_Sys
         $access_token_secret = $configuration['AccessTokenSecret'];
         $class = '';
         $disabled = false;
-        $label = Mage::helper('magetsync')->__('Authorize');
         if($access_token != "" && $access_token_secret != "")
         {
             $class = 'greenAuthorize';
@@ -62,4 +74,3 @@ class Merchante_MagetSync_Block_ButtonAuthorize extends Mage_Adminhtml_Block_Sys
         return $html;
     }
 }
-?>
