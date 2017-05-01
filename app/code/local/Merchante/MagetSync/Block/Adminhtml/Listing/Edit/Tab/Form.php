@@ -30,6 +30,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 2   => Mage::helper('magetsync')->__('Note').' 2'
             ),
         ));
+
         $appendedTemplate = $fieldsetGlobal->addField('appended_template', 'select', array(
             'name'  => 'appended_template',
             'required' => false,
@@ -41,8 +42,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             ),
         ));
 
-
-
         $renewalOption = $fieldsetGlobal->addField('should_auto_renew', 'select', array(
             'name'  => 'should_auto_renew',
             'required' => false,
@@ -53,7 +52,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 0   => Mage::helper('magetsync')->__('No')
             ),
         ));
-
 
         $fieldsetAbout = $form->addFieldset('magetsync_form_about',
             array('legend'=>Mage::helper('magetsync')->__("About information")));
@@ -89,39 +87,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'values'    => Mage::getModel('magetsync/whenMade')->toOptionArray(),
         ));
 
-
-        /**
-         * Validation on event 'change'
-         */
-        $whoMade->setAfterElementHtml("
-                <script type=\"text/javascript\">
-                    function getNextData(selectElement){
-                         if(selectElement.value != '')
-                         {
-                            document.getElementById('is_supply').disabled = false;
-                            $('is_supply').observe('change', function(e){
-                                  var value = document.getElementById('is_supply').value;
-                                  if(value != null)
-                                  {
-                                    document.getElementById('when_made').disabled = false;
-                                  }
-                                  else
-                                  {
-                                    document.getElementById('when_made').value = '';
-                                    document.getElementById('when_made').disabled = true;
-                                  }
-                             });
-                         }
-                         else
-                         {
-                            document.getElementById('is_supply').value = '';
-                            document.getElementById('when_made').value = '';
-                            document.getElementById('is_supply').disabled = true;
-                            document.getElementById('when_made').disabled = true;
-                         }
-                    }
-                </script>");
-
         //Single listing edit
         if(!Mage::registry('magetsync_massive')) {
             $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Renderer_Pricing');
@@ -130,20 +95,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 'required' => true,
                 'label'     => Mage::helper('magetsync')->__("Price")
             ));
-            $pricingRule->setAfterElementHtml("
-                <script type='text/javascript'>
-                    $('custom-price').observe('change', tootglePriceInput);
-                    function tootglePriceInput(evt) {
-                        var priceInput = $('price');
-                        if (evt.element().checked == true) {
-                            priceInput.disabled = false;
-                        } else {
-                            priceInput.disabled = true;
-                            priceInput.value = $('orig-price-val').value;
-                        }
-                    }
-                </script>
-            ");
+
         //Mass attribute update
         } else {
             $fieldsetAbout->addType('pricingrule', 'Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Renderer_MassPricing');
@@ -153,42 +105,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 'rules'    => Mage::getModel('magetsync/attributeTemplate')->toPricingRuleOptionArray(),
                 'strategies'    => Mage::getModel('magetsync/attributeTemplate')->toPricingStrategyOptionArray(),
             ));
-            $pricingRule->setAfterElementHtml("
-            <script type=\"text/javascript\">
-                $('affect_value').observe('keyup', calculateEstimatePrice);
-                $('affect_strategy').observe('change', calculateEstimatePrice);
-                function calculateEstimatePrice(reset) {
-                    var affectPriceVal = document.getElementById('affect_value');
-                    var priceValue = 10;
-                    if (reset !== true) {
-                        if (document.getElementById('affect_strategy').value == 'percentage') {
-                            var delta = priceValue * Number(affectPriceVal.value)/100;
-                        } else {
-                            var delta = Number(affectPriceVal.value);
-                        }
-                        if (document.getElementById('pricing_rule').value == 'increase') {
-                            priceValue += delta;
-                        } else {
-                            priceValue -= delta;
-                        }
-                    }
-
-                    document.getElementById('estimate-price').update(priceValue);
-                }
-                function togglePricing(select) {
-                    if (select.value != 'original') {
-                        document.getElementById('affect_value').show();
-                        document.getElementById('affect_strategy').show();
-                        calculateEstimatePrice();
-                    } else {
-                        document.getElementById('affect_value').hide();
-                        document.getElementById('affect_strategy').hide();
-                        calculateEstimatePrice(true);
-                    }
-                }
-                togglePricing($('pricing_rule'));
-            </script>
-        ");
         }
 
 
@@ -200,40 +116,36 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $filtersub6 = '';
         $filtersub7 = '';
 
-        if ( $dataMagetsy )
-        {
-            if($dataMagetsy['category_id']<>'')
-            {
+        if ( $dataMagetsy ) {
+            if ($dataMagetsy['category_id']<>'') {
                 $filtersub = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['category_id']);
             }
-            if($dataMagetsy['subcategory_id']<>'')
-            {
+            if ($dataMagetsy['subcategory_id']<>'') {
                 $filtersubsub = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory_id']);
             }
-
-            if($dataMagetsy['subsubcategory_id']<>'')
-            {
+            if ($dataMagetsy['subsubcategory_id']<>'') {
                 $filtersub4 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subsubcategory_id']);
             }
-
-            if($dataMagetsy['subcategory4_id']<>'')
-            {
+            if ($dataMagetsy['subcategory4_id']<>'') {
                 $filtersub5 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory4_id']);
             }
-
-            if($dataMagetsy['subcategory5_id']<>'')
-            {
+            if ($dataMagetsy['subcategory5_id']<>'') {
                 $filtersub6 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory5_id']);
             }
-
-            if($dataMagetsy['subcategory6_id']<>'')
-            {
+            if ($dataMagetsy['subcategory6_id']<>'') {
                 $filtersub7 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory6_id']);
             }
         }
 
         $fieldsetCategories = $form->addFieldset('magetsync_form_category',
             array('legend'=> Mage::helper('magetsync')->__("Category information")));
+
+        $propertiesHolder = $form->addFieldset('properties_holder',
+            array('legend'=> Mage::helper('magetsync')->__("Attributes")));
+
+        $placeholder = $propertiesHolder->addField('placeholder', 'note', array(
+            'text' => Mage::helper('magetsync')->__("Will be filled with attribute values after category selection")
+        ));
 
         $category = $fieldsetCategories->addField('category_id', 'select', array(
             'name'  => 'category_id',
@@ -291,248 +203,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'values' =>  $filtersub7
         ));
 
-        /**
-         * Script for dependents selects (Use ajax)
-         */
-        $category->setAfterElementHtml("<script type=\"text/javascript\">
-
-                function getCategory(selectElement){
-
-                    $('subcategory_id').up(0).up(0).hide();
-                    $('subsubcategory_id').up(0).up(0).hide();
-                    $('subcategory4_id').up(0).up(0).hide();
-                    $('subcategory5_id').up(0).up(0).hide();
-                    $('subcategory6_id').up(0).up(0).hide();
-                    $('subcategory7_id').up(0).up(0).hide();
-
-                    if(selectElement.value == '')
-                    {
-                        $('subcategory_id').update('');
-                        $('subsubcategory_id').update('');
-                        $('subcategory4_id').update('');
-                        $('subcategory5_id').update('');
-                        $('subcategory6_id').update('');
-                        $('subcategory7_id').update('');
-
-                        return false;
-                    }
-                    var reloadurl = '".$this->getUrl('adminhtml/magetsync_index/category') . "tag/' + selectElement.value;
-                    new Ajax.Request(reloadurl, {
-                        method: 'get',
-                        onLoading: function (subform) {
-                            $('subcategory_id').update('');
-                            $('subcategory_id').update('Searching…');
-                        },
-                        onComplete: function(subform) {
-                             if(subform.responseText == '')
-                             {
-                                $('subcategory_id').up(0).up(0).hide();
-                                $('subsubcategory_id').up(0).up(0).hide();
-                                $('subcategory4_id').up(0).up(0).hide();
-                                $('subcategory5_id').up(0).up(0).hide();
-                                $('subcategory6_id').up(0).up(0).hide();
-                                $('subcategory7_id').up(0).up(0).hide();
-                             }else
-                             {
-                              $('subcategory_id').up(0).up(0).show();
-                              $('subcategory_id').update(subform.responseText);
-                             }
-                             }
-                    });
-
-                }
-                </script>");
-
-        $subCategory->setAfterElementHtml("<script type=\"text/javascript\">
-                function getSubCategory(selectElement){
-                    $('subsubcategory_id').up(0).up(0).hide();
-                    $('subcategory4_id').up(0).up(0).hide();
-                    $('subcategory5_id').up(0).up(0).hide();
-                    $('subcategory6_id').up(0).up(0).hide();
-                    $('subcategory7_id').up(0).up(0).hide();
-
-                    if(selectElement.value == '')
-                    {
-                        $('subsubcategory_id').update('');
-                        $('subcategory4_id').update('');
-                        $('subcategory5_id').update('');
-                        $('subcategory6_id').update('');
-                        $('subcategory7_id').update('');
-
-                        return false;
-                    }
-                    var reloadurl = '".$this->getUrl('adminhtml/magetsync_index/category') . "tag/' + selectElement.value;
-                    new Ajax.Request(reloadurl, {
-                        method: 'get',
-                        onLoading: function (subform) {
-                            $('subsubcategory_id').update('');
-                            $('subsubcategory_id').update('Searching…');
-                        },
-                        onComplete: function(subform) {
-                             if(subform.responseText == '')
-                             {
-                                $('subsubcategory_id').up(0).up(0).hide();
-                                $('subcategory4_id').up(0).up(0).hide();
-                                $('subcategory5_id').up(0).up(0).hide();
-                                $('subcategory6_id').up(0).up(0).hide();
-                                $('subcategory7_id').up(0).up(0).hide();
-                             }else
-                             {
-                              $('subsubcategory_id').up(0).up(0).show();
-                              $('subsubcategory_id').update(subform.responseText);
-                             }
-                            }
-                    });
-
-                }
-                </script>");
-
-        $subSubCategory->setAfterElementHtml("<script type=\"text/javascript\">
-                function getSubSubCategory(selectElement){
-                    $('subcategory4_id').up(0).up(0).hide();
-                    $('subcategory5_id').up(0).up(0).hide();
-                    $('subcategory6_id').up(0).up(0).hide();
-                    $('subcategory7_id').up(0).up(0).hide();
-
-                    if(selectElement.value == '')
-                    {
-                        $('subcategory4_id').update('');
-                        $('subcategory5_id').update('');
-                        $('subcategory6_id').update('');
-                        $('subcategory7_id').update('');
-
-                        return false;
-                    }
-                    var reloadurl = '".$this->getUrl('adminhtml/magetsync_index/category') . "tag/' + selectElement.value;
-                    new Ajax.Request(reloadurl, {
-                        method: 'get',
-                        onLoading: function (subform) {
-                            $('subcategory4_id').update('');
-                            $('subcategory4_id').update('Searching…');
-                        },
-                        onComplete: function(subform) {
-                             if(subform.responseText == '')
-                             {
-                                $('subcategory4_id').up(0).up(0).hide();
-                                $('subcategory5_id').up(0).up(0).hide();
-                                $('subcategory6_id').up(0).up(0).hide();
-                                $('subcategory7_id').up(0).up(0).hide();
-                             }else
-                             {
-                              $('subcategory4_id').up(0).up(0).show();
-                              $('subcategory4_id').update(subform.responseText);
-                             }
-                            }
-                    });
-
-                }
-                </script>");
-
-        $subCategory4->setAfterElementHtml("<script type=\"text/javascript\">
-                function getSubCategory4(selectElement){
-                    $('subcategory5_id').up(0).up(0).hide();
-                    $('subcategory6_id').up(0).up(0).hide();
-                    $('subcategory7_id').up(0).up(0).hide();
-
-                    if(selectElement.value == '')
-                    {
-                        $('subcategory5_id').update('');
-                        $('subcategory6_id').update('');
-                        $('subcategory7_id').update('');
-
-                        return false;
-                    }
-                    var reloadurl = '".$this->getUrl('adminhtml/magetsync_index/category') . "tag/' + selectElement.value;
-                    new Ajax.Request(reloadurl, {
-                        method: 'get',
-                        onLoading: function (subform) {
-                            $('subcategory5_id').update('');
-                            $('subcategory5_id').update('Searching…');
-                        },
-                        onComplete: function(subform) {
-                             if(subform.responseText == '')
-                             {
-                                $('subcategory5_id').up(0).up(0).hide();
-                                $('subcategory6_id').up(0).up(0).hide();
-                                $('subcategory7_id').up(0).up(0).hide();
-                             }else
-                             {
-                              $('subcategory5_id').up(0).up(0).show();
-                              $('subcategory5_id').update(subform.responseText);
-                             }
-                          }
-                    });
-
-                }
-                </script>");
-
-        $subCategory5->setAfterElementHtml("<script type=\"text/javascript\">
-                function getSubCategory5(selectElement){
-                    $('subcategory6_id').up(0).up(0).hide();
-                    $('subcategory7_id').up(0).up(0).hide();
-
-                    if(selectElement.value == '')
-                    {
-                        $('subcategory6_id').update('');
-                        $('subcategory7_id').update('');
-
-                        return false;
-                    }
-                    var reloadurl = '".$this->getUrl('adminhtml/magetsync_index/category') . "tag/' + selectElement.value;
-                    new Ajax.Request(reloadurl, {
-                        method: 'get',
-                        onLoading: function (subform) {
-                            $('subcategory6_id').update('');
-                            $('subcategory6_id').update('Searching…');
-                        },
-                        onComplete: function(subform) {
-                             if(subform.responseText == '')
-                             {
-                                $('subcategory6_id').up(0).up(0).hide();
-                                $('subcategory7_id').up(0).up(0).hide();
-                             }else
-                             {
-                              $('subcategory6_id').up(0).up(0).show();
-                              $('subcategory6_id').update(subform.responseText);
-                             }
-                          }
-                    });
-
-                }
-                </script>");
-
-        $subCategory6->setAfterElementHtml("<script type=\"text/javascript\">
-                function getSubCategory6(selectElement){
-                    $('subcategory7_id').up(0).up(0).hide();
-
-                    if(selectElement.value == '')
-                    {
-                        $('subcategory7_id').update('');
-
-                        return false;
-                    }
-                    var reloadurl = '".$this->getUrl('adminhtml/magetsync_index/category') . "tag/' + selectElement.value;
-                    new Ajax.Request(reloadurl, {
-                        method: 'get',
-                        onLoading: function (subform) {
-                            $('subcategory7_id').update('');
-                            $('subcategory7_id').update('Searching…');
-                        },
-                        onComplete: function(subform) {
-                             if(subform.responseText == '')
-                             {
-                                $('subcategory7_id').up(0).up(0).hide();
-                             }else
-                             {
-                              $('subcategory7_id').up(0).up(0).show();
-                              $('subcategory7_id').update(subform.responseText);
-                             }
-                          }
-                    });
-
-                }
-                </script>");
-
         $fieldsetSearch = $form->addFieldset('magetsync_form_search',
             array('legend'=> Mage::helper('magetsync')->__("Search information")));
 
@@ -542,11 +212,17 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'values'    => Mage::getModel('magetsync/recipient')->toOptionArray(),
         ));
 
+
+        /**
+         * TODO removed to custom options
+         */
+        /*
         $occasion = $fieldsetSearch->addField('occasion', 'select', array(
             'name'  => 'occasion',
             'label'     => Mage::helper('magetsync')->__("Occasion"),
             'values'    => Mage::getModel('magetsync/occasion')->toOptionArray(),
         ));
+        */
 
         $materials = $fieldsetSearch->addField('materials', 'text',
             array(
@@ -563,20 +239,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 'onchange' => 'enableStyle2(this)'
             ));
 
-        $style1->setAfterElementHtml("<script type=\"text/javascript\">
-                function enableStyle2(selectElement){
-                    if(selectElement.value == '')
-                    {
-
-                        $('style_two').value = '';
-                        $('style_two').up(0).up(0).hide();
-                    }else
-                    {
-                        $('style_two').up(0).up(0).show();
-                    }
-                }
-                </script>");
-
         $style2 = $fieldsetSearch->addField('style_two', 'select',
             array(
                 'label' => Mage::helper('magetsync')->__("Style").' 2',
@@ -584,7 +246,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
                 'required' => false,
                 'values'    => Mage::getModel('magetsync/style')->toOptionArray()
             ));
-
 
         $fieldsetSS = $form->addFieldset('magetsync_form_ss',
             array('legend'=> Mage::helper('magetsync')->__("Shipping and Shop information")));
@@ -605,7 +266,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
             'values'    => Mage::getModel('magetsync/shippingTemplate')->toOptionArray(),
         ));
 
-        $valuesListing =  Mage::registry('magetsync_data')->getData();
         $subCategoryAux    = '';
         $subSubCategoryAux = '';
         $subCategoryAux4   = '';
@@ -614,6 +274,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $subCategoryAux7   = '';
         $style2Aux         = '';
 
+        $valuesListing =  Mage::registry('magetsync_data')->getData();
         if($valuesListing['subcategory_id'] == null){ $subCategoryAux = '$(\'subcategory_id\').up(0).up(0).hide();';}
         if($valuesListing['subsubcategory_id'] == null){ $subSubCategoryAux = '$(\'subsubcategory_id\').up(0).up(0).hide();';}
         if($valuesListing['subcategory4_id'] == null){ $subCategoryAux4 = '$(\'subcategory4_id\').up(0).up(0).hide();';}
@@ -622,7 +283,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         if($valuesListing['subcategory7_id'] == null){ $subCategoryAux7 = '$(\'subcategory7_id\').up(0).up(0).hide();';}
 
         if($valuesListing['style_one'] == null && $valuesListing['style_two'] == null){ $style2Aux = '$(\'style_two\').up(0).up(0).hide();';}
-
 
         $shippingTemplate->setAfterElementHtml("<script type=\"text/javascript\">
                     ".$subCategoryAux."
@@ -640,7 +300,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         $ids = $fieldsetSS->addField('listingids', 'hidden', array(
             'name'  => 'listingids',
         ));
-
 
         $fieldsetLog = $form->addFieldset('magetsync_form_log',
             array('legend'=> Mage::helper('magetsync')->__("Log Section")));
@@ -667,6 +326,15 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit_Tab_Form extends Mage_Adm
         }
             $form->addValues(array('listingids' => Mage::registry('magetsync_massive')));
 
+        //Moved to bottom to prevent data loss during setting values
+        $fieldsetSS->addField('category_reload_url', 'hidden', array(
+            'name'  => 'category_reload_url',
+            'value' => $this->getUrl('adminhtml/magetsync_index/category')
+        ));
+        $fieldsetSS->addField('category_listing_id', 'hidden', array(
+            'name'  => 'category_listing_id',
+            'value' => $valuesListing['id']
+        ));
 
         return parent::_prepareForm();
     }

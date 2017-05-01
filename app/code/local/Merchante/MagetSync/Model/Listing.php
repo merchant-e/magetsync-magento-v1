@@ -112,6 +112,36 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
      * @param null $params
      * @return mixed
      */
+    public function updateAttribute($obligatory, $params = null)
+    {
+        /**
+         * TODO move to new model after API will be set up
+         */
+        $result = $this->selectExecute('PropertyValue', __FUNCTION__, $obligatory, $params);
+
+        return $result;
+    }
+
+    /**
+     * @param $obligatory
+     * @param null $params
+     * @return mixed
+     */
+    public function getTaxonomyNodeProperties($obligatory, $params = null)
+    {
+        /**
+         * TODO move to new model after API will be set up
+         */
+        $result = $this->selectExecute('TaxonomyNodeProperty', __FUNCTION__, $obligatory, $params);
+
+        return $result;
+    }
+
+    /**
+     * @param $obligatory
+     * @param null $params
+     * @return mixed
+     */
     public function getListing($obligatory, $params = null)
     {
         $result = $this->selectExecute($this->name, __FUNCTION__, $obligatory, $params);
