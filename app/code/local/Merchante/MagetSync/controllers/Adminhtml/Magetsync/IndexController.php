@@ -204,6 +204,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
     {
         $tag = $this->getRequest()->getParam('tag');
         $listingId = $this->getRequest()->getParam('listing');
+        $templateId = $this->getRequest()->getParam('template');
         $taxonomy = "";
         $state = "<option value=''>" . Mage::helper('magetsync')->__('Please Select') . "</option>";
 
@@ -214,8 +215,14 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
         if ($updateAttributeApi['status'] == true) {
             $result = json_decode(json_decode($updateAttributeApi['result']), true);
             if ($result['count'] > 0) {
-                $listingModel->load($listingId);
-                $listingProperties = $listingModel->getProperties();
+                if ($listingId != null) {
+                    $entityModel = $listingModel;
+                    $entityModel->load($listingId);
+                } else {
+                    $entityModel = Mage::getModel('magetsync/attributeTemplate');
+                    $entityModel->load($templateId);
+                }
+                $listingProperties = $entityModel->getProperties();
                 $selectedProperties = array();
                 if ($listingProperties) {
                     $selectedProperties = json_decode($listingProperties, true);

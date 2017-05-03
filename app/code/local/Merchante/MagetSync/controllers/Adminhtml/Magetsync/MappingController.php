@@ -416,7 +416,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_MappingController extends Mage_Adm
         $postData['who_made'] = $result['who_made'];
         $postData['when_made'] = $result['when_made'];
         $postData['is_supply'] = $result['is_supply'];
-        $postData['occasion'] = $result['occasion'];
+        //$postData['occasion'] = $result['occasion'];
         $postData['recipient'] = $result['recipient'];
         $postData['style'] = $result['style'];
         $postData['price'] = $result['price'];

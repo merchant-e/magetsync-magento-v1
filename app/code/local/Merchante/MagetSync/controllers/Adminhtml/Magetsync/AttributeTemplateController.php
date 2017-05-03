@@ -94,6 +94,17 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                     $postData['affect_value'] = 0;
                     $postData['affect_strategy'] = NULL;
                 }
+                $propertiesArr = array();
+                foreach ($postData as $dataItemKey => $dataItemVal) {
+                    if (substr($dataItemKey, 0, 9) == 'property_') {
+                        $propertyId = substr($dataItemKey, 9, strlen($dataItemKey));
+                        $propertiesArr[$propertyId] = $dataItemVal;
+                    }
+                }
+                $postData['properties'] = '';
+                if ($propertiesArr) {
+                    $postData['properties'] = json_encode($propertiesArr);
+                }
                 $origData = $attributeTemplateModel->getOrigData();
                 $attributeTemplateModel->addData($postData);
                 $attributeTemplateModel->save();

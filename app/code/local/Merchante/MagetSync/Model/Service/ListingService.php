@@ -107,7 +107,7 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
         );
 
         $params = array(
-            'description'          => $data['description'] ?: '',
+            'description'          => $newDescription,
             'materials'            => $data['materials']   ?: '',
             'state'                => $stateListing,
             'quantity'             => $qty,
@@ -121,7 +121,7 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
             'is_supply'            => $supply,
             'when_made'            => $data['when_made'] ?: '',
             'recipient'            => $data['recipient'] ?: '',
-            'occasion'             => $data['occasion'] ?: '',
+            //'occasion'             => $data['occasion'] ?: '',
             'style'                => $data['style'] ?: '',
             'should_auto_renew'    => $data['should_auto_renew'] ?: 0,
             'language'             => $language
@@ -154,6 +154,27 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
         }
 
         if ($resultApi['status'] == true) {
+
+            //Update custom Listing attributes
+            $propertiesArr = $listing->getProperties();
+            if ($propertiesArr) {
+                foreach ($propertiesArr as $propertyKey => $propertyVal) {
+                    $obliUpd['property_id'] = $propertyKey;
+                    $attributeUpdateParams = array();
+                    if (is_array($propertyVal)) {
+                        $propertyVal = implode(',', $propertyVal);
+                    }
+                    $attributeUpdateParams['value_ids'] = $propertyVal;
+                    $updateAttributeApi = $listing->updateAttribute($obliUpd, $attributeUpdateParams);
+                    if ($updateAttributeApi['status'] != true) {
+                        Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
+                        Merchante_MagetSync_Model_LogData::magetsync(
+                            $data, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                            $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
+                        );
+                    }
+                }
+            }
 
             $result = json_decode(json_decode($resultApi['result']), true);
             $result = $result['results'][0];

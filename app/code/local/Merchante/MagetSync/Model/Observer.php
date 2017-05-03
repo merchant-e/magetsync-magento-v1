@@ -312,7 +312,7 @@ class Merchante_MagetSync_Model_Observer
                         'is_supply'            => $dataSuppley,
                         'when_made'            => $listing['when_made'],
                         'recipient'            => $listing['recipient'],
-                        'occasion'             => $listing['occasion'],
+                        //'occasion'             => $listing['occasion'],
                         'style'                => $styleData,
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $listing['language']
@@ -376,6 +376,27 @@ class Merchante_MagetSync_Model_Observer
 
             $resultApiUpd = $listingModel->updateListing($obliUpd, $params);
             if ($resultApiUpd['status'] == true) {
+
+                //Update custom Listing attributes
+                $propertiesArr = $listing->getProperties();
+                if ($propertiesArr) {
+                    foreach ($propertiesArr as $propertyKey => $propertyVal) {
+                        $obliUpd['property_id'] = $propertyKey;
+                        $attributeUpdateParams = array();
+                        if (is_array($propertyVal)) {
+                            $propertyVal = implode(',', $propertyVal);
+                        }
+                        $attributeUpdateParams['value_ids'] = $propertyVal;
+                        $updateAttributeApi = $listing->updateAttribute($obliUpd, $attributeUpdateParams);
+                        if ($updateAttributeApi['status'] != true) {
+                            Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
+                            Merchante_MagetSync_Model_LogData::magetsync(
+                                $postData, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
+                            );
+                        }
+                    }
+                }
                 if ($autoSync == '1') {
                     if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
                         $result = json_decode(json_decode($resultApiUpd['result']), true);
