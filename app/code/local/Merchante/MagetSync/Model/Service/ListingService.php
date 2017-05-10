@@ -120,9 +120,6 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
             'who_made'             => $data['who_made'] ?: '',
             'is_supply'            => $supply,
             'when_made'            => $data['when_made'] ?: '',
-            'recipient'            => $data['recipient'] ?: '',
-            //'occasion'             => $data['occasion'] ?: '',
-            'style'                => $data['style'] ?: '',
             'should_auto_renew'    => $data['should_auto_renew'] ?: 0,
             'language'             => $language
         );

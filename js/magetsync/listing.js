@@ -1,4 +1,4 @@
-var ajaxUrl, categoryReloadUrl, categoryListingId, categoryTemplateId;
+var ajaxUrl, categoryReloadUrl, categoryListingId, categoryTemplateId, placeholder;
 
 function tootglePriceInput(evt) {
     var priceInput = $('price');
@@ -62,7 +62,8 @@ function getNextData(selectElement) {
 }
 
 function fillProperties(selectElement) {
-    if (selectElement.value == '' || !ajaxUrl) {
+    if (!selectElement || selectElement.value == '' || !ajaxUrl) {
+        $('properties_holder').update(placeholder);
         return false;
     }
     var reloadurl = ajaxUrl + '/tag/' + selectElement.value;
@@ -97,6 +98,7 @@ function getCategory(selectElement) {
         $('subcategory5_id').update('');
         $('subcategory6_id').update('');
         $('subcategory7_id').update('');
+        if (ajaxUrl) fillProperties();
 
         return false;
     }
@@ -140,6 +142,7 @@ function getSubCategory(selectElement) {
         $('subcategory5_id').update('');
         $('subcategory6_id').update('');
         $('subcategory7_id').update('');
+        if (ajaxUrl) fillProperties($('category_id'));
 
         return false;
     }
@@ -180,6 +183,7 @@ function getSubSubCategory(selectElement) {
         $('subcategory5_id').update('');
         $('subcategory6_id').update('');
         $('subcategory7_id').update('');
+        if (ajaxUrl) fillProperties($('subcategory_id'));
 
         return false;
     }
@@ -217,6 +221,7 @@ function getSubCategory4(selectElement) {
         $('subcategory5_id').update('');
         $('subcategory6_id').update('');
         $('subcategory7_id').update('');
+        if (ajaxUrl) fillProperties($('subsubcategory_id'));
 
         return false;
     }
@@ -251,6 +256,7 @@ function getSubCategory5(selectElement) {
     if (selectElement.value == '' || !ajaxUrl) {
         $('subcategory6_id').update('');
         $('subcategory7_id').update('');
+        if (ajaxUrl) fillProperties($('subcategory4_id'));
 
         return false;
     }
@@ -282,6 +288,7 @@ function getSubCategory6(selectElement) {
 
     if (selectElement.value == '' || !ajaxUrl) {
         $('subcategory7_id').update('');
+        if (ajaxUrl) fillProperties($('subcategory5_id'));
 
         return false;
     }
@@ -320,12 +327,14 @@ document.observe('dom:loaded', function () {
     categoryReloadUrl = $('category_reload_url').value;
     categoryListingId = $('category_listing_id');
     categoryTemplateId = $('category_template_id');
+    // Detect Listing or Attribute Template
     if (categoryListingId != null) {
         ajaxUrl = categoryReloadUrl + 'listing/' + categoryListingId.value;
     } else {
         ajaxUrl = categoryTemplateId != null ? categoryReloadUrl + 'template/' + categoryTemplateId.value : false;
     }
 
+    placeholder = $('placeholder').innerHTML;
     var $customPrice = $('custom-price');
     var $affectValue = $('affect_value');
     var $affectStrategy = $('affect_strategy');
@@ -334,7 +343,12 @@ document.observe('dom:loaded', function () {
     $affectValue ? $affectValue.observe('keyup', calculateEstimatePrice) : '';
     $affectStrategy ? $affectStrategy.observe('change', calculateEstimatePrice) : '';
     $pricingRule ? togglePricing($pricingRule) : '';
+    // Retrieve taxonomy for last visible category select
     fillProperties($$('#magetsync_form_category tr').findAll(function (el) {
         if (el.visible()) return el
     }).last().down('select'));
+    // Show next empty select if some categories are preselected
+    // Used for initial page load
+    var $lastVisibleNotEmptySelect = $$('#magetsync_form_category tr').findAll(function (el) {if (el.visible() && el.down('select').value) return el}).last();
+    if ($lastVisibleNotEmptySelect) $lastVisibleNotEmptySelect.next('tr').show()
 });

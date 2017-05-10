@@ -18,7 +18,7 @@ if (!$listingPropertiesColumn) {
                 'nullable' => true,
                 'default' => '',
                 'comment' => 'Properties as JSON',
-                'after' => 'recipient'
+                'after' => 'when_made'
             )
         );
 }
@@ -35,7 +35,7 @@ if (!$templatePropertiesColumn) {
                 'nullable' => true,
                 'default' => '',
                 'comment' => 'Properties as JSON',
-                'after' => 'recipient'
+                'after' => 'when_made'
             )
         );
 }

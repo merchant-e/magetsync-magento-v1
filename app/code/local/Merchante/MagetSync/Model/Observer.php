@@ -235,11 +235,6 @@ class Merchante_MagetSync_Model_Observer
                         $listing['appended_template'],
                         $listing['idproduct']
                     );
-                    $style = array();
-                    $style[] = $listing['style_one'];
-                    $style[] = $listing['style_two'];
-
-                    $styleData = implode(',', $style);
 
                     $supply = isset($listing['is_supply']) ? $listing['is_supply'] : 1;
                     //Boolean field in Etsy but not 'Yes/No' in frontEnd
@@ -311,9 +306,6 @@ class Merchante_MagetSync_Model_Observer
                         'who_made'             => $listing['who_made'],
                         'is_supply'            => $dataSuppley,
                         'when_made'            => $listing['when_made'],
-                        'recipient'            => $listing['recipient'],
-                        //'occasion'             => $listing['occasion'],
-                        'style'                => $styleData,
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $listing['language']
                     );

@@ -228,7 +228,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     $selectedProperties = json_decode($listingProperties, true);
                 }
                 foreach ($result['results'] as $property) {
-                    if (!$property['supports_variations']) {
+                    if (!empty($property['possible_values'])) {
                         $form = new Varien_Data_Form();
                         $type = $property['is_multivalued'] ? 'multiselect' : 'select';
                         $propertyId = $property['property_id'];
@@ -678,11 +678,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $postData['subcategory7_id'] = $listingModel->emptyField($postData['subcategory7_id'], null);
                     }
 
-                    if (isset($postData['style_one'])) {
-                        $postData['style_one'] = $listingModel->emptyField($postData['style_one'], null);
-                        $postData['style_two'] = $listingModel->emptyField($postData['style_two'], null);
-                    }
-
                     /********UPDATE*********/
 
                     if ($data['listing_id'] && $syncStatus) {
@@ -713,12 +708,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $listingModel->composeDescription($data['description'], $prependedTemplate, $appendedTemplate, $data['idproduct']);
                     $renewalOption =
                         $listingModel->emptyField($postData['should_auto_renew'], $data['should_auto_renew'], 0);
-
-                    $style = array();
-                    $style[] = $listingModel->emptyField($postData['style_one'], $data['style_one']);
-                    $style[] = $listingModel->emptyField($postData['style_two'], $data['style_two']);
-
-                    $styleData = implode(',', $style);
 
                     if (isset($data['tags'])) {
                         $search = array(
@@ -757,9 +746,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         'who_made'             => $listingModel->emptyField($postData['who_made'], $data['who_made']),
                         'is_supply'            => $dataSuppley,
                         'when_made'            => $listingModel->emptyField($postData['when_made'], $data['when_made']),
-                        'recipient'            => $listingModel->emptyField($postData['recipient'], $data['recipient']),
-                        //'occasion'             => $listingModel->emptyField($postData['occasion'], $data['occasion']),
-                        'style'                => $styleData,
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $languageData
                     );

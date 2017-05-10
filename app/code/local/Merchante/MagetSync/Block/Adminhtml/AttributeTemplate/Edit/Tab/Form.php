@@ -133,8 +133,11 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
         $propertiesHolder = $form->addFieldset('properties_holder',
             array('legend'=> Mage::helper('magetsync')->__("Attributes")));
 
+        $placeholderText = Mage::helper('magetsync')->__("Make it easier for buyers to find this listing by adding more details.");
+        $placeholderLinkText = Mage::helper('magetsync')->__("Learn more about attributes.");
+        $placeholderLink = "<a target='_blank' href='https://www.etsy.com/help/article/95284237119'>$placeholderLinkText</a>";
         $placeholder = $propertiesHolder->addField('placeholder', 'note', array(
-            'text' => Mage::helper('magetsync')->__("Will be filled with attribute values after category selection")
+            'text' => "<div class='properties-holder'>" . $placeholderText . ' ' . $placeholderLink . "</div>"
         ));
 
         $category = $fieldsetCategories->addField('category_id', 'select', array(
@@ -193,49 +196,13 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
             'values' =>  $filtersub7
         ));
 
-
-
         $fieldsetSearch = $form->addFieldset('magetsync_form_search',
             array('legend'=> Mage::helper('magetsync')->__("Search information")));
-
-        $fieldsetSearch->addField('recipient', 'select', array(
-            'name'  => 'recipient',
-            'label'     => Mage::helper('magetsync')->__("Recipient"),
-            'values'    => Mage::getModel('magetsync/recipient')->toOptionArray(),
-        ));
-
-        /**
-         * TODO removed to custom options
-         */
-        /*
-        $fieldsetSearch->addField('occasion', 'select', array(
-            'name'  => 'occasion',
-            'label'     => Mage::helper('magetsync')->__("Occasion"),
-            'values'    => Mage::getModel('magetsync/occasion')->toOptionArray(),
-        ));
-        */
 
         $fieldsetSearch->addField('materials', 'text',
             array(
                 'label' => Mage::helper('magetsync')->__("Materials"),
                 'name' => 'materials',
-            ));
-
-        $style1 = $fieldsetSearch->addField('style_one', 'select',
-            array(
-                'label' => Mage::helper('magetsync')->__("Style").' 1',
-                'name' => 'style_one',
-                'required' => false,
-                'values'    => Mage::getModel('magetsync/style')->toOptionArray(),
-                'onchange' => 'enableStyle2(this)'
-            ));
-
-        $style2 = $fieldsetSearch->addField('style_two', 'select',
-            array(
-                'label' => Mage::helper('magetsync')->__("Style").' 2',
-                'name' => 'style_two',
-                'required' => false,
-                'values'    => Mage::getModel('magetsync/style')->toOptionArray()
             ));
 
         $fieldsetSS = $form->addFieldset('magetsync_form_ss',
@@ -264,7 +231,6 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
         $subCategoryAux5   = '';
         $subCategoryAux6   = '';
         $subCategoryAux7   = '';
-        $style2Aux         = '';
 
         if($valuesAttributeTemplate['subcategory_id'] == null){ $subCategoryAux = '$(\'subcategory_id\').up(0).up(0).hide();';}
         if($valuesAttributeTemplate['subsubcategory_id'] == null){ $subSubCategoryAux = '$(\'subsubcategory_id\').up(0).up(0).hide();';}
@@ -272,7 +238,6 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
         if($valuesAttributeTemplate['subcategory5_id'] == null){ $subCategoryAux5 = '$(\'subcategory5_id\').up(0).up(0).hide();';}
         if($valuesAttributeTemplate['subcategory6_id'] == null){ $subCategoryAux6 = '$(\'subcategory6_id\').up(0).up(0).hide();';}
         if($valuesAttributeTemplate['subcategory7_id'] == null){ $subCategoryAux7 = '$(\'subcategory7_id\').up(0).up(0).hide();';}
-        if($valuesAttributeTemplate['style_one'] == null && $valuesAttributeTemplate['style_two'] == null){ $style2Aux = '$(\'style_two\').up(0).up(0).hide();';}
 
         $shippingTemplate->setAfterElementHtml("<script type=\"text/javascript\">
                     ".$subCategoryAux."
@@ -281,7 +246,6 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
                     ".$subCategoryAux5."
                     ".$subCategoryAux6."
                     ".$subCategoryAux7."
-                    ".$style2Aux."
                 </script>");
 
         if ( Mage::registry('magetsync_data') )
