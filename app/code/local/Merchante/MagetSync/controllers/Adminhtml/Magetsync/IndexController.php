@@ -754,7 +754,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     $propertiesArr = array();
                     foreach ($postData as $dataItemKey => $dataItemVal) {
-                        if (substr($dataItemKey, 0, 9) == 'property_') {
+                        if (substr($dataItemKey, 0, 9) == 'property_' && $dataItemVal) {
                             $propertyId = substr($dataItemKey, 9, strlen($dataItemKey));
                             $propertiesArr[$propertyId] = $dataItemVal;
                         }
