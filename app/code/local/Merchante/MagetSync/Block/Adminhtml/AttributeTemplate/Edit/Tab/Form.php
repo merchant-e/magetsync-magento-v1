@@ -107,36 +107,36 @@ class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tab_Form extend
         $filtersub7 = '';
 
         if ($dataMagetsy) {
-            if ($dataMagetsy['category_id']<>'') {
+            if ($dataMagetsy['category_id'] <> '') {
                 $filtersub = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['category_id']);
             }
-            if ($dataMagetsy['subcategory_id']<>'') {
+            if ($dataMagetsy['subcategory_id'] <> '') {
                 $filtersubsub = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory_id']);
             }
-            if ($dataMagetsy['subsubcategory_id']<>'') {
+            if ($dataMagetsy['subsubcategory_id'] <> '') {
                 $filtersub4 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subsubcategory_id']);
             }
-            if ($dataMagetsy['subcategory4_id']<>'') {
+            if ($dataMagetsy['subcategory4_id'] <> '') {
                 $filtersub5 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory4_id']);
             }
-            if ($dataMagetsy['subcategory5_id']<>'') {
+            if ($dataMagetsy['subcategory5_id'] <> '') {
                 $filtersub6 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory5_id']);
             }
-            if ($dataMagetsy['subcategory6_id']<>'') {
+            if ($dataMagetsy['subcategory6_id'] <> '') {
                 $filtersub7 = Mage::getModel('magetsync/category')->toOptionArray($dataMagetsy['subcategory6_id']);
             }
         }
 
         $fieldsetCategories = $form->addFieldset('magetsync_form_category',
-            array('legend'=> Mage::helper('magetsync')->__("Category information")));
+            array('legend' => Mage::helper('magetsync')->__("Category information")));
 
         $propertiesHolder = $form->addFieldset('properties_holder',
-            array('legend'=> Mage::helper('magetsync')->__("Attributes")));
+            array('legend' => Mage::helper('magetsync')->__("Attributes")));
 
         $placeholderText = Mage::helper('magetsync')->__("Make it easier for buyers to find this listing by adding more details.");
         $placeholderLinkText = Mage::helper('magetsync')->__("Learn more about attributes.");
         $placeholderLink = "<a target='_blank' href='https://www.etsy.com/help/article/95284237119'>$placeholderLinkText</a>";
-        $placeholder = $propertiesHolder->addField('placeholder', 'note', array(
+        $propertiesHolder->addField('placeholder', 'note', array(
             'text' => "<div class='properties-holder'>" . $placeholderText . ' ' . $placeholderLink . "</div>"
         ));
 

@@ -807,12 +807,12 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             if ($propertiesArr) {
                                 foreach ($propertiesArr as $propertyKey => $propertyVal) {
                                     $obliUpd['property_id'] = $propertyKey;
-                                    $attributeUpdateParams = array();
+                                    $attrUpdParams = array();
                                     if (is_array($propertyVal)) {
                                         $propertyVal = implode(',', $propertyVal);
                                     }
-                                    $attributeUpdateParams['value_ids'] = $propertyVal;
-                                    $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attributeUpdateParams);
+                                    $attrUpdParams['value_ids'] = $propertyVal;
+                                    $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attrUpdParams);
                                     if ($updateAttributeApi['status'] != true) {
                                         Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
                                         Merchante_MagetSync_Model_LogData::magetsync(

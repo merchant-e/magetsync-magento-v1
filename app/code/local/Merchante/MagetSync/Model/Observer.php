@@ -374,12 +374,12 @@ class Merchante_MagetSync_Model_Observer
                 if ($propertiesArr) {
                     foreach ($propertiesArr as $propertyKey => $propertyVal) {
                         $obliUpd['property_id'] = $propertyKey;
-                        $attributeUpdateParams = array();
+                        $attrUpdParams = array();
                         if (is_array($propertyVal)) {
                             $propertyVal = implode(',', $propertyVal);
                         }
-                        $attributeUpdateParams['value_ids'] = $propertyVal;
-                        $updateAttributeApi = $listing->updateAttribute($obliUpd, $attributeUpdateParams);
+                        $attrUpdParams['value_ids'] = $propertyVal;
+                        $updateAttributeApi = $listing->updateAttribute($obliUpd, $attrUpdParams);
                         if ($updateAttributeApi['status'] != true) {
                             Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
                             Merchante_MagetSync_Model_LogData::magetsync(
