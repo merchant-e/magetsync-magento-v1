@@ -239,7 +239,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         if (!$isReqired) {
                             $valuesArr[] = array('value' => '', 'label' => 'Please select');
                         }
-                        foreach($property['possible_values'] as $option) {
+                        $propertiesArr = !empty($property['selected_values']) ? $property['selected_values'] : $property['possible_values'];
+                        foreach($propertiesArr as $option) {
                             $valuesArr[] = array('value' => $option['value_id'], 'label' => $option['name']);
                         }
 
