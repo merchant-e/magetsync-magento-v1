@@ -240,17 +240,41 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $valuesArr[] = array('value' => '', 'label' => 'Please select');
                         }
                         $propertiesArr = !empty($property['selected_values']) ? $property['selected_values'] : $property['possible_values'];
-                        foreach($propertiesArr as $option) {
-                            $valuesArr[] = array('value' => $option['value_id'], 'label' => $option['name']);
-                        }
 
+                        $scaleOptions = array();
+                        $selectedSizeScaleVal = '';
+                        foreach($propertiesArr as $option) {
+                            $valuesArr[] = array('value' => $option['value_id'], 'label' => $option['name'], 'scale' => $option['scale_id']);
+                            $option['scale_id'] && $scaleOptions[$option['scale_id']][] = $option['value_id'];
+                            $selectedSizeScaleVal = $selectedValues && (string)$option['value_id'] == $selectedValues ? (string)$option['scale_id'] : $selectedSizeScaleVal;
+                        }
+                        $renderSizeScales = strtolower($propertyName) == 'size' && !empty($property['scales']) && sizeof($scaleOptions) > 1;
+                        if ($renderSizeScales) {
+                            $scaleValues = array();
+                            $scaleValues[] = array('value' => '', 'label' => Mage::helper('magetsync')->__('Please select'));
+                            foreach($property['scales'] as $option) {
+                                $scaleValues[] = array('value' => $option['scale_id'], 'label' => $option['display_name']);
+                            }
+                            $form->addField('size_scales', 'select', array(
+                                'name'  => 'size_scales',
+                                'required' => $isReqired,
+                                'label'     => Mage::helper('magetsync')->__('Size scales'),
+                                'values'    => $scaleValues,
+                                'value'    => $selectedSizeScaleVal,
+                                'style'    => 'margin-left:60px;width:280px;',
+                            ));
+                            $form->addField('size_scales_values', 'hidden', array(
+                                'value'    => json_encode($valuesArr)
+                            ));
+                        }
+                        $propertyStyle = $renderSizeScales ? 'margin-left:-60px;width:200px;' : 'margin-left:60px;width:280px;';
                         $form->addField('property_'.$propertyId, $type, array(
                             'name'  => 'property_'.$propertyId,
                             'required' => $isReqired,
                             'label'     => Mage::helper('magetsync')->__($propertyName),
                             'values'    => $valuesArr,
                             'value'     => $selectedValues,
-                            'style'    => 'margin-left:60px;width:280px;',
+                            'style'    => $propertyStyle,
                             'class' => $property['is_required'] ? 'required-entry' : ''
                         ));
                         $taxonomy .= $form->toHtml();
@@ -815,7 +839,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                                     $attrUpdParams['value_ids'] = $propertyVal;
                                     $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attrUpdParams);
                                     if ($updateAttributeApi['status'] != true) {
-                                        Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
+                                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to update one of custom attributes.'));
                                         Merchante_MagetSync_Model_LogData::magetsync(
                                             $dataGlobal, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
                                             $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR

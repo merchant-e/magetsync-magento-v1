@@ -100,6 +100,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         $propertyId = substr($dataItemKey, 9, strlen($dataItemKey));
                         $propertiesArr[$propertyId] = $dataItemVal;
                     }
+                    if (strpos($dataItemKey, 'category_id') && empty($dataItemVal)) {
+                        $postData[$dataItemKey] = NULL;
+                    }
                 }
                 $postData['properties'] = '';
                 if ($propertiesArr) {

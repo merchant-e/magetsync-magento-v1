@@ -76,10 +76,48 @@ function fillProperties(selectElement) {
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.taxonomy != '') {
-                $('properties_holder').update(parsedResponse.taxonomy);
+                updateTaxonomy(parsedResponse.taxonomy);
             }
         }
     });
+}
+
+function updateTaxonomy(taxonomy) {
+    $('properties_holder').update(taxonomy);
+    if ($('size_scales')) {
+        handleSizeScales();
+        $('size_scales').observe('change', handleSizeScales);
+    }
+}
+
+function generateNewHtml(sizeScalesValuesObj, scaleVal) {
+    var newHTML = '';
+    for (var key in sizeScalesValuesObj) {
+        if (sizeScalesValuesObj.hasOwnProperty(key) && sizeScalesValuesObj[key].scale == scaleVal) {
+            newHTML += '<option value="' + sizeScalesValuesObj[key].value + '">' + sizeScalesValuesObj[key].label + '</option>';
+        }
+    }
+
+    return newHTML;
+}
+
+function handleSizeScales() {
+    var $sizeScales = $('size_scales');
+    var $sizeScalesValues = $('size_scales_values');
+    if ($sizeScales && $sizeScalesValues) {
+        var sizeScalesValuesObj = JSON.parse($sizeScalesValues.value);
+        var $sizeValues = $sizeScales.up('span').next('span');
+        if (!$sizeScales.value) {
+            $sizeScales.setStyle({'float': 'none'});
+            $sizeValues.hide();
+        } else {
+            var newHTML = generateNewHtml(sizeScalesValuesObj, $sizeScales.value);
+            $sizeValues.down('select').update(newHTML);
+            $sizeScales.setStyle({'float': 'left'});
+            $sizeValues.down('label').setStyle({'margin-left': '50px'});
+            $sizeValues.show();
+        }
+    }
 }
 
 function getCategory(selectElement) {
@@ -122,7 +160,7 @@ function getCategory(selectElement) {
                 $('subcategory_id').up(0).up(0).show();
                 $('subcategory_id').update(parsedResponse.categories);
                 if (parsedResponse.taxonomy != '') {
-                    $('properties_holder').update(parsedResponse.taxonomy);
+                    updateTaxonomy(parsedResponse.taxonomy);
                 }
             }
         }
@@ -165,7 +203,7 @@ function getSubCategory(selectElement) {
                 $('subsubcategory_id').up(0).up(0).show();
                 $('subsubcategory_id').update(parsedResponse.categories);
                 if (parsedResponse.taxonomy != '') {
-                    $('properties_holder').update(parsedResponse.taxonomy);
+                    updateTaxonomy(parsedResponse.taxonomy);
                 }
             }
         }
@@ -205,7 +243,7 @@ function getSubSubCategory(selectElement) {
                 $('subcategory4_id').up(0).up(0).show();
                 $('subcategory4_id').update(parsedResponse.categories);
                 if (parsedResponse.taxonomy != '') {
-                    $('properties_holder').update(parsedResponse.taxonomy);
+                    updateTaxonomy(parsedResponse.taxonomy);
                 }
             }
         }
@@ -242,7 +280,7 @@ function getSubCategory4(selectElement) {
                 $('subcategory5_id').up(0).up(0).show();
                 $('subcategory5_id').update(parsedResponse.categories);
                 if (parsedResponse.taxonomy != '') {
-                    $('properties_holder').update(parsedResponse.taxonomy);
+                    updateTaxonomy(parsedResponse.taxonomy);
                 }
             }
         }
@@ -276,7 +314,7 @@ function getSubCategory5(selectElement) {
                 $('subcategory6_id').up(0).up(0).show();
                 $('subcategory6_id').update(parsedResponse.categories);
                 if (parsedResponse.taxonomy != '') {
-                    $('properties_holder').update(parsedResponse.taxonomy);
+                    updateTaxonomy(parsedResponse.taxonomy);
                 }
             }
         }
@@ -307,7 +345,7 @@ function getSubCategory6(selectElement) {
                 $('subcategory7_id').up(0).up(0).show();
                 $('subcategory7_id').update(parsedResponse.categories);
                 if (parsedResponse.taxonomy != '') {
-                    $('properties_holder').update(parsedResponse.taxonomy);
+                    updateTaxonomy(parsedResponse.taxonomy);
                 }
             }
         }
@@ -350,5 +388,5 @@ document.observe('dom:loaded', function () {
     // Show next empty select if some categories are preselected
     // Used for initial page load
     var $lastVisibleNotEmptySelect = $$('#magetsync_form_category tr').findAll(function (el) {if (el.visible() && el.down('select').value) return el}).last();
-    if ($lastVisibleNotEmptySelect) $lastVisibleNotEmptySelect.next('tr').show()
+    if ($lastVisibleNotEmptySelect) $lastVisibleNotEmptySelect.next('tr').show();
 });
