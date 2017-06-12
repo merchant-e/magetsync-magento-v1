@@ -227,6 +227,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 if ($listingProperties) {
                     $selectedProperties = json_decode($listingProperties, true);
                 }
+                $sizeScaleRendered = false;
                 foreach ($result['results'] as $property) {
                     if (!empty($property['possible_values'])) {
                         $form = new Varien_Data_Form();
@@ -248,8 +249,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $option['scale_id'] && $scaleOptions[$option['scale_id']][] = $option['value_id'];
                             $selectedSizeScaleVal = $selectedValues && (string)$option['value_id'] == $selectedValues ? (string)$option['scale_id'] : $selectedSizeScaleVal;
                         }
-                        $renderSizeScales = strtolower($propertyName) == 'size' && !empty($property['scales']) && sizeof($scaleOptions) > 1;
-                        if ($renderSizeScales) {
+                        $renderSizeScales = substr(strtolower($propertyName), -4) == 'size' && !empty($property['scales']) && sizeof($scaleOptions) > 1;
+                        if ($renderSizeScales && !$sizeScaleRendered) {
                             $scaleValues = array();
                             $scaleValues[] = array('value' => '', 'label' => Mage::helper('magetsync')->__('Please select'));
                             foreach($property['scales'] as $option) {
@@ -266,6 +267,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             $form->addField('size_scales_values', 'hidden', array(
                                 'value'    => json_encode($valuesArr)
                             ));
+                            $sizeScaleRendered = true;
                         }
                         $propertyStyle = $renderSizeScales ? 'margin-left:-60px;width:200px;' : 'margin-left:60px;width:280px;';
                         $form->addField('property_'.$propertyId, $type, array(
