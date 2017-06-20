@@ -121,21 +121,14 @@ function handleSizeScales() {
 }
 
 function getCategory(selectElement) {
-
-    $('subcategory_id').up(0).up(0).hide();
-    $('subsubcategory_id').up(0).up(0).hide();
-    $('subcategory4_id').up(0).up(0).hide();
-    $('subcategory5_id').up(0).up(0).hide();
-    $('subcategory6_id').up(0).up(0).hide();
-    $('subcategory7_id').up(0).up(0).hide();
+    $('subcategory_id').update('').up(0).up(0).hide();
+    $('subsubcategory_id').update('').up(0).up(0).hide();
+    $('subcategory4_id').update('').up(0).up(0).hide();
+    $('subcategory5_id').update('').up(0).up(0).hide();
+    $('subcategory6_id').update('').up(0).up(0).hide();
+    $('subcategory7_id').update('').up(0).up(0).hide();
 
     if (selectElement.value == '' || !ajaxUrl) {
-        $('subcategory_id').update('');
-        $('subsubcategory_id').update('');
-        $('subcategory4_id').update('');
-        $('subcategory5_id').update('');
-        $('subcategory6_id').update('');
-        $('subcategory7_id').update('');
         if (ajaxUrl) fillProperties();
 
         return false;
@@ -144,18 +137,12 @@ function getCategory(selectElement) {
     new Ajax.Request(reloadurl, {
         method: 'get',
         onLoading: function () {
-            $('subcategory_id').update('');
             $('subcategory_id').update('Searching…');
         },
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.categories == '') {
-                $('subcategory_id').up(0).up(0).hide();
-                $('subsubcategory_id').up(0).up(0).hide();
-                $('subcategory4_id').up(0).up(0).hide();
-                $('subcategory5_id').up(0).up(0).hide();
-                $('subcategory6_id').up(0).up(0).hide();
-                $('subcategory7_id').up(0).up(0).hide();
+                $('subcategory_id').update('');
             } else {
                 $('subcategory_id').up(0).up(0).show();
                 $('subcategory_id').update(parsedResponse.categories);
@@ -168,18 +155,13 @@ function getCategory(selectElement) {
 }
 
 function getSubCategory(selectElement) {
-    $('subsubcategory_id').up(0).up(0).hide();
-    $('subcategory4_id').up(0).up(0).hide();
-    $('subcategory5_id').up(0).up(0).hide();
-    $('subcategory6_id').up(0).up(0).hide();
-    $('subcategory7_id').up(0).up(0).hide();
+    $('subsubcategory_id').update('').up(0).up(0).hide();
+    $('subcategory4_id').update('').up(0).up(0).hide();
+    $('subcategory5_id').update('').up(0).up(0).hide();
+    $('subcategory6_id').update('').up(0).up(0).hide();
+    $('subcategory7_id').update('').up(0).up(0).hide();
 
     if (selectElement.value == '' || !ajaxUrl) {
-        $('subsubcategory_id').update('');
-        $('subcategory4_id').update('');
-        $('subcategory5_id').update('');
-        $('subcategory6_id').update('');
-        $('subcategory7_id').update('');
         if (ajaxUrl) fillProperties($('category_id'));
 
         return false;
@@ -188,17 +170,12 @@ function getSubCategory(selectElement) {
     new Ajax.Request(reloadurl, {
         method: 'get',
         onLoading: function () {
-            $('subsubcategory_id').update('');
             $('subsubcategory_id').update('Searching…');
         },
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.categories == '') {
-                $('subsubcategory_id').up(0).up(0).hide();
-                $('subcategory4_id').up(0).up(0).hide();
-                $('subcategory5_id').up(0).up(0).hide();
-                $('subcategory6_id').up(0).up(0).hide();
-                $('subcategory7_id').up(0).up(0).hide();
+                $('subsubcategory_id').update('');
             } else {
                 $('subsubcategory_id').up(0).up(0).show();
                 $('subsubcategory_id').update(parsedResponse.categories);
@@ -211,16 +188,12 @@ function getSubCategory(selectElement) {
 }
 
 function getSubSubCategory(selectElement) {
-    $('subcategory4_id').up(0).up(0).hide();
-    $('subcategory5_id').up(0).up(0).hide();
-    $('subcategory6_id').up(0).up(0).hide();
-    $('subcategory7_id').up(0).up(0).hide();
+    $('subcategory4_id').update('').up(0).up(0).hide();
+    $('subcategory5_id').update('').up(0).up(0).hide();
+    $('subcategory6_id').update('').up(0).up(0).hide();
+    $('subcategory7_id').update('').up(0).up(0).hide();
 
     if (selectElement.value == '' || !ajaxUrl) {
-        $('subcategory4_id').update('');
-        $('subcategory5_id').update('');
-        $('subcategory6_id').update('');
-        $('subcategory7_id').update('');
         if (ajaxUrl) fillProperties($('subcategory_id'));
 
         return false;
@@ -229,16 +202,12 @@ function getSubSubCategory(selectElement) {
     new Ajax.Request(reloadurl, {
         method: 'get',
         onLoading: function () {
-            $('subcategory4_id').update('');
             $('subcategory4_id').update('Searching…');
         },
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.categories == '') {
-                $('subcategory4_id').up(0).up(0).hide();
-                $('subcategory5_id').up(0).up(0).hide();
-                $('subcategory6_id').up(0).up(0).hide();
-                $('subcategory7_id').up(0).up(0).hide();
+                $('subcategory4_id').update('');
             } else {
                 $('subcategory4_id').up(0).up(0).show();
                 $('subcategory4_id').update(parsedResponse.categories);
@@ -251,14 +220,11 @@ function getSubSubCategory(selectElement) {
 }
 
 function getSubCategory4(selectElement) {
-    $('subcategory5_id').up(0).up(0).hide();
-    $('subcategory6_id').up(0).up(0).hide();
-    $('subcategory7_id').up(0).up(0).hide();
+    $('subcategory5_id').update('').up(0).up(0).hide();
+    $('subcategory6_id').update('').up(0).up(0).hide();
+    $('subcategory7_id').update('').up(0).up(0).hide();
 
     if (selectElement.value == '' || !ajaxUrl) {
-        $('subcategory5_id').update('');
-        $('subcategory6_id').update('');
-        $('subcategory7_id').update('');
         if (ajaxUrl) fillProperties($('subsubcategory_id'));
 
         return false;
@@ -267,15 +233,12 @@ function getSubCategory4(selectElement) {
     new Ajax.Request(reloadurl, {
         method: 'get',
         onLoading: function () {
-            $('subcategory5_id').update('');
             $('subcategory5_id').update('Searching…');
         },
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.categories == '') {
-                $('subcategory5_id').up(0).up(0).hide();
-                $('subcategory6_id').up(0).up(0).hide();
-                $('subcategory7_id').up(0).up(0).hide();
+                $('subcategory5_id').update('');
             } else {
                 $('subcategory5_id').up(0).up(0).show();
                 $('subcategory5_id').update(parsedResponse.categories);
@@ -288,12 +251,10 @@ function getSubCategory4(selectElement) {
 }
 
 function getSubCategory5(selectElement) {
-    $('subcategory6_id').up(0).up(0).hide();
-    $('subcategory7_id').up(0).up(0).hide();
+    $('subcategory6_id').update('').up(0).up(0).hide();
+    $('subcategory7_id').update('').up(0).up(0).hide();
 
     if (selectElement.value == '' || !ajaxUrl) {
-        $('subcategory6_id').update('');
-        $('subcategory7_id').update('');
         if (ajaxUrl) fillProperties($('subcategory4_id'));
 
         return false;
@@ -302,14 +263,12 @@ function getSubCategory5(selectElement) {
     new Ajax.Request(reloadurl, {
         method: 'get',
         onLoading: function () {
-            $('subcategory6_id').update('');
             $('subcategory6_id').update('Searching…');
         },
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.categories == '') {
-                $('subcategory6_id').up(0).up(0).hide();
-                $('subcategory7_id').up(0).up(0).hide();
+                $('subcategory6_id').update('');
             } else {
                 $('subcategory6_id').up(0).up(0).show();
                 $('subcategory6_id').update(parsedResponse.categories);
@@ -322,10 +281,9 @@ function getSubCategory5(selectElement) {
 }
 
 function getSubCategory6(selectElement) {
-    $('subcategory7_id').up(0).up(0).hide();
+    $('subcategory7_id').update('').up(0).up(0).hide();
 
     if (selectElement.value == '' || !ajaxUrl) {
-        $('subcategory7_id').update('');
         if (ajaxUrl) fillProperties($('subcategory5_id'));
 
         return false;
@@ -334,13 +292,12 @@ function getSubCategory6(selectElement) {
     new Ajax.Request(reloadurl, {
         method: 'get',
         onLoading: function () {
-            $('subcategory7_id').update('');
             $('subcategory7_id').update('Searching…');
         },
         onComplete: function (subform) {
             var parsedResponse = JSON.parse(subform.responseText);
             if (parsedResponse.categories == '') {
-                $('subcategory7_id').up(0).up(0).hide();
+                $('subcategory7_id').update('');
             } else {
                 $('subcategory7_id').up(0).up(0).show();
                 $('subcategory7_id').update(parsedResponse.categories);
