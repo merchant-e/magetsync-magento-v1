@@ -832,6 +832,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                             //Update custom Listing attributes
                             if ($propertiesArr) {
+                                $obliUpd = array('listing_id' => $result['listing_id']);
                                 foreach ($propertiesArr as $propertyKey => $propertyVal) {
                                     $obliUpd['property_id'] = $propertyKey;
                                     $attrUpdParams = array();
@@ -841,8 +842,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                                     $attrUpdParams['value_ids'] = $propertyVal;
                                     $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attrUpdParams);
                                     if ($updateAttributeApi['status'] != true) {
-                                        //Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to update one of custom attributes.'));
-                                        Mage::getSingleton('adminhtml/session')->addError($updateAttributeApi['message']);
+                                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to update one of custom attributes. Error is: ') . $updateAttributeApi['message']);
                                         Merchante_MagetSync_Model_LogData::magetsync(
                                             $dataGlobal, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
                                             $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
