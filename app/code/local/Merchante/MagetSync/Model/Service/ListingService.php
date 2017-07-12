@@ -152,13 +152,9 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
 
         if ($resultApi['status'] == true) {
 
-            $result = json_decode(json_decode($resultApi['result']), true);
-            $result = $result['results'][0];
-
             //Update custom Listing attributes
             $propertiesArr = $listing->getProperties();
             if ($propertiesArr) {
-                $obliUpd = array('listing_id' => $result['listing_id']);
                 foreach ($propertiesArr as $propertyKey => $propertyVal) {
                     $obliUpd['property_id'] = $propertyKey;
                     $attrUpdParams = array();
@@ -168,12 +164,17 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
                     $attrUpdParams['value_ids'] = $propertyVal;
                     $updateAttributeApi = $listing->updateAttribute($obliUpd, $attrUpdParams);
                     if ($updateAttributeApi['status'] != true) {
-                        $errorMsg = 'Unable to update one of custom attributes. Error is: ';
-                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($errorMsg) . $updateAttributeApi['message']);
+                        Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
+                        Merchante_MagetSync_Model_LogData::magetsync(
+                            $data, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                            $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
+                        );
                     }
                 }
             }
 
+            $result = json_decode(json_decode($resultApi['result']), true);
+            $result = $result['results'][0];
             $statusOperation =
                 $listing->saveDetails($result, $data['idproduct'], $price, $listing->getId());
 
