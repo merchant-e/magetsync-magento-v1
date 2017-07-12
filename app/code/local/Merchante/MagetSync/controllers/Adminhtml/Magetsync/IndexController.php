@@ -31,6 +31,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 $listing->triggerUpdate();
             }
         }
+
         $this->_initAction();
         $this->renderLayout();
     }
@@ -842,11 +843,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                                     $attrUpdParams['value_ids'] = $propertyVal;
                                     $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attrUpdParams);
                                     if ($updateAttributeApi['status'] != true) {
-                                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to update one of custom attributes. Error is: ') . $updateAttributeApi['message']);
-                                        Merchante_MagetSync_Model_LogData::magetsync(
-                                            $dataGlobal, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                                            $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
-                                        );
+                                        $errorMsg = 'Unable to update one of custom attributes. Error is: ';
+                                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($errorMsg) . $updateAttributeApi['message']);
                                     }
                                 }
                             }
