@@ -229,13 +229,12 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 }
                 $sizeScaleRendered = false;
                 foreach ($result['results'] as $property) {
-                    $form = new Varien_Data_Form();
                     if (!empty($property['possible_values'])) {
-                        $generalStyles = 'margin-left:60px;width:280px;';
+                        $form = new Varien_Data_Form();
                         $type = $property['is_multivalued'] ? 'multiselect' : 'select';
                         $propertyId = $property['property_id'];
                         $propertyName = $property['display_name'];
-                        $selectedValues = $selectedProperties[$propertyId]['values'];
+                        $selectedValues = $selectedProperties[$propertyId];
                         $isReqired = $property['is_required'];
                         $valuesArr = array();
                         if (!$isReqired) {
@@ -270,7 +269,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             ));
                             $sizeScaleRendered = true;
                         }
-                        $propertyStyle = $renderSizeScales ? 'margin-left:-60px;width:200px;' : $generalStyles;
+                        $propertyStyle = $renderSizeScales ? 'margin-left:-60px;width:200px;' : 'margin-left:60px;width:280px;';
                         $form->addField('property_'.$propertyId, $type, array(
                             'name'  => 'property_'.$propertyId,
                             'required' => $isReqired,
@@ -280,43 +279,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             'style'    => $propertyStyle,
                             'class' => $property['is_required'] ? 'required-entry' : ''
                         ));
-                        $taxonomy .= $form->toHtml();
-                    } else {
-                        $type = 'text';
-                        $generalStyles = 'margin-left:60px;width:275px;';
-                        $propertyId = $property['property_id'];
-                        $propertyName = $property['display_name'];
-                        if ($propertyName == 'Custom Property') continue;
-                        $isReqired = $property['is_required'];
-                        $selectedValue = $selectedProperties[$propertyId]['values'];
-                        $selectedScale = $selectedProperties[$propertyId]['scale'];
-
-                        $hasScales = !empty($property['scales']);
-
-                        $propertyStyle = $hasScales ? 'float:left;margin:0 20px 0 60px;width:275px;' : $generalStyles;
-
-                        $form->addField('property_'.$propertyId, $type, array(
-                            'name'  => 'property_'.$propertyId,
-                            'required' => $isReqired,
-                            'label'     => Mage::helper('magetsync')->__($propertyName),
-                            'value'     => $selectedValue,
-                            'style'    => $propertyStyle,
-                            'class' => $property['is_required'] ? 'required-entry' : ''
-                        ));
-                        if ($hasScales) {
-                            $scaleValues = array();
-                            foreach($property['scales'] as $option) {
-                                $scaleValues[] = array('value' => $option['scale_id'], 'label' => $option['display_name']);
-                            }
-                            $form->addField('scales_' . $propertyId, 'select', array(
-                                'name'  => 'scales_' . $propertyId,
-                                'required' => $isReqired,
-                                'label'     => Mage::helper('magetsync')->__($propertyName . ' Scales'),
-                                'values'    => $scaleValues,
-                                'value'    => $selectedScale,
-                                'style'    => 'width:100px;',
-                            ));
-                        }
                         $taxonomy .= $form->toHtml();
                     }
                 }
@@ -821,14 +783,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                     foreach ($postData as $dataItemKey => $dataItemVal) {
                         if (substr($dataItemKey, 0, 9) == 'property_' && $dataItemVal) {
                             $propertyId = substr($dataItemKey, 9, strlen($dataItemKey));
-                            $propertiesArr[$propertyId] = array();
-                            $propertiesArr[$propertyId]['values'] = $dataItemVal;
-                        }
-                        if (substr($dataItemKey, 0, 7) == 'scales_' && $dataItemVal) {
-                            $scalePropertyId = substr($dataItemKey, 7, strlen($dataItemKey));
-                            if (!empty($propertiesArr[$scalePropertyId]) && !empty($propertiesArr[$scalePropertyId]['values'])) {
-                                $propertiesArr[$scalePropertyId]['scale'] = $dataItemVal;
-                            }
+                            $propertiesArr[$propertyId] = $dataItemVal;
                         }
                     }
                     $postData['properties'] = '';
@@ -878,21 +833,13 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                             //Update custom Listing attributes
                             if ($propertiesArr) {
                                 $obliUpd = array('listing_id' => $result['listing_id']);
-                                foreach ($propertiesArr as $propertyKey => $propertyValues) {
+                                foreach ($propertiesArr as $propertyKey => $propertyVal) {
                                     $obliUpd['property_id'] = $propertyKey;
-                                    $propertyVal = $propertyValues['values'];
                                     $attrUpdParams = array();
                                     if (is_array($propertyVal)) {
                                         $propertyVal = implode(',', $propertyVal);
                                     }
-
-                                    $hasScales = !empty($propertyValues['scale']);
-                                    if ($hasScales) {
-                                        $attrUpdParams['scale_id'] = $propertyValues['scale'];
-                                        $attrUpdParams['values'] = $propertyVal;
-                                    } else {
-                                        $attrUpdParams['value_ids'] = $propertyVal;
-                                    }
+                                    $attrUpdParams['value_ids'] = $propertyVal;
                                     $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attrUpdParams);
                                     if ($updateAttributeApi['status'] != true) {
                                         Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Unable to update one of custom attributes. Error is: ') . $updateAttributeApi['message']);
