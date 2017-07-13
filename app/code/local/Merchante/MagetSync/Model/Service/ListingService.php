@@ -156,8 +156,9 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
             $result = $result['results'][0];
 
             //Update custom Listing attributes
-            $propertiesArr = $listing->getProperties();
-            if ($propertiesArr) {
+            $listingProperties = $listing->getProperties();
+            if ($listingProperties) {
+                $propertiesArr = json_decode($listingProperties, true);
                 $obliUpd = array('listing_id' => $result['listing_id']);
                 foreach ($propertiesArr as $propertyKey => $propertyVal) {
                     $obliUpd['property_id'] = $propertyKey;
@@ -169,8 +170,10 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
                     $updateAttributeApi = $listing->updateAttribute($obliUpd, $attrUpdParams);
                     if ($updateAttributeApi['status'] != true) {
                         Merchante_MagetSync_Model_LogData::magetsync(
-                            $data, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
-                            $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
+                            $listing->getId(),
+                            Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                            $updateAttributeApi['message'],
+                            Merchante_MagetSync_Model_LogData::LEVEL_ERROR
                         );
                     }
                 }
