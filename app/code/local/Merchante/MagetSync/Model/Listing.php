@@ -915,7 +915,7 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     }
 
                     if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                        if ($valueVar->getType() != 'drop-down' && $valueVar->getType() != 'radio') continue;
+                        if ($valueVar->getType() != 'drop_down' && $valueVar->getType() != 'radio') continue;
                         $dataValue = $valueVar->getData();
                         $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
                         $valuesOpt = $valueVar->getValues();
