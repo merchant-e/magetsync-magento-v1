@@ -795,8 +795,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
 
                     if ($syncStatus) {
                         $callType = 'all';
-                        $resource = Mage::getSingleton('catalog/product')->getResource();
-                        $productType = $resource->getAttributeRawValue($data['idproduct'], 'type_id', Mage::app()->getStore());
                         $new_pricing = Mage::getStoreConfig(
                             'magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing'
                         );
@@ -805,26 +803,12 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         if ($data['listing_id']) {
                             $obliUpd = array('listing_id' => $data['listing_id']);
 
-                            /**
-                             * Update inventory call not used for simple products
-                             */
-                            if ($productType == 'simple') {
-                                $params['quantity'] = $data['quantity'];
-                                $params['price'] = $priceToBeSent;
-                                $callType = 'image';
-                            }
                             $resultApi = $listingModel->updateListing($obliUpd, $params);
                         } else {
+                            // Price and qty are still required for listing creation
                             $params['price'] = $priceToBeSent;
                             $params['quantity'] = $data['quantity'];
                             $resultApi = $listingModel->createListing(null, $params);
-
-                            /**
-                             * Update inventory call not used for simple products
-                             */
-                            if ($productType == 'simple') {
-                                $callType = 'image';
-                            }
                         }
                         if ($resultApi['status'] == true) {
 

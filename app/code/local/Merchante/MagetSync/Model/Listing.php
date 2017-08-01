@@ -909,12 +909,18 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
 
                 foreach ($options as $valueVar) {
 
+                    if ($dataPro['type_id'] != Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
+                        && $dataPro['type_id'] != Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                        break;
+                    }
+
                     if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+                        if ($valueVar->getType() != 'drop-down' && $valueVar->getType() != 'radio') continue;
                         $dataValue = $valueVar->getData();
                         $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
                         $valuesOpt = $valueVar->getValues();
                         $propertyName = ucfirst($dataValue['title']);
-                    } elseif ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                    } else {
                         $dataValue = $valueVar;
                         $exist = $this->searchForName(ucfirst($dataValue['label']), $variationModel);
                         $valuesOpt = $valueVar['values'];
@@ -923,25 +929,6 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     $scaleValue = 0;
                     if ($exist <> -1) {
                         $propertyID = $variationModel[$exist]['propertyid'];
-
-                        if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
-                            || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
-                        ) {
-                            if ($propertyName == 'Size') {
-                                $propertyScaleName = 'sizing';
-                            } else {
-                                $propertyScaleName = strtolower($propertyName);
-                            }
-                            $scaleName = $propertyScaleName . '_scale';
-
-                            $scaleValue = Mage::getStoreConfig(
-                                'magetsync_section/magetsync_group_variations/magetsync_field_' . $propertyScaleName .
-                                '_scale'
-                            );
-
-                            $scalesArray[$scaleName] = $scaleValue;
-                        }
-
                     } else {
                         /* 513 and 514 are custom properties on Etsy */
                         if ($nCustom == 0) {
@@ -957,44 +944,76 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     $propertyIDs[] = $propertyID;
                     $y = 0;
                     foreach ($valuesOpt as $item) {
-                        if (!$isOptionFirst) {
-                            $allSecondOptionValues[] = $item['label'];
-                        }
-                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['price'] = $item['pricing_value'];
-                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['is_percent'] = $item['is_percent'];
-                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_name'] = $valueVar['frontend_label'];
-                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $item['label'];
-                        $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_id'] = $propertyID;
-
-                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE ||
-                            $dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE
+                        $valueToCheck = $item['label'] ? $item['label'] : $item['title'];
+                        $checkedValue = $valueToCheck;
+                        $matches = null;
+                        if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
+                            || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
                         ) {
-                            $matches = null;
-                            if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
-                                || $propertyID == 100 || $propertyID == 511 || $propertyID == 512
+                            if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
+                                $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
                             ) {
-                                if ($scaleValue != 343 && $scaleValue != 346 && $scaleValue != 349 &&
-                                    $scaleValue != 352 && $scaleValue != 329 && $scaleValue != 340
-                                ) {
-                                    preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'], $matches);
-                                }
-                            }
-                            if ($matches && count($matches) > 0) {
-                                $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $matches[1];
+                                preg_match('/^\D*(\d+(?:[\.|\,]\d+)?)/', $valueToCheck, $matches);
                             }
                         }
+                        if ($matches && count($matches) > 0) {
+                            $checkedValue = $matches[1];
+                        }
+                        if ($propertyName == 'Size') {
+                            $propertyScaleName = 'sizing';
+                        } else {
+                            $propertyScaleName = strtolower($propertyName);
+                        }
+                        $scaleName = $propertyName . '_scale';
 
+                        $scaleValue = Mage::getStoreConfig(
+                            'magetsync_section/magetsync_group_variations/magetsync_field_' . $propertyScaleName .
+                            '_scale'
+                        );
+
+                        if ($scaleValue) $scalesArray[$scaleName] = $scaleValue;
+
+                        if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                            if (!$isOptionFirst) {
+                                $allSecondOptionValues[] = $item['label'];
+                            }
+                            $variationMapping[$valueVar['attribute_code']][$item['value_index']]['price'] = $item['pricing_value'];
+                            $variationMapping[$valueVar['attribute_code']][$item['value_index']]['is_percent'] = $item['is_percent'];
+                            $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_name'] = $valueVar['frontend_label'];
+                            $variationMapping[$valueVar['attribute_code']][$item['value_index']]['value'] = $checkedValue;
+                            $variationMapping[$valueVar['attribute_code']][$item['value_index']]['property_id'] = $propertyID;
+                        } else {
+                            // Custom options
+                            $singleVariation = array();
+                            $singleVariation['property_value'] = $checkedValue;
+                            if ($item['price_type'] == 'fixed') {
+                                $finalPrice = $priceBase + $item['price'];
+                            } else {
+                                $finalPrice = $priceBase *  (1 + $item['price']/100);
+                            }
+                            $singleVariation['property_price'] = (string)$finalPrice;
+                            $singleVariation['property_id'] = $propertyID;
+                            $singleVariation['property_name'] = $valueVar['title'];
+                            $scaleName = $singleVariation['property_name'] . '_scale';
+                            if (array_key_exists($scaleName, $scalesArray)) {
+                                $singleVariation['scale_id'] = $scalesArray[$scaleName];
+                            }
+                            if ($item['sku']) $singleVariation['property_sku'] = $item['sku'];
+                            $variationMapping[] = $singleVariation;
+                        }
                         $y = $y + 1;
                     }
 
                     if ($exist == -1) {
                         $nCustom = $nCustom + 1;
                     }
+                    // Used for configurable only
                     $isOptionFirst = false;
                 }
 
                 $productsData = array();
-                if ($productModel->getTypeId() == 'configurable') {
+                $productType = $productModel->getTypeId();
+                if ($productType == 'configurable') {
                     $confProduct = Mage::getModel('catalog/product_type_configurable')->setProduct($productModel);
                     $simpleCollection = $confProduct->getUsedProductCollection()->addAttributeToSelect('*')->addFilterByRequiredOptions();
                     foreach ($simpleCollection as $simpleProduct) {
@@ -1021,7 +1040,49 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         ));
                         $requestParams[] = $product;
                     }
+                } else if ($productType == 'simple') {
 
+                    $product = array();
+                    $product['property_values'] = array();
+                    $product['sku'] = $productModel->getSku();
+                    $qty = $productModel->getStockItem() ? intval($productModel->getStockItem()->getQty()) : 0;
+                    $inStock = intval($productModel->getIsInStock());
+
+                    if (!empty($variationMapping)) {
+                        foreach ($variationMapping as $option) {
+                            $product['property_values'] = array();
+                            $propertyValArr =  array(
+                                'property_id' => $option['property_id'],
+                                'property_name' => $option['property_name'],
+                                'value' => $option['property_value']
+                            );
+                            if ($option['scale_id']) {
+                                $propertyValArr['scale_id'] = $option['scale_id'];
+                            }
+                            $product['property_values'][] = $propertyValArr;
+
+                            $product['offerings'] = array(array(
+                                'price' => $option['property_price'],
+                                'quantity' => $qty,
+                                'is_enabled' => $inStock
+                            ));
+
+                            if ($option['property_sku']) $product['sku'] = $option['property_sku'];
+                            $requestParams[] = $product;
+                        }
+
+                    } else {
+                        $product['offerings'] = array(array(
+                            'price' => $priceBase,
+                            'quantity' => $qty,
+                            'is_enabled' => $inStock
+                        ));
+
+                        $requestParams[] = $product;
+                    }
+                }
+
+                if (!empty($requestParams)) {
                     /**
                      * Check if each master variation attribute has all listed variation attributes
                      */
@@ -1045,11 +1106,12 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                         );
                         return array(
                             'status' => false,
-                            'message' => 'Unable to update inventory.'
+                            'message' => 'Unable to update inventory. ' . $resultVariationApi['message']
                         );
                     }
                 }
             }
+
             
             if ($callType == 'all' || $callType == 'image') {
                 /**********************************/
