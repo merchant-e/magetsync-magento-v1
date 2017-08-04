@@ -915,7 +915,18 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     }
 
                     if ($dataPro['type_id'] == Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
-                        if ($valueVar->getType() != 'drop_down' && $valueVar->getType() != 'radio') continue;
+                        if ($valueVar->getType() != 'drop_down' && $valueVar->getType() != 'radio') {
+                            $warnMessage = Mage::helper('magetsync')->__('Custom option');
+                            $warnMessage .= ' ' . Mage::helper('magetsync')->__($valueVar['title']) . ' ';
+                            $warnMessage .= Mage::helper('magetsync')->__('of type');
+                            $warnMessage .= ' ' . Mage::helper('magetsync')->__($valueVar->getType()) . ' ';
+                            $warnMessage .= Mage::helper('magetsync')->__('was ignored.') . ' ';
+                            $warnMessage .= Mage::helper('magetsync')->__('Etsy only supports drop-down and radio buttons as variations.');
+                            Mage::getSingleton('adminhtml/session')->addWarning(
+                                Mage::helper('magetsync')->__($warnMessage)
+                            );
+                            continue;
+                        }
                         $dataValue = $valueVar->getData();
                         $exist = $this->searchForName(ucfirst($dataValue['title']), $variationModel);
                         $valuesOpt = $valueVar->getValues();
@@ -945,6 +956,12 @@ class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy
                     $y = 0;
                     foreach ($valuesOpt as $item) {
                         $valueToCheck = $item['label'] ? $item['label'] : $item['title'];
+                        if (strlen($valueToCheck) > 20) {
+                            $valueToCheck = substr($valueToCheck, 0, 20);
+                            Mage::getSingleton('adminhtml/session')->addNotice(
+                                Mage::helper('magetsync')->__('Custom options in listing has been trimmed to fit Etsy\'s enforced limit.')
+                            );
+                        }
                         $checkedValue = $valueToCheck;
                         $matches = null;
                         if ($propertyID == 504 || $propertyID == 501 || $propertyID == 505 || $propertyID == 506
