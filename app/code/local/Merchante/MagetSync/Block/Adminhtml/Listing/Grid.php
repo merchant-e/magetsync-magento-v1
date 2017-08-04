@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class for creating Listing Grid
  * Class Merchante_MagetSync_Block_Adminhtml_Listing_Grid
@@ -139,7 +139,15 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid extends Mage_Adminhtml_Bl
             'confirm' => Mage::helper('magetsync')->__('You are about to queue product(s) on Etsy. If you have filled out all the required information please proceed.'),
         ));
 
-	$this->getMassactionBlock()->addItem('deleteoption', array('label'=> Mage::helper('magetsync')->__('Delete'),'url'  => $this->getUrl('*/*/deleteoption'),'confirm' => Mage::helper('magetsync')->__('Are you sure?'),));
+        // reset and re-synchronize images on Etsy
+        $this->getMassactionBlock()->addItem('resetimages', array(
+            'label'=> Mage::helper('magetsync')->__('Reset Images'),
+            'url'  => $this->getUrl('*/*/resetimages', array('' => '')),
+            'confirm' => Mage::helper('magetsync')->__('You are about to re-upload product images to Etsy. This process may take some time, depending on the number of products selected.'),
+        ));
+
+		$this->getMassactionBlock()->addItem('deleteoption', array('label'=> Mage::helper('magetsync')->__('Delete'),'url'  => $this->getUrl('*/*/deleteoption'),'confirm' => Mage::helper('magetsync')->__('Are you sure?'),));
+		
         return $this;
     }
 

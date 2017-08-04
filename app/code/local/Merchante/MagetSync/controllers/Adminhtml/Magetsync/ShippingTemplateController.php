@@ -1,6 +1,9 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
 
+/**
+ * @copyright  Copyright (c) 2017 Merchant-e
+ * Class Merchante_MagetSync_Adminhtml_Magetsync_ShippingTemplateController
+ */
 class Merchante_MagetSync_Adminhtml_Magetsync_ShippingTemplateController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initAction()

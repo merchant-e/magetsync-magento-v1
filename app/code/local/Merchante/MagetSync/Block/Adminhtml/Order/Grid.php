@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class for override Order Grid behaviours
  * Class Merchante_MagetSync_Block_Adminhtml_Order_Grid

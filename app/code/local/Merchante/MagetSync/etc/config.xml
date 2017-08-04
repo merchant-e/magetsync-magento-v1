@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <!--
-/**** @copyright  Copyright (c) 2015 Merchant-e ****/
+/**** @copyright  Copyright (c) 2017 Merchant-e ****/
 -->
 <config>
-	<modules>
-		<Merchante_MagetSync>
-			<version>0.2.1</version>
-		</Merchante_MagetSync>
-	</modules>
-	<frontend>
+    <modules>
+        <Merchante_MagetSync>
+            <version>0.2.8</version>
+        </Merchante_MagetSync>
+    </modules>
+    <frontend>
         <translate>
             <modules>
                 <Merchante_MagetSync>
@@ -18,310 +18,217 @@
                 </Merchante_MagetSync>
             </modules>
         </translate>
-		<routers>
-			<magetsync>
-				<use>standard</use>
-				<args>
-					<module>Merchante_MagetSync</module>
-					<frontName>magetsync</frontName>
-				</args>
-			</magetsync>
-		</routers>
-		<layout>
-   		<updates>
-        	<magetsync>
-            	 <file>magetsync.xml</file>
-          	</magetsync>
-    	</updates>
-	</layout>
-	</frontend>
+        <routers>
+            <magetsync>
+                <use>standard</use>
+                <args>
+                    <module>Merchante_MagetSync</module>
+                    <frontName>magetsync</frontName>
+                </args>
+            </magetsync>
+        </routers>
+        <layout>
+            <updates>
+                <magetsync>
+                    <file>magetsync.xml</file>
+                </magetsync>
+            </updates>
+        </layout>
+    </frontend>
     <admin>
         <routers>
             <adminhtml>
                 <args>
                     <modules>
-                        <magetsync
-                                after="Mage_Adminhtml">Merchante_MagetSync_Adminhtml</magetsync>
+                        <magetsync after="Mage_Adminhtml">Merchante_MagetSync_Adminhtml</magetsync>
                     </modules>
                 </args>
             </adminhtml>
         </routers>
     </admin>
- <adminhtml>
-     <translate>
-         <modules>
-             <Merchante_MagetSync>
-                 <files>
-                     <default>MagetSync.csv</default>
-                 </files>
-             </Merchante_MagetSync>
-         </modules>
-     </translate>
-   <layout>
-      <updates>
-          <magetsync>
-              <file>magetsync.xml</file>
-           </magetsync>
-      </updates>
-   </layout>
-   <menu>
-      <magetsync translate="title" module="adminhtml">
-         <title>MagetSync</title>
-         <sort_order>81</sort_order>
-          <children>
-              <listing translate="title" module="adminhtml">
-                  <title>Listings Manager</title>
-                  <sort_order>1</sort_order>
-                  <action>adminhtml/magetsync_index</action>
-              </listing>
-              <mapping module="adminhtml">
-                 <title>Mappings</title>
-                 <sort_order>2</sort_order>
-                 <action>adminhtml/magetsync_mapping</action>
-              </mapping>
-              <global translate="title" module="adminhtml">
-                  <title>Global Options</title>
-                  <sort_order>3</sort_order>
-                  <children>
-                      <shopSection translate="title" module="adminhtml">
-                          <title>Shop Sections</title>
-                          <sort_order>1</sort_order>
-                          <action>adminhtml/magetsync_shopSection</action>
-                      </shopSection>
-                      <shippingTemplate translate="title" module="adminhtml">
-                          <title>Shipping Profiles</title>
-                          <sort_order>2</sort_order>
-                          <action>adminhtml/magetsync_shippingTemplate</action>
-                      </shippingTemplate>
-                      <template translate="title" module="adminhtml">
-                          <title>Templates</title>
-                          <sort_order>3</sort_order>
-                          <action>adminhtml/system_config/edit/section/magetsync_section_templates</action>
-                      </template>
-                  </children>
-              </global>
-              <configuration_magetsync translate="title" module="adminhtml">
-                  <title>Configuration</title>
-                  <sort_order>4</sort_order>
-                  <action>adminhtml/system_config/edit/section/magetsync_section</action>
-              </configuration_magetsync>
-          </children>
-       </magetsync>
-    </menu>
-     <acl>
-         <resources>
-             <admin>
-                 <children>
-                     <system>
-                         <children>
-                             <config>
-                                 <children>
-                                     <magetsync_section translate="title">
-                                         <title>MagetSync</title>
-                                     </magetsync_section>
-                                     <magetsync_section_templates translate="title">
-                                         <title>Templates</title>
-                                     </magetsync_section_templates>
-				     <magetsync_section_draftmode translate="title">
-                                         <title>Draft Mode</title>
-                                     </magetsync_section_draftmode>
-                                 </children>
-                             </config>
-                         </children>
-                     </system>
-                     <magetsync translate="title" module="adminhtml">
-                         <title>MagetSync</title>
-                         <sort_order>81</sort_order>
-                         <children>
-                             <listing translate="title" module="adminhtml">
-                                 <title>Listings Manager</title>
-                             </listing>
-                             <mapping module="adminhtml">
-                                 <title>Mappings</title>
-                             </mapping>
-                             <global translate="title" module="adminhtml">
-                                 <title>Global Options</title>
-                                 <children>
-                                     <shopSection translate="title" module="adminhtml">
-                                         <title>Shop Sections</title>
-                                     </shopSection>
-                                     <shippingTemplate translate="title" module="adminhtml">
-                                         <title>Shipping Profiles</title>
-                                     </shippingTemplate>
-                                     <template translate="title" module="adminhtml">
-                                         <title>Templates</title>
-                                     </template>
-                                 </children>
-                             </global>
-                             <configuration_magetsync translate="title" module="adminhtml">
-                                 <title>Configuration</title>
-                             </configuration_magetsync>
-                         </children>
-                     </magetsync>
-                 </children>
-             </admin>
-         </resources>
-     </acl>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Merchante_MagetSync>
+                    <files>
+                        <default>MagetSync.csv</default>
+                    </files>
+                </Merchante_MagetSync>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <magetsync>
+                    <file>magetsync.xml</file>
+                </magetsync>
+            </updates>
+        </layout>
     </adminhtml>
     <global>
-	 <blocks>
-         <magetsync>
-              <class>Merchante_MagetSync_Block</class>
-         </magetsync>
-      </blocks>
-      <helpers>
-         <magetsync>
-             <class>Merchante_MagetSync_Helper</class>
-         </magetsync>
-      </helpers>
-	 <models>
-		<magetsync>
-		     <class>Merchante_MagetSync_Model</class>
-		     <resourceModel>magetsync_mysql4</resourceModel>
-		 </magetsync>
-		<magetsync_mysql4>
-		     <class>Merchante_MagetSync_Model_Mysql4</class>
-		     <entities>
-		         <etsy>
-		           <table>magetsync_configuration</table>
-		         </etsy>
-		          <listing>
-		           <table>magetsync_listing</table>
-		         </listing>
-                 <orderEtsy>
-                     <table>magetsync_orderetsy</table>
-                 </orderEtsy>
-                 <shopSection>
-                     <table>magetsync_shopsection</table>
-                 </shopSection>
-                 <shippingTemplate>
-                     <table>magetsync_shippingtemplate</table>
-                 </shippingTemplate>
-                 <shippingEntry>
-                     <table>magetsync_shippingentry</table>
-                 </shippingEntry>
-                 <countryEtsy>
-                     <table>magetsync_country</table>
-                 </countryEtsy>
-                 <processingTime>
-                     <table>magetsync_processingtime</table>
-                 </processingTime>
-                 <category>
-                     <table>magetsync_category</table>
-                 </category>
-                 <recipient>
-                     <table>magetsync_recipient</table>
-                 </recipient>
-                 <whenMade>
-                     <table>magetsync_whenmade</table>
-                 </whenMade>
-                 <whoMade>
-                     <table>magetsync_whomade</table>
-                 </whoMade>
-                 <occasion>
-                     <table>magetsync_occasion</table>
-                 </occasion>
-                 <style>
-                     <table>magetsync_style</table>
-                 </style>
-                 <variation>
-                     <table>magetsync_variation</table>
-                 </variation>
-                 <imageEtsy>
-                     <table>magetsync_imageetsy</table>
-                 </imageEtsy>
-		  <mappingEtsy>
-                     <table>magetsync_mappingetsy</table>
-                 </mappingEtsy>
-                 <logData>
-                     <table>magetsync_logdata</table>
-                 </logData>
-		      </entities>
-		</magetsync_mysql4>
-		</models>
-		<resources>
-		        <magetsync_write>
-		            <connection>
-		                <use>core_write</use>
-		            </connection>
-		        </magetsync_write>
-		       <magetsync_read>
-		          <connection>
-		             <use>core_read</use>
-		          </connection>
-		       </magetsync_read>
-		</resources>
-            <resources>
-                <MagetSync_dbscript_setup>
-                    <setup>
-                        <module>Merchante_MagetSync</module>
-                    </setup>
-                </MagetSync_dbscript_setup>
-            </resources>
-            <events>
-                <core_block_abstract_prepare_layout_before>
-                    <observers>
-                        <magetsync>
-                            <class>magetsync/product_grid_observer</class>
-                            <method>addMassAction</method>
-                        </magetsync>
-                    </observers>
-                </core_block_abstract_prepare_layout_before>
-                <core_block_abstract_to_html_before>
-                    <observers>
-                        <magetsync>
+        <blocks>
+            <magetsync>
+                <class>Merchante_MagetSync_Block</class>
+            </magetsync>
+        </blocks>
+        <helpers>
+            <magetsync>
+                <class>Merchante_MagetSync_Helper</class>
+            </magetsync>
+        </helpers>
+        <models>
+            <magetsync>
+                <class>Merchante_MagetSync_Model</class>
+                <resourceModel>magetsync_mysql4</resourceModel>
+            </magetsync>
+            <magetsync_mysql4>
+                <class>Merchante_MagetSync_Model_Mysql4</class>
+                <entities>
+                    <etsy>
+                        <table>magetsync_configuration</table>
+                    </etsy>
+                    <listing>
+                        <table>magetsync_listing</table>
+                    </listing>
+                    <orderEtsy>
+                        <table>magetsync_orderetsy</table>
+                    </orderEtsy>
+                    <shopSection>
+                        <table>magetsync_shopsection</table>
+                    </shopSection>
+                    <shippingTemplate>
+                        <table>magetsync_shippingtemplate</table>
+                    </shippingTemplate>
+                    <shippingEntry>
+                        <table>magetsync_shippingentry</table>
+                    </shippingEntry>
+                    <countryEtsy>
+                        <table>magetsync_country</table>
+                    </countryEtsy>
+                    <processingTime>
+                        <table>magetsync_processingtime</table>
+                    </processingTime>
+                    <category>
+                        <table>magetsync_category</table>
+                    </category>
+                    <whenMade>
+                        <table>magetsync_whenmade</table>
+                    </whenMade>
+                    <whoMade>
+                        <table>magetsync_whomade</table>
+                    </whoMade>
+                    <occasion>
+                        <table>magetsync_occasion</table>
+                    </occasion>
+                    <variation>
+                        <table>magetsync_variation</table>
+                    </variation>
+                    <imageEtsy>
+                        <table>magetsync_imageetsy</table>
+                    </imageEtsy>
+                    <mappingEtsy>
+                        <table>magetsync_mappingetsy</table>
+                    </mappingEtsy>
+                    <logData>
+                        <table>magetsync_logdata</table>
+                    </logData>
+                    <attributeTemplate>
+                        <table>magetsync_attributetemplate</table>
+                    </attributeTemplate>
+                </entities>
+            </magetsync_mysql4>
+        </models>
+        <resources>
+            <magetsync_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </magetsync_write>
+            <magetsync_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </magetsync_read>
+        </resources>
+        <resources>
+            <MagetSync_dbscript_setup>
+                <setup>
+                    <module>Merchante_MagetSync</module>
+                </setup>
+            </MagetSync_dbscript_setup>
+        </resources>
+        <events>
+            <core_block_abstract_prepare_layout_before>
+                <observers>
+                    <magetsync>
+                        <class>magetsync/product_grid_observer</class>
+                        <method>addMassAction</method>
+                    </magetsync>
+                </observers>
+            </core_block_abstract_prepare_layout_before>
+            <core_block_abstract_to_html_before>
+                <observers>
+                    <magetsync>
                         <type>singleton</type>
                         <class>magetsync/order_grid_observer</class>
                         <method>beforeBlockToHtml</method>
                     </magetsync>
                 </observers>
-               </core_block_abstract_to_html_before>
-                <sales_order_grid_collection_load_before>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/order_grid_observer</class>
-                            <method>collectionLoadBefore</method>
-                        </magetsync>
-                    </observers>
-                </sales_order_grid_collection_load_before>
-                <catalog_product_attribute_update_before>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/product_observer</class>
-                            <method>massiveUpdate</method>
-                        </magetsync>
-                    </observers>
-                </catalog_product_attribute_update_before>
-                <catalog_product_save_after>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/product_observer</class>
-                            <method>logUpdate</method>
-                        </magetsync>
-                    </observers>
-                </catalog_product_save_after>
-                <sales_order_shipment_track_save_before>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/observer</class>
-                            <method>saveTrack</method>
-                        </magetsync>
-                    </observers>
-                </sales_order_shipment_track_save_before>
-                <sales_order_save_commit_after>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/order_observer</class>
-                            <method>orderState</method>
-                        </magetsync>
-                    </observers>
+            </core_block_abstract_to_html_before>
+            <sales_order_grid_collection_load_before>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/order_grid_observer</class>
+                        <method>collectionLoadBefore</method>
+                    </magetsync>
+                </observers>
+            </sales_order_grid_collection_load_before>
+            <catalog_product_attribute_update_before>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/product_observer</class>
+                        <method>massiveUpdate</method>
+                    </magetsync>
+                </observers>
+            </catalog_product_attribute_update_before>
+            <catalog_product_stock_item_mass_change>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/product_observer</class>
+                        <method>massiveUpdate</method>
+                    </magetsync>
+                </observers>
+            </catalog_product_stock_item_mass_change>
+            <catalog_product_save_after>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/product_observer</class>
+                        <method>logUpdate</method>
+                    </magetsync>
+                </observers>
+            </catalog_product_save_after>
+            <sales_order_shipment_track_save_before>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/observer</class>
+                        <method>saveTrack</method>
+                    </magetsync>
+                </observers>
+            </sales_order_shipment_track_save_before>
+            <sales_order_save_commit_after>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/order_observer</class>
+                        <method>orderState</method>
+                    </magetsync>
+                </observers>
             </sales_order_save_commit_after>
-            
+
             <catalog_product_import_finish_before>
                 <observers>
                     <magetsync>
@@ -330,37 +237,37 @@
                         <method>importUpdateQuantity</method>
                     </magetsync>
                 </observers>
-             </catalog_product_import_finish_before>
-            
+            </catalog_product_import_finish_before>
+
             <admin_session_user_login_success>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/login_observer</class>
-                            <method>check</method>
-                        </magetsync>
-                    </observers>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/login_observer</class>
+                        <method>check</method>
+                    </magetsync>
+                </observers>
             </admin_session_user_login_success>
-                <sales_order_shipment_save_after>
-                    <observers>
-                        <magetsync>
-                            <type>singleton</type>
-                            <class>magetsync/order_observer</class>
-                            <method>shipmentSaveAfter</method>
-                        </magetsync>
-                    </observers>
-                </sales_order_shipment_save_after>
-				<sales_order_creditmemo_save_after>
-                    <observers>
-                        <magetsync_creditmemo>
-                            <type>singleton</type>
-                            <class>magetsync/observer</class>
-                            <method>updateProductQty</method>
-                        </magetsync_creditmemo>
-                    </observers>
-                </sales_order_creditmemo_save_after>
-    </events>
-        </global>
+            <sales_order_shipment_save_after>
+                <observers>
+                    <magetsync>
+                        <type>singleton</type>
+                        <class>magetsync/order_observer</class>
+                        <method>shipmentSaveAfter</method>
+                    </magetsync>
+                </observers>
+            </sales_order_shipment_save_after>
+            <sales_order_creditmemo_save_after>
+                <observers>
+                    <magetsync_creditmemo>
+                        <type>singleton</type>
+                        <class>magetsync/observer</class>
+                        <method>updateProductQty</method>
+                    </magetsync_creditmemo>
+                </observers>
+            </sales_order_creditmemo_save_after>
+        </events>
+    </global>
     <default>
         <carriers>
             <magetsync_shipping>
@@ -372,18 +279,23 @@
                 <sallowspecific>0</sallowspecific>
             </magetsync_shipping>
         </carriers>
+        <magetsync_section>
+            <magetsync_group_debug>
+                <enable_log>0</enable_log>
+                <enable_exception_log>0</enable_exception_log>
+            </magetsync_group_debug>
+            <magetsync_group_sales_order>
+                <magetsync_field_default_payment_method>1</magetsync_field_default_payment_method>
+            </magetsync_group_sales_order>
+        </magetsync_section>
         <payment>
             <magetsync_payment>
                 <model>magetsync/custom_payment</model>
-                <active>1</active>
                 <order_status>processing</order_status>
-                <title>MagetSync</title>
-                <allowspecific>0</allowspecific>
-                <sort_order>1</sort_order>
             </magetsync_payment>
         </payment>
     </default>
-  <crontab>
+    <crontab>
         <jobs>
             <magetsync>
                 <schedule>
@@ -417,6 +329,14 @@
                     <model>magetsync/observer::checkListingsExpired</model>
                 </run>
             </magetsync_checklistingsexpired>
+            <magetsync_imagereset>
+                <schedule>
+                    <cron_expr>*/1 * * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>magetsync/observer::imageResetCron</model>
+                </run>
+            </magetsync_imagereset>
         </jobs>
-  </crontab>
+    </crontab>
 </config>

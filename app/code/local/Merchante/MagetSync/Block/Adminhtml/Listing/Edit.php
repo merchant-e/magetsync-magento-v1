@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class for enabled edit actions on Listing form
  * Class Merchante_MagetSync_Block_Adminhtml_Listing_Edit
@@ -57,9 +57,29 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
                             }',
                     'class' => 'save',
                 ), 0, 100);
+            } else {
+                $label = Mage::helper('magetsync')->__('Renew');
+                $this->_addButton('renew', array(
+                    'label' => $label,
+                    'onclick' =>
+                        'new Ajax.Request(\'' . Mage::getModel('adminhtml/url')->getUrl('*/*/renew', array('listingId' => $dataRecord['listing_id'])) . '\',{
+                             method: \'post\',
+                             onSuccess: function(value){
+                                var myWindow = window.open(\'\', \'_self\');
+                                myWindow.document.write(value.responseText);
+                             },
+                             onFailure: function() { alert(\'' . $msgError . '\'); },
+                             parameters: {\'magentoListingId\':'.$dataRecord['id'].', \'etsyListingId\':'.$dataRecord['listing_id'].'}});',
+                    'class' => 'save',
+                ), 0, 100);
             }
-            // Do not allow delete listing product directly except In Queue'
-            if (!$this->isInQueue($syncState)) {
+
+            $deleteFailedAllowed = Mage::getStoreConfig('magetsync_section_draftmode/magetsync_group_delete/magetsync_field_enable_failed_items_deletion');
+            if (($deleteFailedAllowed && $syncState == Merchante_MagetSync_Model_Listing::STATE_FAILED)
+                 || $this->isInQueue($syncState))
+            {
+                //Keep delete button
+            } else {
                 $this->_removeButton('delete');
             }
         // Mass attribute update
@@ -127,6 +147,6 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Edit extends
      * @return bool
      */
     public function isInQueue($syncState) {
-        return $syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE;
+        return $syncState == Merchante_MagetSync_Model_Listing::STATE_INQUEUE || $syncState == Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
     }
 }

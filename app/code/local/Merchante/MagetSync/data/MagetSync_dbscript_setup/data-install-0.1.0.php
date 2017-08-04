@@ -1,6 +1,6 @@
 <?php
 /******************************************
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  *************DATA SCRIPT'S***************
  *****************************************/
@@ -21,82 +21,6 @@ if(!$query) {
     );
     foreach ($values as $value) {
         $installer->getConnection()->insert($installer->getTable('magetsync_configuration'), $value);
-    }
-}
-
-$select = 'SELECT * FROM ' . $installer->getTable('magetsync_recipient').' WHERE id=1';
-$query = $readConnection->fetchAll($select);
-if(!$query) {
-    $values = array(
-        array(
-            'name' => 'men',
-            'display' => 'Men',
-
-        ),
-        array(
-            'name' => 'women',
-            'display' => 'Women',
-        ),
-        array(
-            'name' => 'unisex_adults',
-            'display' => 'Unisex adults',
-        ),
-        array(
-            'name' => 'teen_boys',
-            'display' => 'Teen boys',
-        ),
-        array(
-            'name' => 'teen_boys',
-            'display' => 'Teen boys',
-        ),
-        array(
-            'name' => 'teen_girls',
-            'display' => 'Teens',
-        ),
-        array(
-            'name' => 'boys',
-            'display' => 'Boys',
-        ),
-        array(
-            'name' => 'girls',
-            'display' => 'Girls',
-        ),
-        array(
-            'name' => 'children',
-            'display' => 'Children',
-        ),
-        array(
-            'name' => 'baby_boys',
-            'display' => 'Baby boys',
-        ),
-        array(
-            'name' => 'baby_girls',
-            'display' => 'Baby girls',
-        ),
-        array(
-            'name' => 'babies',
-            'display' => 'Babies',
-        ),
-        array(
-            'name' => 'birds',
-            'display' => 'Birds',
-        ),
-        array(
-            'name' => 'cats',
-            'display' => 'Cats',
-        ),
-        array(
-            'name' => 'dogs',
-            'display' => 'Dogs',
-        ),
-        array(
-            'name' => 'pets',
-            'display' => 'Pets',
-        ),
-    );
-
-    foreach ($values as $value) {
-        $installer->getConnection()->insert($installer->getTable('magetsync_recipient'), $value);
     }
 }
 

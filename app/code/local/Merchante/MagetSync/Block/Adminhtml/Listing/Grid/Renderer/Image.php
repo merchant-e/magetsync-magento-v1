@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class for rendering listing grid
  * Class Merchante_MagetSync_Block_Adminhtml_Listing_Grid_Renderer_Image
@@ -100,6 +100,7 @@ class Merchante_MagetSync_Block_Adminhtml_Listing_Grid_Renderer_Image extends Ma
         $options['4'] = Mage::helper('magetsync')->__('Out of sync');
         $options['5'] = Mage::helper('magetsync')->__('Expired');
         $options['6'] = Mage::helper('magetsync')->__('Mapped');
+        $options['8'] = Mage::helper('magetsync')->__('Queued');
 
         return $options;
     }

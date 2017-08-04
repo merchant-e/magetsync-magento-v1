@@ -1,7 +1,7 @@
 <?php
 
 /******************************************
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  ************INSTALL SCRIPT'S*************
  *****************************************/
@@ -118,9 +118,6 @@ if ($installer->getConnection()->isTableExists($installer->getTable('magetsync/l
         ->addColumn('is_private', Varien_Db_Ddl_Table::TYPE_TINYINT, null, array(
             'nullable' => true,
         ), 'is_private')
-        ->addColumn('recipient', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
-            'nullable' => true,
-        ), 'recipient')
         ->addColumn('occasion', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
             'nullable' => true,
         ), 'occasion')
@@ -327,26 +324,6 @@ if ($installer->getConnection()->isTableExists($installer->getTable('magetsync/c
         ->addColumn('lon', Varien_Db_Ddl_Table::TYPE_FLOAT, null, array(
             'nullable' => true,
         ), 'lon');
-
-    $installer->getConnection()->createTable($table);
-}
-
-
-if ($installer->getConnection()->isTableExists($installer->getTable('magetsync/recipient')) != true) {
-    $table = $installer->getConnection()
-        ->newTable($installer->getTable('magetsync/recipient'))
-        ->addColumn('id', Varien_Db_Ddl_Table::TYPE_INTEGER, null, array(
-            'identity' => true,
-            'unsigned' => true,
-            'nullable' => false,
-            'primary' => true,
-        ), 'id')
-        ->addColumn('name', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
-            'nullable' => true,
-        ), 'name')
-        ->addColumn('display', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
-            'nullable' => true,
-        ), 'display');
 
     $installer->getConnection()->createTable($table);
 }

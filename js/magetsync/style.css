@@ -63,3 +63,14 @@
     text-indent: -999em;
     overflow: hidden;
 }
+
+.properties-holder {
+    min-height: 23px !important;
+    margin-bottom: 11px !important;
+    padding: 8px 8px 2px 32px !important;
+    font-size: .95em !important;
+    font-weight: bold !important;
+    border: 1px solid #ffd967 !important;
+    background: #fffbf0 url(../../skin/adminhtml/default/default/images/note_msg_icon.gif) no-repeat 10px 10px !important;
+    color: #3d6611 !important;
+}

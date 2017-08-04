@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class to render shipping template form and add shipping entries grid
  * Class Merchante_MagetSync_Block_Adminhtml_Global_ShippingTemplate_Edit_Renderer_ShippingTemplate

@@ -1,9 +1,7 @@
 <?php
-error_reporting(E_ALL ^ E_NOTICE);
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
- *
+ * @copyright  Copyright (c) 2017 Merchant-e
  * Class for shop section form
  * Class Merchante_Magetsync_Adminhtml_ShopSectionController
  */
@@ -16,7 +14,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
     protected function _initAction()
     {
         $this->loadLayout()->_setActiveMenu('magetsync/shopSection')
-            ->_addBreadcrumb('MagetSync Manager','MagetSync Manager');
+             ->_addBreadcrumb('MagetSync Manager', 'MagetSync Manager');
+
         return $this;
     }
 
@@ -36,22 +35,22 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
     {
         $testId = $this->getRequest()->getParam('id');
         $testModel = Mage::getModel('magetsync/shopSection')->load($testId);
-        if ($testModel->getId() || $testId == 0)
-        {
+        if ($testModel->getId() || $testId == 0) {
             Mage::register('magetsync_shopsection', $testModel);
             $this->loadLayout();
             $this->_setActiveMenu('magetsync/shopSection');
             $this->getLayout()->getBlock('head')
-                ->setCanLoadExtJs(true);
-            $this->_addContent($this->getLayout()
-                ->createBlock('magetsync/adminhtml_global_shopSection_edit'))
-                ->_addLeft($this->getLayout()
-                        ->createBlock('magetsync/adminhtml_global_shopSection_edit_tabs')
-                );
+                 ->setCanLoadExtJs(true);
+            $this->_addContent(
+                $this->getLayout()
+                     ->createBlock('magetsync/adminhtml_global_shopSection_edit')
+            )
+                 ->_addLeft(
+                     $this->getLayout()
+                          ->createBlock('magetsync/adminhtml_global_shopSection_edit_tabs')
+                 );
             $this->renderLayout();
-        }
-        else
-        {
+        } else {
             Mage::getSingleton('adminhtml/session')
                 ->addError(Mage::helper('magetsync')->__('Shop section does not exist'));
             $this->_redirect('*/*/');
@@ -86,34 +85,35 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
                 Mage::getSingleton('adminhtml/session')
                     ->settestData(false);
                 $this->_redirect('*/*/');
+
                 return;
 
-            }else{
+            } else {
                 Mage::getSingleton('adminhtml/session')
                     ->addError($dataApi['message']);
                 Mage::getSingleton('adminhtml/session')
                     ->settestData(false);
                 $this->_redirect('*/*/');
+
                 return;
             }
-        }  catch (Exception $e){
-            Mage::log("Error: ".print_r($e, true),null,'magetsync_shopsection.log');
-            if($e instanceof OAuthException)
-            {
-            Mage::getSingleton('adminhtml/session')
-            ->addError($e->lastResponse);
-            }
-            else
-            {
+        } catch (Exception $e) {
+            Mage::log("Error: " . print_r($e, true), null, 'magetsync_shopsection.log');
+            if ($e instanceof OAuthException) {
+                Mage::getSingleton('adminhtml/session')
+                    ->addError($e->lastResponse);
+            } else {
                 Mage::getSingleton('adminhtml/session')
                     ->addError($e->getMessage());
             }
             Mage::getSingleton('adminhtml/session')
-                ->settestData($this->getRequest()
-                        ->getPost()
+                ->settestData(
+                    $this->getRequest()
+                         ->getPost()
                 );
+
             return;
-            }
+        }
 
     }
 
@@ -130,40 +130,40 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
      */
     public function saveAction()
     {
-        if(!$this->verifyEtsyApi()){ return; }
+        if (!$this->verifyEtsyApi()) {
+            return;
+        }
 
-        if ($this->getRequest()->getPost())
-        {
+        if ($this->getRequest()->getPost()) {
             try {
                 $shopSectionModel = Mage::getModel('magetsync/shopSection');
                 $params = array();
-                if($this->getRequest()->getParam('user_id'))
-                {
-                   $params['user_id'] = $this->getRequest()->getParam('user_id');
+                if ($this->getRequest()->getParam('user_id')) {
+                    $params['user_id'] = $this->getRequest()->getParam('user_id');
                 }
-                if($this->getRequest()->getParam('title'))
-                {
+                if ($this->getRequest()->getParam('title')) {
                     $params['title'] = $this->getRequest()->getParam('title');
                 }
 
                 $language = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language');
-                if($language <> null) { $params['language']= $language;}
-                else{ throw new Exception(Mage::helper('magetsync')->__('etsy_language_error')); }
+                if ($language <> null) {
+                    $params['language'] = $language;
+                } else {
+                    throw new Exception(Mage::helper('magetsync')->__('etsy_language_error'));
+                }
                 $shop = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop');
-                $obligatory = array('shop_id'=>$shop);
+                $obligatory = array('shop_id' => $shop);
                 $postData = $this->getRequest()->getPost();
                 $result = null;
-                if( $this->getRequest()->getParam('id') <= 0 )
-                {
-                    $resultApi = $shopSectionModel->createShopSection($obligatory,$params);
-                }
-                else {
+                if ($this->getRequest()->getParam('id') <= 0) {
+                    $resultApi = $shopSectionModel->createShopSection($obligatory, $params);
+                } else {
                     $obligatory['shop_section_id'] = $this->getRequest()->getParam('shop_section_id');
                     $resultApi = $shopSectionModel->updateShopSection($obligatory, $params);
                 }
-                if($resultApi['status'] == true) {
+                if ($resultApi['status'] == true) {
 
-                    $result = json_decode(json_decode($resultApi['result']),true);
+                    $result = json_decode(json_decode($resultApi['result']), true);
                     $result = $result['results'][0];
 
                     $postData['shop_section_id'] = $result['shop_section_id'];
@@ -178,35 +178,37 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
 
                     Mage::getSingleton('adminhtml/session')
                         ->addSuccess(Mage::helper('magetsync')->__('Successfully saved'));
-                }
-                else
-                {
+                } else {
                     Mage::getSingleton('adminhtml/session')
                         ->addError($resultApi['message']);
                 }
                 Mage::getSingleton('adminhtml/session')
                     ->settestData(false);
                 $this->_redirect('*/*/');
+
                 return;
-            } catch (Exception $e){
-                Mage::log("Error: ".print_r($e, true),null,'magetsync_shopsection.log');
-                if($e instanceof OAuthException)
-                {
+            } catch (Exception $e) {
+                Mage::log("Error: " . print_r($e, true), null, 'magetsync_shopsection.log');
+                if ($e instanceof OAuthException) {
                     Mage::getSingleton('adminhtml/session')
                         ->addError($e->lastResponse);
-                }
-                else
-                {
+                } else {
                     Mage::getSingleton('adminhtml/session')
                         ->addError($e->getMessage());
                 }
                 Mage::getSingleton('adminhtml/session')
-                    ->settestData($this->getRequest()
-                            ->getPost()
+                    ->settestData(
+                        $this->getRequest()
+                             ->getPost()
                     );
-                $this->_redirect('*/*/edit',
-                    array('id' => $this->getRequest()
-                            ->getParam('id')));
+                $this->_redirect(
+                    '*/*/edit',
+                    array(
+                        'id' => $this->getRequest()
+                                     ->getParam('id')
+                    )
+                );
+
                 return;
             }
         }
@@ -218,35 +220,33 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
      */
     public function deleteAction()
     {
-        if(!$this->verifyEtsyApi()){ return; }
+        if (!$this->verifyEtsyApi()) {
+            return;
+        }
 
-        if($this->getRequest()->getParam('id') > 0)
-        {
-            try
-            {
+        if ($this->getRequest()->getParam('id') > 0) {
+            try {
                 $shopSectionModel = Mage::getModel('magetsync/shopSection');
                 $shopValue = $shopSectionModel->load($this->getRequest()->getParam('id'));
                 $shop = Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_shop');
-                $obligatory = array('shop_id'=>$shop);
+                $obligatory = array('shop_id' => $shop);
                 $obligatory['shop_section_id'] = $shopValue['shop_section_id'];
-                $resultApi = $shopSectionModel->deleteShopSection($obligatory,null);
-                if($resultApi['status']=!false) {
-                    $shopSectionModel->setId($this->getRequest()
-                        ->getParam('id'))
-                        ->delete();
+                $resultApi = $shopSectionModel->deleteShopSection($obligatory, null);
+                if ($resultApi['status'] = !false) {
+                    $shopSectionModel->setId(
+                        $this->getRequest()
+                             ->getParam('id')
+                    )
+                                     ->delete();
 
                     Mage::getSingleton('adminhtml/session')
                         ->addSuccess(Mage::helper('magetsync')->__('Successfully deleted'));
-                }
-                else
-                {
+                } else {
                     Mage::getSingleton('adminhtml/session')
                         ->addError($resultApi['message']);
                 }
                 $this->_redirect('*/*/');
-            }
-            catch (Exception $e)
-            {
+            } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')
                     ->addError($e->getMessage());
                 $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
@@ -261,22 +261,23 @@ class Merchante_MagetSync_Adminhtml_Magetsync_ShopSectionController extends Mage
      */
     public function verifyEtsyApi()
     {
-        if(Mage::getModel('magetsync/etsy')->load(1)->getData('AccessToken') <> '')
-        {
+        if (Mage::getModel('magetsync/etsy')->load(1)->getData('AccessToken') <> '') {
             return true;
-        }
-        else
-        {
+        } else {
             Mage::getSingleton('adminhtml/session')
-                ->addError(Mage::helper('magetsync')->__('First you must authorise access to Etsy under System > Configuration > MagetSync'));
+                ->addError(
+                    Mage::helper('magetsync')->__(
+                        'First you must authorise access to Etsy under System > Configuration > MagetSync'
+                    )
+                );
             $this->_redirect('*/*/');
+
             return false;
         }
     }
 
     /**
      * Check if user has permissions to visit page
-     *
      * @return boolean
      */
     protected function _isAllowed()
