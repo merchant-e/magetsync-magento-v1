@@ -2,7 +2,6 @@
 
 /**
  * @copyright  Copyright (c) 2016 Merchant-e
- *
  * Class Merchante_MagetSync_Adminhtml_Magetsync_AttributTemplatesController
  */
 class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extends Mage_Adminhtml_Controller_Action
@@ -13,7 +12,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     protected function _initAction()
     {
         $this->loadLayout()->_setActiveMenu('magetsync/attributeTemplate')
-            ->_addBreadcrumb('MagetSync Manager', 'MagetSync Manager');
+             ->_addBreadcrumb('MagetSync Manager', 'MagetSync Manager');
+
         return $this;
     }
 
@@ -34,8 +34,10 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
         $templateToDuplicateId = $this->getRequest()->getParam('templateToDuplicateId');
         $attributeTemplateId = $this->getRequest()->getParam('id');
         if ($templateToDuplicateId) {
-            $templateDuplicateFromModelData = Mage::getModel('magetsync/attributeTemplate')->load($templateToDuplicateId)->getData();
-            $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->setData($templateDuplicateFromModelData);
+            $templateDuplicateFromModelData =
+                Mage::getModel('magetsync/attributeTemplate')->load($templateToDuplicateId)->getData();
+            $attributeTemplateIdModel =
+                Mage::getModel('magetsync/attributeTemplate')->setData($templateDuplicateFromModelData);
         } else {
             $attributeTemplateIdModel = Mage::getModel('magetsync/attributeTemplate')->load($attributeTemplateId);
         }
@@ -80,12 +82,32 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         $productIdsToAddArr = Mage::helper('adminhtml/js')->decodeGridSerializedInput($productIds);
                     }
                 } else {
-                    if ($prodIdsArr = $attributeTemplateModel->getProductIds())
-                    $productIdsToAddArr = explode(',', $prodIdsArr);
+                    if ($prodIdsArr = $attributeTemplateModel->getProductIds()) {
+                        $productIdsToAddArr = explode(',', $prodIdsArr);
+                    }
                 }
                 $postData['product_ids'] = implode(',', $productIdsToAddArr);
                 $postData['products_count'] = count($productIdsToAddArr);
 
+                if ($postData['pricing_rule'] == 'original' || $postData['affect_value'] == 0) {
+                    $postData['pricing_rule'] = 'original';
+                    $postData['affect_value'] = 0;
+                    $postData['affect_strategy'] = NULL;
+                }
+                $propertiesArr = array();
+                foreach ($postData as $dataItemKey => $dataItemVal) {
+                    if (substr($dataItemKey, 0, 9) == 'property_' && $dataItemVal) {
+                        $propertyId = substr($dataItemKey, 9, strlen($dataItemKey));
+                        $propertiesArr[$propertyId] = $dataItemVal;
+                    }
+                    if (strpos($dataItemKey, 'category_id') && empty($dataItemVal)) {
+                        $postData[$dataItemKey] = NULL;
+                    }
+                }
+                $postData['properties'] = '';
+                if ($propertiesArr) {
+                    $postData['properties'] = json_encode($propertiesArr);
+                }
                 $origData = $attributeTemplateModel->getOrigData();
                 $attributeTemplateModel->addData($postData);
                 $attributeTemplateModel->save();
@@ -97,64 +119,92 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                         $newData = $attributeTemplateModel->getData();
                         $updateNewProductsOnly = $this->compareTemplateDatas($newData, $origData);
                         if ($updateNewProductsOnly) {
-                            $productIdsToAddArr = array_diff($productIdsToAddArr, explode(',', $origData['product_ids']));
+                            $productIdsToAddArr =
+                                array_diff($productIdsToAddArr, explode(',', $origData['product_ids']));
                         }
                     }
-                    $products = Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addIdFilter($productIdsToAddArr)->load();
+                    $products =
+                        Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addIdFilter(
+                            $productIdsToAddArr
+                        )->load();
                     $createdListingsData = array();
                     foreach ($products as $product) {
-                        $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($product->getEntityId());
+                        $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild(
+                            $product->getEntityId()
+                        );
                         if (!$parent) {
-                            $result = Mage::getModel('magetsync/listing')->saveListingSynchronized($product, null, false);
+                            $result =
+                                Mage::getModel('magetsync/listing')->saveListingSynchronized($product, null, false);
                             if ($result && $result['success']) {
-                                $product->setData('synchronizedEtsy', 1)->getResource()->saveAttribute($product, 'synchronizedEtsy');
+                                $product->setData('synchronizedEtsy', 1)->getResource()->saveAttribute(
+                                    $product, 'synchronizedEtsy'
+                                );
                                 $createdListingsData[$product->getId()] = round($product->getPrice(), 2);
                             } else {
                                 Mage::getSingleton('adminhtml/session')
-                                    ->addError(Mage::helper('magetsync')->__($result['error'] . ' [' . $product->getEntityId() . ']'));
+                                    ->addError(
+                                        Mage::helper('magetsync')->__(
+                                            $result['error'] . ' [' . $product->getEntityId() . ']'
+                                        )
+                                    );
                             }
                         } else {
                             Mage::getSingleton('adminhtml/session')
-                                ->addError(Mage::helper('magetsync')->__('This is a child product, you can not synchronize this kind of product [' . $product->getEntityId() . '].'));
+                                ->addError(
+                                    Mage::helper('magetsync')->__(
+                                        'This is a child product, you can not synchronize this kind of product [' .
+                                        $product->getEntityId() . '].'
+                                    )
+                                );
                         }
                     }
 
-                    if (!$this->verifyEtsyApi() || Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language') === null) {
-                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__('Please set up Etsy.'));
+                    if (!$this->verifyEtsyApi() ||
+                        Mage::getStoreConfig('magetsync_section/magetsync_group/magetsync_field_language') === null
+                    ) {
+                        Mage::getSingleton('adminhtml/session')->addError(
+                            Mage::helper('magetsync')->__('Please set up Etsy.')
+                        );
 
                         return;
                     }
 
                     $listingModel = Mage::getModel('magetsync/listing');
-                    $newListings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter('idproduct', array('in' => array_keys($createdListingsData)))->load();
+                    $newListings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter(
+                        'idproduct', array('in' => array_keys($createdListingsData))
+                    )->load();
                     foreach ($newListings as $listing) {
-                        $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                        if ($listing->getData('sync') != Merchante_MagetSync_Model_Listing::STATE_EXPIRED) {
+                            $postData['sync'] = Merchante_MagetSync_Model_Listing::STATE_AUTO_QUEUE;
+                        }
                         $postData['sync_ready'] = 1;
                         $postData['title'] = $listing->getTitle();
 
-                        if ($listing->getAttributeTemplateId() && $listing->getAttributeTemplateId() != $attributeTemplateId) {
-                            $attributeTemplateModel->removeAssociatedProduct($listing->getAttributeTemplateId(), $listing->getIdproduct());
+                        if ($listing->getAttributeTemplateId() &&
+                            $listing->getAttributeTemplateId() != $attributeTemplateId
+                        ) {
+                            $attributeTemplateModel->removeAssociatedProduct(
+                                $listing->getAttributeTemplateId(), $listing->getIdproduct()
+                            );
                         }
                         $postData['attribute_template_id'] = $attributeTemplateId;
+                        $productPrice = $createdListingsData[$listing->getIdproduct()];
 
-                        if ($listing->getPrice()) {
-                            $origPrice = $listing->getPrice();
-                        } else {
-                            $origPrice = $createdListingsData[$listing->getIdproduct()];
-                        }
                         if ($postData['pricing_rule'] == 'original') {
-                            $finalPrice = $origPrice;
+                            $finalPrice = $productPrice;
+                            $postData['is_custom_price'] = 0;
                         } else {
                             if ($postData['affect_strategy'] == 'percentage') {
-                                $delta = round($origPrice*(floatval($postData['affect_value'])/100), 2);
+                                $delta = round($productPrice * (floatval($postData['affect_value']) / 100), 2);
                             } else {
                                 $delta = $postData['affect_value'];
                             }
                             if ($postData['pricing_rule'] == 'increase') {
-                                $finalPrice = $origPrice + $delta;
+                                $finalPrice = $productPrice + $delta;
                             } else {
-                                $finalPrice = $origPrice - $delta;
+                                $finalPrice = $productPrice - $delta;
                             }
+                            $postData['is_custom_price'] = 1;
                         }
                         $postData['price'] = $finalPrice;
 
@@ -163,7 +213,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
                     }
                 }
 
-                $this->_getSession()->addSuccess($this->__('The attribute template has been saved and listing(s) auto queued.'));
+                $this->_getSession()->addSuccess(
+                    $this->__('The attribute template has been saved and listing(s) auto queued.')
+                );
             } catch (Mage_Core_Exception $e) {
                 $this->_getSession()->addError($e->getMessage());
             } catch (Exception $e) {
@@ -240,9 +292,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     public function productsGridAction()
     {
         $this->loadLayout()
-            ->getLayout()
-            ->getBlock('magetsync.attributetemplate.edit.tab.products')
-            ->setSelectedProducts($this->getRequest()->getPost('products', null));
+             ->getLayout()
+             ->getBlock('magetsync.attributetemplate.edit.tab.products')
+             ->setSelectedProducts($this->getRequest()->getPost('products', null));
 
         $this->renderLayout();
     }
@@ -253,8 +305,8 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
     public function productsTabAction()
     {
         $this->loadLayout()
-            ->getLayout()
-            ->getBlock('magetsync.attributetemplate.edit.tab.products');
+             ->getLayout()
+             ->getBlock('magetsync.attributetemplate.edit.tab.products');
 
         $this->renderLayout();
     }
@@ -326,8 +378,10 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
      */
     public function compareTemplateDatas($newData, $origData)
     {
-        foreach($origData as $dataKey => $dataVal) {
-            if ($dataKey == 'product_ids' || $dataKey == 'products_count') continue;
+        foreach ($origData as $dataKey => $dataVal) {
+            if ($dataKey == 'product_ids' || $dataKey == 'products_count') {
+                continue;
+            }
 
             if ($newData[$dataKey] == $dataVal) {
                 continue;
@@ -349,15 +403,19 @@ class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extend
             return true;
         } else {
             Mage::getSingleton('adminhtml/session')
-                ->addError(Mage::helper('magetsync')->__('First you must authorise access to Etsy under System > Configuration > MagetSync'));
+                ->addError(
+                    Mage::helper('magetsync')->__(
+                        'First you must authorise access to Etsy under System > Configuration > MagetSync'
+                    )
+                );
             $this->_redirect('*/*/');
+
             return false;
         }
     }
 
     /**
      * Check if user has permissions to visit page
-     *
      * @return boolean
      */
     protected function _isAllowed()

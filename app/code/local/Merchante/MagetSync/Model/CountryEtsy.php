@@ -3,7 +3,6 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 /**
  * @copyright  Copyright (c) 2015 Merchant-e
- *
  * Class Merchante_MagetSync_Model_CountryEtsy
  */
 class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Etsy
@@ -29,7 +28,7 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
      */
     public function findAllCountry($obligatory, $params = null)
     {
-        return $this->selectExecute($this->name,__FUNCTION__,$obligatory,$params);
+        return $this->selectExecute($this->name, __FUNCTION__, $obligatory, $params);
     }
 
     /**
@@ -39,7 +38,7 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
      */
     public function getCountry($obligatory, $params = null)
     {
-        return $this->selectExecute($this->name,__FUNCTION__,$obligatory,$params);
+        return $this->selectExecute($this->name, __FUNCTION__, $obligatory, $params);
     }
 
     /**
@@ -49,7 +48,7 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
      */
     public function findByIsoCode($obligatory, $params = null)
     {
-        return $this->selectExecute($this->name,__FUNCTION__,$obligatory,$params);
+        return $this->selectExecute($this->name, __FUNCTION__, $obligatory, $params);
     }
 
     /**
@@ -59,11 +58,19 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
     {
         $Collection = Mage::getModel('magetsync/countryEtsy')->getCollection();
 
-        $CArray = array(array('value'=>null, 'label'=>Mage::helper('magetsync')->__('Please Select')));
+        $CArray = array(
+            array(
+                'value' => null,
+                'label' => Mage::helper('magetsync')->__('Please Select')
+            )
+        );
 
-        foreach ($Collection as $CList){
+        foreach ($Collection as $CList) {
 
-            $CArray[] = array('value'=>$CList['country_id'],'label'=>$CList['name']);
+            $CArray[] = array(
+                'value' => $CList['country_id'],
+                'label' => $CList['name']
+            );
         }
 
         return $CArray;
@@ -75,8 +82,9 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
     public function setAllCountries()
     {
         $countryModel = Mage::getModel('magetsync/countryEtsy');
-        $resultApi = $this->findAllCountry(null,null);
-        if($resultApi['status'] == true) {
+        $resultApi = $this->findAllCountry(null, null);
+
+        if ($resultApi['status'] == true) {
             $result = json_decode(json_decode($resultApi['result']), true);
             $result = (isset($result['results']) ? $result['results'] : null);
             foreach ($result as $value) {
@@ -92,11 +100,9 @@ class Merchante_MagetSync_Model_CountryEtsy extends Merchante_MagetSync_Model_Et
                     $entity->save();
                 }
             }
-            Mage::log("Error: ".print_r($resultApi, true),null,'magetsync_countries.log');
-        }
-        else
-        {
-            Mage::log("Error: ".print_r($resultApi, true),null,'magetsync_countries.log');
+            $this->log("Error: " . print_r($resultApi, true));
+        } else {
+            $this->log("Error: " . print_r($resultApi, true));
         }
     }
 

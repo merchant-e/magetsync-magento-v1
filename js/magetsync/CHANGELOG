@@ -1,16 +1,45 @@
+## 2017.02 [beta-build-0466749] - 2017-03-17
+### Added
+- Support for new Etsy Inventory features 
+- Renew Expired Listing option
+
+##[2017.01 - Public Release] [c4139b9] - 2017-02-10
+### Added
+- New configurable option to allow embedding of product attributes into product descriptions (enhanced Global Templates)
+- Added Centralised logger for troubleshooting purposes (with config option)
+
+### Changed
+- MagetSync controllers refactoring and general code base improvements and optimisations
+- Config option to assign all Etsy orders to MagetSync payment method by default
+- Order state pending removed - all Etsy orders should now have 'processing' as state
+- Etsy_name column under 'mappingsetsy' increased to 140 chars
+
+### Fixed
+- Bug: Etsy orders created using Magento price instead of Etsy price
+- Bug: Listings has variations with prices set... in all instances
+- Bug: Updates made to a child product not detected
+- Bug  preventing PayPal paid orders being imported in Magento - by assigning all orders by default to MagetSync payment method
+- Bug: Custom prices being rewritten on product updates
+- Possible security issues
+
+------- end of 2016 --------
+### From this point forward MagetSync versions will be assigned a year and release number
 ##[0.9.7.5] - 2016-11-28
 ### Added
 - Support for Attribute Templates
 - New Pricing Rules (Increase/Decrease prices globally using Attribute Templates)
-- Option to re-upload product images for previouly synced products (New Image Reset Option - with its own cron task)
+- Option to re-upload product images for previously synced products (New Image Reset Option - with its own cron task)
 - New Observer for when Magento products are restocked (credit memo/order cancelled)
+- Mappings: SKU search for auto suggestion
+- Option to auto resize larger images
+- Modman support
 
-### Changed 
+### Changed
 - Added new measures to prevent excessive API calls when using auto-queue
 - New 'Draft' label for products in Draft state
 - Long custom options labels/values are auto trimmed to Etsy limit (20 chars)
 
-### Bug
+### Fixed
 - Fixed PHP array incompatibility with older PHP versions
 - Fixed Permissions for non-admin users (Access Denied error)
 
@@ -87,7 +116,7 @@
 - Optimize Mapping initial page load
 
 ### Fixed
-- Listings Manager: ‘Title' Search field in the table header doesn’t find any products
+- Listings Manager: ï¿½Title' Search field in the table header doesnï¿½t find any products
 - Listings Manager: SKUs aren't searchable under the title search field
 
 ##[0.9.6] - 2015-11-24
@@ -175,7 +204,7 @@
 
 ### Fixed
 - Inventory: Validation in control of stock
-- Listing Manager: General validations 
+- Listing Manager: General validations
 
 
 ##[0.9.3.2] - 2015-05-27

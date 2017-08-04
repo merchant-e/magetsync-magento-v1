@@ -49,16 +49,6 @@ $table = $installer->getConnection()
         'unsigned' => true,
         'length' => 2
     ), 'appended_template')
-    ->addColumn('style_one', Varien_Db_Ddl_Table::TYPE_TEXT, 30, array(
-        'nullable' => true,
-        'default' => null,
-        'unsigned' => true
-    ), 'style_one')
-    ->addColumn('style_two', Varien_Db_Ddl_Table::TYPE_TEXT, 30, array(
-        'nullable' => true,
-        'default' => null,
-        'unsigned' => true
-    ), 'style_two')
     ->addColumn('should_auto_renew', Varien_Db_Ddl_Table::TYPE_SMALLINT, null, array(
         'nullable' => true,
         'default' => 0,
@@ -92,9 +82,6 @@ $table = $installer->getConnection()
     ->addColumn('when_made', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
         'nullable' => true,
     ), 'when_made')
-    ->addColumn('recipient', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
-        'nullable' => true,
-    ), 'recipient')
     ->addColumn('occasion', Varien_Db_Ddl_Table::TYPE_VARCHAR, 30, array(
         'nullable' => true,
     ), 'occasion')

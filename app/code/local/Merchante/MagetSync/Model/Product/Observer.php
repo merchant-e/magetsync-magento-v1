@@ -3,39 +3,44 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 /**
  * @copyright  Copyright (c) 2015 Merchant-e
- *
  * Class observer for catalog products
  * Class Mod_Products_Model_Observer
  */
-class Merchante_MagetSync_Model_Product_Observer {
+class Merchante_MagetSync_Model_Product_Observer
+{
 
     /**
      * Method observer for after saving product
      * @param $observer
      */
-    public function logUpdate($observer,$idProduct = null, $attributes = null) {
-        try{
-        if($idProduct == null)
-        {
-            $product = $observer->getEvent()->getProduct();
-            $data = $product->getData();
-            if($data['visibility'] == Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE)
-            {
-               return;
-            }
-            //Mage::log("Error: ".print_r($data, true),null,'magetsync_productX.log');
-            $status = (isset($data['synchronizedEtsy'])?$data['synchronizedEtsy']:null);
-        }else{
-            $product = Mage::getModel('catalog/product')->load($idProduct);
-            $data = $product->getData();
-            $status = $attributes['synchronizedEtsy'];
-        }
-        $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($data['entity_id']);
+    public function logUpdate($observer, $idProduct = null, $attributes = null)
+    {
+        try {
+            if ($idProduct == null) {
+                $product = $observer->getEvent()->getProduct();
+                $data = $product->getData();
 
-        if(!$parent) {
+                $status = (isset($data['synchronizedEtsy']) ? $data['synchronizedEtsy'] : null);
+            } else {
+                $product = Mage::getModel('catalog/product')->load($idProduct);
+                $data = $product->getData();
+                $status = $attributes['synchronizedEtsy'];
+                if (is_null($status)) {
+                    $status = $data['synchronizedEtsy'];
+                }
+            }
+            /** @var Mage_Catalog_Model_Product $parent */
+            $parent = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($data['entity_id']);
+
+
+            if (!$parent) {
+                $productModel = $product;
+            } else {
+                $productModel = Mage::getModel('catalog/product')->load($parent[0]);
+            }
             if ($status == 1) {
-                $result = Mage::getModel('magetsync/listing')->saveListingSynchronized($product, $attributes, false);
-            }elseif ($status == 0) {
+                Mage::getModel('magetsync/listing')->saveListingSynchronized($productModel, $attributes, false);
+            } elseif ($status == 0) {
                 //If the product was in queue delete this.
                 $listingModel = Mage::getModel('magetsync/listing');
                 $query = $listingModel->getCollection()->getSelect()->where('idproduct = ?', $data['entity_id']);
@@ -53,26 +58,34 @@ class Merchante_MagetSync_Model_Product_Observer {
                     }
                 }
             }
-        }
-        } catch (Exception $e){
+        } catch (Exception $e) {
             Mage::logException($e);
+
             return;
         }
     }
 
-    public function massiveUpdate($observer) {
-        try{
+    public function massiveUpdate($observer)
+    {
+        try {
+
+            $parentProductIDs = array();
             $data = $observer->getEvent()->getData();
-            $product_ids = $data['product_ids'];
-            $attributes = $data['attributes_data'];
-            $value = array_key_exists('synchronizedEtsy',$attributes);
-            if($value) {
-                foreach ($product_ids as $item) {
-                    $this->logUpdate(null, $item, $attributes);
-                }
+            $listingModel = Mage::getModel('magetsync/listing');
+            $requestProductIDs = $data['product_ids'] ?: $data['products'];
+            foreach ($requestProductIDs as $productID) {
+                $parentProductIDs = array_merge($parentProductIDs, Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($productID));
             }
-        } catch (Exception $e){
+            $allProductIDs = array_merge($requestProductIDs, $parentProductIDs);
+            $existingListings = $listingModel->getCollection()->addFieldToSelect('*')->addFieldToFilter(
+                'idproduct', array('in' => $allProductIDs)
+            )->load();
+            foreach ($existingListings as $listing) {
+                $this->logUpdate(null, $listing->getIdproduct(), $data['attributes_data']);
+            }
+        } catch (Exception $e) {
             Mage::logException($e);
+
             return;
         }
     }
