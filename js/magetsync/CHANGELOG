@@ -1,7 +1,13 @@
-## 2017.02 [beta-build-0466749] - 2017-03-17
+## 2017.02 [RC] - 2017-08-04
 ### Added
-- Support for new Etsy Inventory features 
+- Support for new Etsy Inventory features
+- Support for new Etsy Taxonomy and Product attributes
+- Custom Options with SKU support
 - Renew Expired Listing option
+
+### Changed
+- Handling of Expired listings. New Renew button added
+- Optimised Custom options/variations feature
 
 ##[2017.01 - Public Release] [c4139b9] - 2017-02-10
 ### Added
