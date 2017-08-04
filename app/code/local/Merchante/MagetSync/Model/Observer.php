@@ -235,11 +235,6 @@ class Merchante_MagetSync_Model_Observer
                         $listing['appended_template'],
                         $listing['idproduct']
                     );
-                    $style = array();
-                    $style[] = $listing['style_one'];
-                    $style[] = $listing['style_two'];
-
-                    $styleData = implode(',', $style);
 
                     $supply = isset($listing['is_supply']) ? $listing['is_supply'] : 1;
                     //Boolean field in Etsy but not 'Yes/No' in frontEnd
@@ -311,9 +306,6 @@ class Merchante_MagetSync_Model_Observer
                         'who_made'             => $listing['who_made'],
                         'is_supply'            => $dataSuppley,
                         'when_made'            => $listing['when_made'],
-                        'recipient'            => $listing['recipient'],
-                        'occasion'             => $listing['occasion'],
-                        'style'                => $styleData,
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $listing['language']
                     );
@@ -376,6 +368,27 @@ class Merchante_MagetSync_Model_Observer
 
             $resultApiUpd = $listingModel->updateListing($obliUpd, $params);
             if ($resultApiUpd['status'] == true) {
+
+                //Update custom Listing attributes
+                $propertiesArr = $listing->getProperties();
+                if ($propertiesArr) {
+                    foreach ($propertiesArr as $propertyKey => $propertyVal) {
+                        $obliUpd['property_id'] = $propertyKey;
+                        $attrUpdParams = array();
+                        if (is_array($propertyVal)) {
+                            $propertyVal = implode(',', $propertyVal);
+                        }
+                        $attrUpdParams['value_ids'] = $propertyVal;
+                        $updateAttributeApi = $listing->updateAttribute($obliUpd, $attrUpdParams);
+                        if ($updateAttributeApi['status'] != true) {
+                            Mage::getSingleton('adminhtml/session')->addError('Unable to update one of custom attributes.');
+                            Merchante_MagetSync_Model_LogData::magetsync(
+                                $postData, Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                                $updateAttributeApi['message'], Merchante_MagetSync_Model_LogData::LEVEL_ERROR
+                            );
+                        }
+                    }
+                }
                 if ($autoSync == '1') {
                     if ($listing['sync'] == Merchante_MagetSync_Model_Listing::STATE_OUTOFSYNC) {
                         $result = json_decode(json_decode($resultApiUpd['result']), true);

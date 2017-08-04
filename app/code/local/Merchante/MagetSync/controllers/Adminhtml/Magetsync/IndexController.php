@@ -31,6 +31,7 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                 $listing->triggerUpdate();
             }
         }
+
         $this->_initAction();
         $this->renderLayout();
     }
@@ -203,7 +204,88 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
     public function categoryAction()
     {
         $tag = $this->getRequest()->getParam('tag');
+        $listingId = $this->getRequest()->getParam('listing');
+        $templateId = $this->getRequest()->getParam('template');
+        $taxonomy = "";
         $state = "<option value=''>" . Mage::helper('magetsync')->__('Please Select') . "</option>";
+
+        $listingModel = Mage::getModel('magetsync/listing');
+        $requestParams['taxonomy_id'] = $tag;
+
+        $updateAttributeApi = $listingModel->getTaxonomyNodeProperties($requestParams);
+        if ($updateAttributeApi['status'] == true) {
+            $result = json_decode(json_decode($updateAttributeApi['result']), true);
+            if ($result['count'] > 0) {
+                if ($listingId != null) {
+                    $entityModel = $listingModel;
+                    $entityModel->load($listingId);
+                } else {
+                    $entityModel = Mage::getModel('magetsync/attributeTemplate');
+                    $entityModel->load($templateId);
+                }
+                $listingProperties = $entityModel->getProperties();
+                $selectedProperties = array();
+                if ($listingProperties) {
+                    $selectedProperties = json_decode($listingProperties, true);
+                }
+                $sizeScaleRendered = false;
+                foreach ($result['results'] as $property) {
+                    if (!empty($property['possible_values'])) {
+                        $form = new Varien_Data_Form();
+                        $type = $property['is_multivalued'] ? 'multiselect' : 'select';
+                        $propertyId = $property['property_id'];
+                        $propertyName = $property['display_name'];
+                        $selectedValues = $selectedProperties[$propertyId];
+                        $isReqired = $property['is_required'];
+                        $valuesArr = array();
+                        if (!$isReqired) {
+                            $valuesArr[] = array('value' => '', 'label' => 'Please select');
+                        }
+                        $propertiesArr = !empty($property['selected_values']) ? $property['selected_values'] : $property['possible_values'];
+
+                        $scaleOptions = array();
+                        $selectedSizeScaleVal = '';
+                        foreach($propertiesArr as $option) {
+                            $valuesArr[] = array('value' => $option['value_id'], 'label' => $option['name'], 'scale' => $option['scale_id']);
+                            $option['scale_id'] && $scaleOptions[$option['scale_id']][] = $option['value_id'];
+                            $selectedSizeScaleVal = $selectedValues && (string)$option['value_id'] == $selectedValues ? (string)$option['scale_id'] : $selectedSizeScaleVal;
+                        }
+                        $renderSizeScales = substr(strtolower($propertyName), -4) == 'size' && !empty($property['scales']) && sizeof($scaleOptions) > 1;
+                        if ($renderSizeScales && !$sizeScaleRendered) {
+                            $scaleValues = array();
+                            $scaleValues[] = array('value' => '', 'label' => Mage::helper('magetsync')->__('Please select'));
+                            foreach($property['scales'] as $option) {
+                                $scaleValues[] = array('value' => $option['scale_id'], 'label' => $option['display_name']);
+                            }
+                            $form->addField('size_scales', 'select', array(
+                                'name'  => 'size_scales',
+                                'required' => $isReqired,
+                                'label'     => Mage::helper('magetsync')->__('Size scales'),
+                                'values'    => $scaleValues,
+                                'value'    => $selectedSizeScaleVal,
+                                'style'    => 'margin-left:60px;width:280px;',
+                            ));
+                            $form->addField('size_scales_values', 'hidden', array(
+                                'value'    => json_encode($valuesArr)
+                            ));
+                            $sizeScaleRendered = true;
+                        }
+                        $propertyStyle = $renderSizeScales ? 'margin-left:-60px;width:200px;' : 'margin-left:60px;width:280px;';
+                        $form->addField('property_'.$propertyId, $type, array(
+                            'name'  => 'property_'.$propertyId,
+                            'required' => $isReqired,
+                            'label'     => Mage::helper('magetsync')->__($propertyName),
+                            'values'    => $valuesArr,
+                            'value'     => $selectedValues,
+                            'style'    => $propertyStyle,
+                            'class' => $property['is_required'] ? 'required-entry' : ''
+                        ));
+                        $taxonomy .= $form->toHtml();
+                    }
+                }
+            }
+        }
+
         $controlAux = 0;
         if ($tag != '') {
             $subCategories = Mage::getModel('magetsync/category')->getCollection();
@@ -215,10 +297,9 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
             }
         }
         if ($controlAux == 0) {
-            echo '';
-        } else {
-            echo $state;
+            $state = '';
         }
+        $this->getResponse()->setBody(json_encode(array('categories' => $state, 'taxonomy' => $taxonomy)));
     }
 
     /**
@@ -327,6 +408,80 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
             echo json_encode($result, true);
         }
     }
+
+    /**
+     * Fetches taxonomies through API and replaces DB values
+     * Loops through all Listings and resets categories that are no longer supported
+     */
+    public function fetchTaxonomyAction()
+    {
+        $result = array('success' => true);
+
+        try {
+            $categoryModel = Mage::getModel('magetsync/category');
+            $dataApi = $categoryModel->getSellerTaxonomy(null, null);
+            if ($dataApi['status'] == true) {
+                $coreResource = Mage::getSingleton('core/resource');
+                $connection = $coreResource->getConnection('core_write');
+                $tableName = $connection->getTableName('magetsync_category');
+                $connection->truncateTable($tableName);
+                $values = json_decode(json_decode($dataApi['result']), true);
+                $values = (isset($values['results']) ? $values['results'] : null);
+                $categoryModel->recursiveCategoriesForTaxonomy($values, $connection, $tableName);
+
+                $collection = Mage::getModel('magetsync/category')->getCollection()
+                    ->addFieldToSelect('level_id');
+                $categoriesArr = $collection->getColumnValues('level_id');
+                $listingCollection = Mage::getModel('magetsync/listing')->getCollection()
+                    ->addFieldToSelect('*');
+                foreach ($listingCollection as $listing) {
+                    $removeDescendants = false;
+                    if (!in_array($listing->getData('category_id'), $categoriesArr)) {
+                        $removeDescendants = true;
+                        $listing->setData('category_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subsubcategory_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subsubcategory_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory4_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory4_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory5_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory5_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory6_id'), $categoriesArr) || $removeDescendants) {
+                        $removeDescendants = true;
+                        $listing->setData('subcategory6_id', NULL);
+                    }
+                    if (!in_array($listing->getData('subcategory7_id'), $categoriesArr) || $removeDescendants) {
+                        $listing->setData('subcategory7_id', NULL);
+                    }
+                    $listing->save();
+                }
+
+            } else {
+                $result['success'] = false;
+                $result['msg'] = 'API returned unsuccessful response. Please try again later.';
+            }
+
+            echo json_encode($result, true);
+
+        } catch (Exception $e) {
+            $result = array(
+                'success' => false,
+                'msg'     => $e->getMessage()
+            );
+            echo json_encode($result, true);
+        }
+    }
+
     /**
      * Method for reindexing listings(Global Notes)
      */
@@ -551,11 +706,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $postData['subcategory7_id'] = $listingModel->emptyField($postData['subcategory7_id'], null);
                     }
 
-                    if (isset($postData['style_one'])) {
-                        $postData['style_one'] = $listingModel->emptyField($postData['style_one'], null);
-                        $postData['style_two'] = $listingModel->emptyField($postData['style_two'], null);
-                    }
-
                     /********UPDATE*********/
 
                     if ($data['listing_id'] && $syncStatus) {
@@ -586,12 +736,6 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         $listingModel->composeDescription($data['description'], $prependedTemplate, $appendedTemplate, $data['idproduct']);
                     $renewalOption =
                         $listingModel->emptyField($postData['should_auto_renew'], $data['should_auto_renew'], 0);
-
-                    $style = array();
-                    $style[] = $listingModel->emptyField($postData['style_one'], $data['style_one']);
-                    $style[] = $listingModel->emptyField($postData['style_two'], $data['style_two']);
-
-                    $styleData = implode(',', $style);
 
                     if (isset($data['tags'])) {
                         $search = array(
@@ -630,18 +774,27 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         'who_made'             => $listingModel->emptyField($postData['who_made'], $data['who_made']),
                         'is_supply'            => $dataSuppley,
                         'when_made'            => $listingModel->emptyField($postData['when_made'], $data['when_made']),
-                        'recipient'            => $listingModel->emptyField($postData['recipient'], $data['recipient']),
-                        'occasion'             => $listingModel->emptyField($postData['occasion'], $data['occasion']),
-                        'style'                => $styleData,
                         'should_auto_renew'    => $renewalOption,
                         'language'             => $languageData
                     );
                     $dataGlobal = $data['id'];
                     $hasError = false;
+
+                    $propertiesArr = array();
+                    foreach ($postData as $dataItemKey => $dataItemVal) {
+                        if (substr($dataItemKey, 0, 9) == 'property_' && $dataItemVal) {
+                            $propertyId = substr($dataItemKey, 9, strlen($dataItemKey));
+                            $propertiesArr[$propertyId] = $dataItemVal;
+                        }
+                    }
+                    $postData['properties'] = '';
+                    if ($propertiesArr) {
+                        $postData['properties'] = json_encode($propertiesArr);
+                    }
+
+
                     if ($syncStatus) {
                         $callType = 'all';
-                        $resource = Mage::getSingleton('catalog/product')->getResource();
-                        $productType = $resource->getAttributeRawValue($data['idproduct'], 'type_id', Mage::app()->getStore());
                         $new_pricing = Mage::getStoreConfig(
                             'magetsync_section/magetsync_group_options/magetsync_field_enable_different_pricing'
                         );
@@ -650,31 +803,35 @@ class Merchante_MagetSync_Adminhtml_Magetsync_IndexController extends Mage_Admin
                         if ($data['listing_id']) {
                             $obliUpd = array('listing_id' => $data['listing_id']);
 
-                            /**
-                             * Update inventory call not used for simple products
-                             */
-                            if ($productType == 'simple') {
-                                $params['quantity'] = $data['quantity'];
-                                $params['price'] = $priceToBeSent;
-                                $callType = 'image';
-                            }
                             $resultApi = $listingModel->updateListing($obliUpd, $params);
                         } else {
+                            // Price and qty are still required for listing creation
                             $params['price'] = $priceToBeSent;
                             $params['quantity'] = $data['quantity'];
                             $resultApi = $listingModel->createListing(null, $params);
-
-                            /**
-                             * Update inventory call not used for simple products
-                             */
-                            if ($productType == 'simple') {
-                                $callType = 'image';
-                            }
                         }
                         if ($resultApi['status'] == true) {
 
                             $result = json_decode(json_decode($resultApi['result']), true);
                             $result = $result['results'][0];
+
+                            //Update custom Listing attributes
+                            if ($propertiesArr) {
+                                $obliUpd = array('listing_id' => $result['listing_id']);
+                                foreach ($propertiesArr as $propertyKey => $propertyVal) {
+                                    $obliUpd['property_id'] = $propertyKey;
+                                    $attrUpdParams = array();
+                                    if (is_array($propertyVal)) {
+                                        $propertyVal = implode(',', $propertyVal);
+                                    }
+                                    $attrUpdParams['value_ids'] = $propertyVal;
+                                    $updateAttributeApi = $listingModel->updateAttribute($obliUpd, $attrUpdParams);
+                                    if ($updateAttributeApi['status'] != true) {
+                                        $errorMsg = 'Unable to update one of custom attributes. Error is: ';
+                                        Mage::getSingleton('adminhtml/session')->addError(Mage::helper('magetsync')->__($errorMsg) . $updateAttributeApi['message']);
+                                    }
+                                }
+                            }
 
                             $statusOperation =
                                 $listingModel->saveDetails($result, $data['idproduct'], $priceToBeSent, $dataGlobal, $callType);

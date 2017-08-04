@@ -107,7 +107,7 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
         );
 
         $params = array(
-            'description'          => $data['description'] ?: '',
+            'description'          => $newDescription,
             'materials'            => $data['materials']   ?: '',
             'state'                => $stateListing,
             'quantity'             => $qty,
@@ -120,9 +120,6 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
             'who_made'             => $data['who_made'] ?: '',
             'is_supply'            => $supply,
             'when_made'            => $data['when_made'] ?: '',
-            'recipient'            => $data['recipient'] ?: '',
-            'occasion'             => $data['occasion'] ?: '',
-            'style'                => $data['style'] ?: '',
             'should_auto_renew'    => $data['should_auto_renew'] ?: 0,
             'language'             => $language
         );
@@ -157,6 +154,31 @@ class Merchante_MagetSync_Model_Service_ListingService extends Merchante_MagetSy
 
             $result = json_decode(json_decode($resultApi['result']), true);
             $result = $result['results'][0];
+
+            //Update custom Listing attributes
+            $listingProperties = $listing->getProperties();
+            if ($listingProperties) {
+                $propertiesArr = json_decode($listingProperties, true);
+                $obliUpd = array('listing_id' => $result['listing_id']);
+                foreach ($propertiesArr as $propertyKey => $propertyVal) {
+                    $obliUpd['property_id'] = $propertyKey;
+                    $attrUpdParams = array();
+                    if (is_array($propertyVal)) {
+                        $propertyVal = implode(',', $propertyVal);
+                    }
+                    $attrUpdParams['value_ids'] = $propertyVal;
+                    $updateAttributeApi = $listing->updateAttribute($obliUpd, $attrUpdParams);
+                    if ($updateAttributeApi['status'] != true) {
+                        Merchante_MagetSync_Model_LogData::magetsync(
+                            $listing->getId(),
+                            Merchante_MagetSync_Model_LogData::TYPE_LISTING,
+                            $updateAttributeApi['message'],
+                            Merchante_MagetSync_Model_LogData::LEVEL_ERROR
+                        );
+                    }
+                }
+            }
+
             $statusOperation =
                 $listing->saveDetails($result, $data['idproduct'], $price, $listing->getId());
 

@@ -59,7 +59,21 @@
         </reference>
     </adminhtml_magetsync_attributetemplate_index>
 
+    <adminhtml_magetsync_index_edit>
+        <reference name="head">
+            <action method="addJs"><file>magetsync/listing.js</file></action>
+        </reference>
+    </adminhtml_magetsync_index_edit>
+    <adminhtml_magetsync_index_updateattributes>
+        <reference name="head">
+            <action method="addJs"><file>magetsync/listing.js</file></action>
+        </reference>
+    </adminhtml_magetsync_index_updateattributes>
+
     <adminhtml_magetsync_attributetemplate_edit>
+        <reference name="head">
+            <action method="addJs"><file>magetsync/listing.js</file></action>
+        </reference>
         <reference name="left">
             <block type="magetsync/adminhtml_attributeTemplate_edit_tabs" name="magetsync.attributetemplate.edit.tabs" />
         </reference>
