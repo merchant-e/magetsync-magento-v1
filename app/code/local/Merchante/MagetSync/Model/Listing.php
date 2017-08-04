@@ -2,7 +2,7 @@
 error_reporting(E_ALL ^ E_NOTICE);
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  * Class Merchante_MagetSync_Model_Listing
  */
 class Merchante_MagetSync_Model_Listing extends Merchante_MagetSync_Model_Etsy

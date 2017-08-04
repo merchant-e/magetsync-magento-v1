@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2016 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class Merchante_MagetSync_Block_Adminhtml_AttributeTemplate_Edit_Tabs
  */

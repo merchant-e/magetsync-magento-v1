@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2015 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class for enabling edit actions on Shop Section form
  * Class Merchante_MagetSync_Block_Adminhtml_Global_ShopSection_Edit

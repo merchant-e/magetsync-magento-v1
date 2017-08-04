@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2016 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  * Class Merchante_MagetSync_Model_Sources_GlobalNote_Source
  */
 class Merchante_MagetSync_Model_Sources_GlobalNote_Source

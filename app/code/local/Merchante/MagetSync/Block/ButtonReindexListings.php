@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2016 Merchant-e
+ * @copyright  Copyright (c) 2017 Merchant-e
  *
  * Class for creating reindex button in system configuration
  * Class Merchante_MagetSync_Block_ButtonReindexListings
