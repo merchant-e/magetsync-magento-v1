@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!--
-/**** @copyright  Copyright (c) 2017 Merchant-e****/
+/**** @copyright  Copyright (c) 2021 Merchant-e****/
 -->
 <config>
     <tabs>
@@ -91,7 +91,7 @@
                         <magetsync_field_version translate="label comment">
                             <label>Version</label>
                             <frontend_type>Label</frontend_type>
-                            <comment>2017.02 [RC]</comment>
+                            <comment>2021.02 [RC]</comment>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

@@ -2,7 +2,7 @@
 error_reporting(E_ALL ^ E_NOTICE);
 
 /**
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  *
  * Class Merchante_MagetSync_Model_AttributeTemplate
  */

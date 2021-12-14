@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  *
  * Class to render listing form and add log section
  * Class Merchante_MagetSync_Block_Adminhtml_Global_Listing_Edit_Renderer_Listing

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  * Class Merchante_MagetSync_Model_Etsy
  */
 class Merchante_MagetSync_Model_Etsy extends Mage_Core_Model_Abstract

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  * Class for handling catalog product actions
  * Class Merchante_MagetSync_Adminhtml_Catalog_Product_IndexController
  */

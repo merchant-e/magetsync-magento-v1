@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  * Class Merchante_MagetSync_Adminhtml_Magetsync_AttributTemplatesController
  */
 class Merchante_MagetSync_Adminhtml_Magetsync_AttributeTemplateController extends Mage_Adminhtml_Controller_Action

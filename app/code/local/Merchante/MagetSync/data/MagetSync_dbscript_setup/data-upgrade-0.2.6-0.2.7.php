@@ -1,6 +1,6 @@
 <?php
 /******************************************
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  *
 /* @var $installer Mage_Core_Model_Resource_Setup */
 $installer = $this;
@@ -11,7 +11,7 @@ $installer->startSetup();
  * Changes for magetsync_whenmade table
  */
 $changes = array(
-    '2010_2016'   => array('name' => '2010_2017','display' => '2010 - 2017')
+    '2010_2016'   => array('name' => '2010_2021','display' => '2010 - 2021')
 );
 
 $whens = Mage::getModel('magetsync/whenMade')

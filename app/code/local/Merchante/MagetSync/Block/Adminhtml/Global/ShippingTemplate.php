@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @copyright  Copyright (c) 2017 Merchant-e
+ * @copyright  Copyright (c) 2021 Merchant-e
  *
  * Class for prepare Shipping Template grid
  * Class Merchante_MagetSync_Block_Adminhtml_Global_ShippingTemplate
